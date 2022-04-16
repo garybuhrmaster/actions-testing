@@ -13,7 +13,7 @@ jobs:
 
   deb-build:
 
-    name: Build on ${{ matrix.container }}
+    name: Debian build on ${{ matrix.container }}
 
     runs-on: ubuntu-latest
 
@@ -37,9 +37,9 @@ jobs:
     - run: apt-get -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yml
 
-  rpm-build:
+  el-build:
 
-    name: Build on ${{ matrix.container }}
+    name: EL build on ${{ matrix.container }}
 
     runs-on: ubuntu-latest
 
@@ -48,6 +48,26 @@ jobs:
         container:
         - centos:7
         - redhat/ubi8
+      fail-fast: false
+
+    container:
+      image: ${{ matrix.container }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - run: yum -y upgrade
+    - run: yum --enablerepo=extras -y install ansible
+    - run: ansible-playbook ci/ansible-playbooks/playbook.yml
+
+  fedora-build:
+
+    name: Fedora build on ${{ matrix.container }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        container:
         - fedora:34
         - fedora:35
         - fedora:36
@@ -58,8 +78,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - run: yum -y upgrade
-    - run: yum -y install ansible
+    - run: dnf -y upgrade
+    - run: dnf -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yml
 
   windows-build:

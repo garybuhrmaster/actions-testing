@@ -1,6 +1,6 @@
 # XMLTV build dependencies
 
-tasks:
+- tasks:
   - name: Package installation
     dnf:
       pkg:
