@@ -29,9 +29,6 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
     - name: Update OS
       run: |
         apt-get update
@@ -93,6 +90,9 @@ jobs:
         perl \
         perl-tk
 
+    - name: Checkout
+      uses: actions/checkout@v3
+
     - name: perl Makefile.PL
       run: perl Makefile.PL --yes
 
@@ -120,9 +120,6 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
     - name: Update OS
       run: dnf -y upgrade
 
@@ -180,6 +177,9 @@ jobs:
           perl-XML-Twig \
           perl-XML-Writer
 
+    - name: Checkout
+      uses: actions/checkout@v3
+
     - name: perl Makefile.PL
       run: perl Makefile.PL --yes
 
@@ -206,9 +206,6 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
     - name: Update OS
       run: zypper update -y
 
@@ -217,6 +214,7 @@ jobs:
         zypper install -y \
           perl \
           make \
+          tar \
           perl-Archive-Zip \
           perl-CGI \
           perl-Data-Dump \
@@ -265,6 +263,9 @@ jobs:
           perl-XML-TreePP \
           perl-XML-Twig \
           perl-XML-Writer
+
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: perl Makefile.PL
       run: perl Makefile.PL --yes
