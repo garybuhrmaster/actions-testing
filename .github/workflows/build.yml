@@ -199,6 +199,10 @@ jobs:
 
     runs-on: windows-latest
 
+    env:
+      PERL_MM_USE_DEFAULT: 1
+      TZ: Etc/UTC
+
     strategy:
       fail-fast: false
 
@@ -246,6 +250,9 @@ jobs:
 
     - name: Create artifacts directory
       run: mkdir artifacts
+
+    - name: Copy Windows EXE
+      run: copy xmltv.exe artifacts/xmltv.exe
 
     - name: Upload Windows EXE
       uses: actions/upload-artifact@v2
