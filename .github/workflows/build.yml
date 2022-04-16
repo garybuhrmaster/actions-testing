@@ -89,11 +89,20 @@ jobs:
         perl \
         perl-tk
 
+    - name: ls
+      run: ls -altd *
+
+    - name: ls workspac
+      run: ls -altd  ${{ github.workspace }}
+
     - name: perl Makefile.PL
+      working-directory: ${{ github.workspace }}
       run: perl Makefile.PL
     - name: make
+      working-directory: ${{ github.workspace }}
       run: make
     - name: make test
+      working-directory: ${{ github.workspace }}
       run: make test
 
   windows-build:
