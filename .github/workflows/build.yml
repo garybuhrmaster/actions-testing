@@ -38,7 +38,7 @@ jobs:
         apt-get update
         apt-get -y upgrade
 
-    - name: Install requirements
+    - name: Install build requirements
       run: |
         apt-get -y install --no-install-recommends \
         libarchive-zip-perl \
@@ -127,7 +127,7 @@ jobs:
     - name: Update OS
       run: dnf -y upgrade
 
-    - name: Install requirements
+    - name: Install build requirements
       run: |
         dnf -y install \
           perl \
@@ -207,9 +207,8 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: Install requirements
+    - name: Install build requirements
       run: |
-        cpanm Date::Manip
         cpanm XML::DOM
         cpanm XML::Twig
         cpanm Tk
