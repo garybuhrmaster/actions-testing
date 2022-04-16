@@ -2,14 +2,16 @@
 
 - hosts:        all
 
-- include_tasks: freebsd.yml
-  when: ansible_os_family == "FreeBSD"
+  tasks:
 
-- include_tasks: debian.yml
-  when: ansible_os_family == "Debian"
+  - include_tasks: freebsd.yml
+    when: ansible_os_family == "FreeBSD"
 
-- include_tasks: redhat.yml
-  when: ansible_os_family == "RedHat"
+  - include_tasks: debian.yml
+    when: ansible_os_family == "Debian"
 
-- include_tasks: windows.yml
-  when: ansible_os_family == "Windows"
+  - include_tasks: redhat.yml
+    when: ansible_os_family == "RedHat"
+
+  - include_tasks: windows.yml
+    when: ansible_os_family == "Windows"
