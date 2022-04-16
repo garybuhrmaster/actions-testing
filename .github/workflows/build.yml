@@ -35,7 +35,7 @@ jobs:
     - run: apt-get update
     - run: apt-get -y upgrade
     - run: apt-get -y install ansible
-    - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
+    - run: ansible-playbook ci/ansible-playbooks/playbook.yml
 
   rpm-build:
 
@@ -46,8 +46,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - redhat/ubi7/ubi
-        - redhat/ubi8/ubi
+        - centos:7
+        - redhat/ubi8
         - fedora:34
         - fedora:35
         - fedora:36
@@ -58,9 +58,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - run: dnf -y upgrade
-    - run: dnf -y install ansible
-    - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
+    - run: yum -y upgrade
+    - run: yum -y install ansible
+    - run: ansible-playbook ci/ansible-playbooks/playbook.yml
 
   windows-build:
 
