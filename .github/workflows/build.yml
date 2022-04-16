@@ -55,7 +55,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - run: yum -y epel-release
+    - run: yum -y install epel-release
     - run: yum -y upgrade
     - run: yum -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yml
