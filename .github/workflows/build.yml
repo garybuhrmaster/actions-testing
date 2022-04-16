@@ -29,7 +29,7 @@ jobs:
     - run: apt-get update
     - run: apt-get -y upgrade
     - run: |
-      apt-get -y install \
+        apt-get -y install \
         libarchive-zip-perl \
         libcgi-pm-perl \
         libdata-dump-perl \
@@ -82,7 +82,7 @@ jobs:
         make \
         perl \
         perl-tk \
-       --no-install-recommends
+        --no-install-recommends
 
     - run: perl Makefile.PL
     - run: make
