@@ -15,7 +15,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container:
+        container: |
           ubuntu:16.04
           ubuntu:18.04
     steps:
@@ -27,7 +27,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container:
+        container: |
           fedora-latest
           fedora:34
     steps:
