@@ -25,6 +25,7 @@ jobs:
         - ubuntu:20.04
         - ubuntu:21.10
         - ubuntu:22.04
+      fail-fast: false
 
     container:
       image: ${{ matrix.container }}
@@ -32,8 +33,8 @@ jobs:
     steps:
     - run: cat /etc/debian_version
     - run: apt-get update
-    - run: apt-get upgrade
-    - run: apt-get install ansible
+    - run: apt-get -y upgrade
+    - run: apt-get -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
 
   rpm-build:
@@ -50,6 +51,7 @@ jobs:
         - fedora:34
         - fedora:35
         - fedora:36
+      fail-fast: false
 
     container:
       image: ${{ matrix.container }}
