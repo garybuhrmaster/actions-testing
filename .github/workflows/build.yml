@@ -31,7 +31,7 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - run: cat /etc/debian_version
+    - uses: actions/checkout@v3
     - run: apt-get update
     - run: apt-get -y upgrade
     - run: apt-get -y install ansible
@@ -57,7 +57,7 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - run: cat /etc/os-release
+    - uses: actions/checkout@v3
     - run: dnf -y upgrade
     - run: dnf -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
@@ -69,7 +69,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-
+      - uses: actions/checkout@v3
       - name: perl -V
         run: perl -V
 
