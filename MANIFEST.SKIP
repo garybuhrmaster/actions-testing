@@ -1,0 +1,16 @@
+(^|/)\.\#
+(^|/)do_not_dist(/|$)
+^MANIFEST\.SKIP$
+^\.git/
+^\.github/
+^\.gitattributes
+^\.gitignore
+^ci/
+^\.dockerignore
+^\.travis.yml
+^mkdist$
+^todo/
+^#.*#$
+\.cache$
+\.orig$
+grab/eu_epgdata/build_channel_ids

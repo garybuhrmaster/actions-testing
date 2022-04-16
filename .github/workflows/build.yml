@@ -25,15 +25,15 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
-    - name: Checkout
+    - name: checkout
       uses: actions/checkout@v3
 
-    - name: Update OS
+    - name: update OS
       run: |
         apt-get update
         apt-get -y upgrade
 
-    - name: Install requirements
+    - name: install requirements
       run: |
         apt-get -y install --no-install-recommends \
         libarchive-zip-perl \
@@ -90,10 +90,10 @@ jobs:
         perl-tk
 
     - name: ls
-      run: ls -altd *
+      run: ls -alt *
 
     - name: ls workspac
-      run: ls -altd  ${{ github.workspace }}
+      run: ls -alt ${{ github.workspace }}
 
     - name: perl Makefile.PL
       working-directory: ${{ github.workspace }}

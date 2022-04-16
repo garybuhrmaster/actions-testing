@@ -1,0 +1,1016 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use XMLTV::Ask;
+use XMLTV::Capabilities qw/baseline manualconfig cache/;
+use XMLTV::Configure::Writer;
+use XMLTV::DST;
+use XMLTV::Get_nice qw(get_nice_tree);
+   $XMLTV::Get_nice::ua->parse_head(0);
+   $XMLTV::Get_nice::FailOnError = 0;
+use XMLTV::Memoize;
+    XMLTV::Memoize::check_argv('XMLTV::Get_nice::get_nice_aux');
+use XMLTV::Options qw/ParseOptions/;
+use XMLTV::ProgressBar;
+
+use DateTime;
+use DateTime::Duration;
+use Encode qw/decode encode/;
+use File::Path;
+use Getopt::Long;
+use HTML::Entities;
+use HTML::TreeBuilder;
+use HTTP::Cache::Transparent;
+use IO::Scalar;
+
+############################################################################
+#                          Main declarations                               #
+############################################################################
+
+# Grabber details
+my $GRABBER_NAME     = 'tv_grab_fr';
+my $GRABBER_VERSION  = "$XMLTV::VERSION";
+
+my $ROOT_URL                = "https://www.telestar.fr";
+my $GRID_FOR_CHANNEL        = "$ROOT_URL/programme-tv/";
+my $GRID_FOR_BOUQUET        = "$ROOT_URL/programme-tv/bouquets/";
+my $GRID_BY_CHANNEL_PER_DAY = "$ROOT_URL/programme-tv/grille-chaine/";
+
+my $ENCODING  = "utf-8";
+my $LANG      = "fr";
+my $MAX_RETRY = 5;
+
+my %tv_attributes = (
+    'source-info-name'    => 'Tele Star',
+    'source-info-url'     => 'telestar.tv',
+    'source-data-url'     => "$GRID_FOR_CHANNEL",
+    'generator-info-name' => "XMLTV/$XMLTV::VERSION, $GRABBER_NAME",
+);
+
+my ( $opt, $conf ) = ParseOptions( {
+    grabber_name => "$GRABBER_NAME",
+    version => "$GRABBER_VERSION",
+    description => "France (Tele Star)",
+    capabilities => [qw/baseline manualconfig cache apiconfig/],
+    defaults => { days => 14, offset => 0, quiet => 0, debug => 0, slow => 0 },
+    extra_options => [qw/slow/],
+    stage_sub => \&config_stage,
+    listchannels_sub => \&list_channels,
+} );
+
+############################################################################
+#          At this point, the script takes over from ParseOptions          #
+############################################################################
+
+validate_options();
+validate_config();
+initialise_cache();
+print_version_info();
+
+my $channels = get_configured_channels(1);
+
+my $writer = setup_xmltv_writer();
+write_xmltv_header($writer);
+write_channel_list($writer, $channels);
+write_listings_data($writer, $channels);
+write_xmltv_footer($writer);
+
+############################################################################
+#                              Subroutines                                 #
+############################################################################
+
+sub config_stage {
+    my ( $stage, $conf ) = @_;
+
+    my $result;
+    my $writer = new XMLTV::Configure::Writer( OUTPUT => \$result,
+                                               encoding => $ENCODING );
+
+    $writer->start( { grabber => "$GRABBER_NAME" } );
+
+    if ($stage eq 'start') {
+        $writer->write_string( {
+            id => 'cachedir',
+            title => [ [ "Directory to store $GRABBER_NAME cache", 'en' ] ],
+            description => [
+            [ $GRABBER_NAME . ' uses a cache to store files that have been '.
+                'downloaded. Please specify path to cache directory. ',
+                'en' ] ],
+            default => get_default_cachedir(),
+        } );
+        $writer->end('bouquet');
+    }
+    elsif ($stage eq 'bouquet') {
+        $writer->start_selectone( {
+            id => 'bouquet',
+            title => [ [ 'Please select your TV service (bouquet)', 'en' ] ],
+            description => [
+                [ "When choosing which channels to download listings for, $GRABBER_NAME " .
+                "will only show the channels on your selected TV service.",
+                'en' ] ],
+        } );
+        my $bouquets = get_bouquets();
+        foreach my $b ( sort keys %$bouquets ) {
+            my $name = $b;
+            my $id   = $bouquets->{$b};
+
+            $writer->write_option( {
+                value => $id,
+                text  => [ [ $name, 'fr' ] ],
+            } );
+        }
+        $writer->end_selectone();
+
+        # The select-channels stage must be the last stage called
+        $writer->end('select-channels');
+    }
+    else {
+        die "Unknown stage $stage";
+    }
+
+    return $result;
+}
+
+sub list_channels {
+    my ( $conf, $opt ) = @_;
+
+    # Do not filter channels with --list-channels
+    my $filtered = $opt->{'list-channels'} ? 0 : 1;
+
+    my $channels = get_available_channels($opt, $conf, $filtered);
+
+    my $result = "";
+    my $fh = new IO::Scalar \$result;
+    my $oldfh = select( $fh );
+
+    my %g_args = (OUTPUT => $fh);
+
+    my $writer = new XMLTV::Writer(%g_args, encoding => $ENCODING);
+    $writer->start(\%tv_attributes);
+
+    foreach my $c_id (sort keys %{$channels}) {
+        $writer->write_channel($channels->{$c_id});
+    }
+
+    $writer->end;
+    select( $oldfh );
+    $fh->close();
+
+    return $result;
+}
+
+sub get_bouquets {
+    my %bouquets;
+    debug_print("get_bouquets(): searching for available bouquets");
+
+    my $url = $GRID_FOR_CHANNEL . "bouquets";
+    my $t = get_nice_tree($url, undef, undef, undef);
+    debug_print("get_bouquets(): url = '$url'");
+    if (not defined $t) {
+        print STDERR "Unable to retrieve bouquets page\n";
+        return;
+    }
+
+    foreach my $b_tree ( $t->look_down( "_tag", "div", "class", "bouquet" ) ) {
+        my $b_title = $b_tree->look_down("_tag", "h2")->as_text();
+        debug_print("  Found bouquet name: $b_title");
+        my $b_url = $b_tree->look_down("_tag", "a", "class", "red-link")->attr('href');
+        debug_print("  Found bouquet URL $b_url");
+        my ($b_id)    = $b_url =~ /^\/programme-tv\/bouquets\/(.+)/;
+        debug_print("  Found bouquet ID $b_id");
+
+        $bouquets{$b_title} = $b_id;
+    }
+    $t->delete(); undef $t;
+
+    return \%bouquets;
+}
+
+sub get_available_channels {
+    my ($opt, $conf, $filtered) = @_;
+
+    my $bouquet_id;
+
+    if ($filtered) {
+        $bouquet_id = $conf->{'bouquet'}[0];
+        if (not defined $bouquet_id) {
+            debug_print("get_available_channels(): no bouquet specified, please re-configure grabber");
+            return;
+        }
+        debug_print("get_available_channels(): filtering out unconfigured channels");
+        debug_print("get_available_channels(): searching for channels on bouquet ID: $bouquet_id");
+    }
+    else {
+        debug_print("get_available_channels(): searching all available channels");
+    }
+
+    my $url = $GRID_FOR_CHANNEL . "bouquets";
+    my $t = get_nice_tree($url, undef, undef, undef);
+    if (not defined $t) {
+        print STDERR "Error: Unable to retrieve bouquets page\n";
+        return;
+    }
+
+    my %available_channels;
+
+    BOUQUET:
+    foreach my $b_tree ( $t->look_down( "_tag", "div", "class", "bouquet" ) ) {
+        my $b_title = $b_tree->look_down("_tag", "h2")->as_text();
+        my $b_url   = $b_tree->look_down("_tag", "a", "class", "red-link")->attr('href');
+        my ($b_id)  = $b_url =~ /^\/programme-tv\/bouquets\/(.+)/;
+        next BOUQUET unless (!$filtered || ($b_id eq $bouquet_id));
+        debug_print("get_available_channels(): found requested bouquet ID: $b_id");
+
+        CHANNEL:
+        my @b_chans = $b_tree->look_down( "_tag", "a" );
+        debug_print("    Found " . scalar @b_chans . " channels");
+        foreach my $b_chan (@b_chans) {
+            my $c_url = $b_chan->attr('href');
+            if ( $c_url =~ /^\/programme-tv\/grille-chaine\/(.+)/ ) {
+                my $c_name = $b_chan->as_text();
+                my $c_id = $1;
+                debug_print("      available channel: $c_name ($c_id)");
+
+                my %ch = (
+                    'id'           => $c_id . ".telestar.fr",
+                    'display-name' => [[ $c_name, 'fr' ]],
+                );
+
+                $available_channels{$c_id} = \%ch;
+            }
+        }
+    }
+    $t->delete(); undef $t;
+
+    return \%available_channels;
+}
+
+sub setup_xmltv_writer {
+    my %g_args = ();
+    if (defined $opt->{output}) {
+        debug_print("\nOpening XMLTV output file '$opt->{output}'\n");
+        my $fh = new IO::File ">$opt->{output}";
+        die "Error: Cannot write to '$opt->{output}', exiting" if (! $fh);
+        %g_args = (OUTPUT => $fh);
+    }
+
+    return new XMLTV::Writer(%g_args, encoding => $ENCODING);
+}
+
+sub write_xmltv_header {
+    my $writer = shift;
+    debug_print("Writing XMLTV header");
+    $writer->start(\%tv_attributes);
+}
+
+sub write_channel_list {
+    my ($writer, $channels) = @_;
+
+    debug_print("write_channel_list: writing <channel> elements");
+    foreach my $c_id (sort keys %{$channels}) {
+        my $c_name = encode_and_trim( $channels->{$c_id}{'display-name'}[0][0]);
+        my %ch = (
+            'id'           => $c_id . ".telestar.fr",
+            'display-name' => [[ $c_name, 'fr' ]],
+        );
+        $writer->write_channel( \%ch );
+    }
+}
+
+sub get_configured_channels {
+    my $filtered = shift;
+    my $available_channels = get_available_channels($opt, $conf, $filtered);
+
+    my %seen_ids;
+    foreach (keys %{$available_channels}) {
+        $seen_ids{$_} = 0;
+    }
+
+    debug_print("get_configured_channels(): checking configured channels");
+    foreach my $c_id (@{$conf->{'channel'}}) {
+        ($c_id) = $c_id =~ /^([\w%]+)\.telestar\.fr$/;
+        if (! exists $seen_ids{$c_id}) {
+            debug_print("**    UNAVAILABLE channel: '$c_id'");
+        }
+        else {
+            my $c_name = $available_channels->{$c_id}{'display-name'}[0][0];
+            debug_print("      configured channel: $c_name ($c_id)");
+            $seen_ids{$c_id} = 1;
+        }
+    }
+
+    # remove any channels not flagged
+    my %available_configured;
+    foreach my $c_id (keys %{$available_channels}) {
+        if ($seen_ids{$c_id}) {
+           $available_configured{$c_id} = $available_channels->{$c_id};
+        }
+    }
+
+    if ($opt->{'debug'}) {
+        my $wanted = scalar @{$conf->{'channel'}};
+        my $actual = scalar keys %available_configured;
+        debug_print("get_configured_channels(): $actual/$wanted configured channels supported by grabber");
+    }
+
+    return \%available_configured;
+}
+
+sub write_listings_data {
+    my ($writer, $channels) = @_;
+
+    my $dates = get_dates_to_grab();
+    my $urls = generate_urls_to_grab($dates);
+
+    my $bar;
+    if (not $opt->{quiet} and not $opt->{debug}) {
+        $bar = new XMLTV::ProgressBar('Getting listings...', scalar keys %$urls);
+    }
+
+    # Store individual programmes in a list and write each channel in full later.
+    # key = upstream channel ID, value = listref of programme elements
+    my %programmes;
+
+    debug_print("\nProcessing list of URLs to grab...\n");
+    foreach my $ymd (sort keys %$urls) {
+
+        my $url = $urls->{$ymd};
+        my $progs_on_channel = get_daily_data_for_requested_channels($url, $ymd, $channels);
+
+        foreach my $c (keys %$progs_on_channel) {
+            push @{ $programmes{$c} }, @{ $progs_on_channel->{$c} };
+        }
+
+        if (not $opt->{quiet} and not $opt->{debug}) {
+            update $bar;
+        }
+    }
+
+    # use Data::Dumper; print STDERR Dumper(\%programmes);
+    # exit;
+
+    # No stop times are given in the listings (only inaccurate durations), so
+    # we can use the start time of a following programme as the stop time of
+    # the previous programme. (May fail if channel does not have listings
+    # for full 24hrs).
+    foreach my $c (keys %programmes) {
+        debug_print("  Analysing/updating schedule gaps between programmes on channel ID '$c'");
+        $programmes{$c} = update_programme_stop_times($programmes{$c});
+    }
+
+    # Write out all available programme elements for each channel
+    foreach my $c_id (sort keys %programmes) {
+        debug_print("  Writing listings for channel '$c_id'");
+        foreach my $p (@{$programmes{$c_id}}) {
+            $writer->write_programme($p);
+        }
+    }
+}
+
+sub get_dates_to_grab {
+    my @dates_to_grab = ();
+    # First date to grab listings for
+    my $grab_start_date = get_date_today_with_offset($opt->{offset});
+    push @dates_to_grab, $grab_start_date;
+    # Remaining dates to grab listings for
+    for (my $offset = 1; $offset < $opt->{days}; $offset++) {
+        push @dates_to_grab, $grab_start_date + DateTime::Duration->new( days => $offset );
+    }
+
+    debug_print("Will grab listings for following dates:");
+    if ($opt->{debug}) {
+        foreach (@dates_to_grab) {
+            print STDERR "  " . $_->strftime("%a, %d %b %Y") . "\n";
+        }
+    }
+
+    return \@dates_to_grab;
+}
+
+sub generate_urls_to_grab {
+    my ($dates_to_grab) = @_;
+    my $bouquet = $conf->{'bouquet'}[0];
+    my %urls;
+
+    debug_print("Creating list of URLs to grab based on configured bouquet...");
+    foreach my $d (@$dates_to_grab) {
+        my $ymd = $d->strftime("%Y%m%d");
+        my $dmy = $d->strftime("%d-%m-%Y");
+        my $url = $GRID_FOR_BOUQUET . $bouquet . "/journee/(date)/" . $dmy . "/(ajax)/1";
+        $urls{$ymd} = $url;
+        debug_print( "  Adding URL: $url" );
+    }
+
+    return \%urls;
+}
+
+sub get_daily_data_for_requested_channels {
+    my ($url, $ymd, $channels) = @_;
+
+    debug_print("get_daily_data_for_requested_channels(): url=$url");
+
+    # Get the page's tree
+    my $t = get_nice_tree($url, undef, undef, undef);
+    if (not defined $t) {
+        debug_print("Error: Could not get data for URL: $url");
+        return;
+    }
+
+    # Locate the listings grid
+    my $grid = $t->look_down('_tag', 'div', 'class', 'grid-content');
+
+    # Locate the channel container in the grid and list of available channels
+    my $c_cont = $grid->look_down('_tag', 'div', 'id', 'channels');
+    my @available_channels = $c_cont->look_down('_tag', 'div', 'class', 'channel');
+
+    # Locate the programme container in the grid
+    my $p_cont = $grid->look_down('_tag', 'div', 'id', 'programs');
+    my @programmes = $p_cont->look_down('_tag', 'div', 'class', 'channel');
+
+    my %progs_on_channel;
+
+    foreach my $i (0 .. (scalar @available_channels -1)) {
+        my $c = $available_channels[$i];
+        my $c_url = $c->look_down('_tag', 'a')->attr('href');
+        my ($c_id) = $c_url =~ /^\/programme-tv\/grille-chaine\/(.+)/;
+        if (exists($channels->{$c_id})) {
+            $progs_on_channel{$c_id} = process_channel_row($c_id, $programmes[$i], $ymd);
+        }
+    }
+
+    $t->delete(); undef $t;
+
+    return \%progs_on_channel;
+}
+
+sub process_channel_row {
+    my ($c_id, $row, $ymd) = @_;
+
+    debug_print("process_channel_row: processing listings for: $c_id ($ymd)");
+
+    my @programmes = ();
+    PROGRAMME:
+    foreach my $programme ($row->look_down('_tag', 'div', 'class', qr/program /) ) {
+        # skip empty program cells
+        if ($programme->attr('class') =~ /no-program/) {
+            debug_print("  skipping 'no-program' entry\n");
+            next PROGRAMME;
+        }
+        # extract the programme data
+        my $p = process_program($c_id, $programme, $ymd);
+        push @programmes, $p if defined $p;
+        debug_print("\n");
+    }
+
+    return \@programmes;
+}
+
+sub process_program {
+    my ($c_id, $programme, $ymd) = @_;
+
+    my $title_text;
+    my $prog_page;
+    my $title = $programme->look_down('_tag', 'p', 'class', 'title');
+    if ($title) {
+        if ($title->as_text() =~ /\w+/) {
+            $title_text = trim($title->as_text());
+            debug_print("process_program: found programme title '" . $title_text . "'");
+
+            my $link = $title->look_down('_tag', 'a', 'class', 'lien-fiche');
+            if ($link and $link->attr('href') =~ /programme-tv/) {
+                $prog_page = $ROOT_URL . $link->attr('href');
+                debug_print("        Programme subpage found '" . $prog_page . "'");
+            }
+        }
+        else {
+            debug_print("        No programme title text found, skipping programme");
+            return undef; # REQUIRED
+        }
+    }
+    else {
+        debug_print("        No programme title tag found, skipping programme");
+        return undef; # REQUIRED
+    }
+
+    my $start_time;
+    my $duration_mins;
+    my $start = $programme->look_down('_tag', 'p', 'class', 'time');
+    if ($start) {
+        if ($start->as_text() =~ /(\d\d)h(\d\d)/) {
+            my ($hh, $mm) = ($1, $2);
+            $start_time = $ymd.$hh.$mm."00";
+            debug_print("        Found programme start '" . $hh."h".$mm . "'");
+        }
+        else {
+            debug_print("        Start time not parsed, skipping programme'");
+            return undef; # REQUIRED
+        }
+
+        # Programme durations are given, but rarely agree with the difference
+        # between this programme's start time and the next
+        $duration_mins = $start->look_down('_tag', 'span');
+        if ($duration_mins) {
+            if ($duration_mins->as_text() =~ /\((\d+) min\)/) {
+                $duration_mins = $1;
+                debug_print("        Found programme duration '" . $duration_mins ." mins'");
+            }
+            else {
+                debug_print("        No programme duration found");
+            }
+        }
+    }
+    else {
+        debug_print("        No start time found, skipping programme'");
+        return undef; # REQUIRED
+    }
+
+    debug_print("        Creating programme hash for '" . $title_text . " / " . $start_time);
+    my %prog = (channel => $c_id.".telestar.fr",
+                title   => [ [ encode_and_trim($title_text), $LANG ] ],
+                start   => utc_offset($start_time, "+0100"),
+                );
+
+    # Store some temp data for later processing. A leading underscore in
+    # a key name means the data is not written by XMLTV::Writer
+    if ($duration_mins and $duration_mins > 0) {
+        $prog{'_duration_mins'} = $duration_mins;
+    }
+    if ($prog_page) {
+        $prog{'_prog_page'} = $prog_page;
+    }
+
+    my $episodenumber = $programme->look_down('_tag', 'p', 'class', 'title-episode');
+    if ($episodenumber) {
+        if ($episodenumber->as_text() =~ /Saison (\d+) Episode (\d+)/) {
+            my ($season_num, $episode_num) = ($1, $2);
+            # Season/episode number is zero-indexed. (Totals are one-indexed.)
+            # Sometimes, a series or episode number of 0 is seen, so we ignore it
+            if ($season_num == 0) {
+                $season_num = "";
+            }
+            else {
+                $season_num--;
+            }
+            if ($episode_num == 0) {
+                $episode_num = "";
+            }
+            else {
+                $episode_num--;
+            }
+            $episodenumber = $episodenumber->as_text();
+            $prog{'episode-num'} = [ [ $season_num . "." . $episode_num . ".", "xmltv_ns" ] ];
+            debug_print("        Found programme episode numbering '" . $episodenumber . "'");
+        }
+        # Likely the programme's sub-title if not an episode number
+        elsif ($episodenumber->as_text() =~ /\w+/) {
+            $episodenumber = $episodenumber->as_text();
+            $prog{'sub-title'} = [ [ encode_and_trim( $episodenumber ), $LANG ] ];
+            debug_print("        Found programme sub-title '" . $episodenumber . "'");
+        }
+    }
+    else {
+        debug_print("        No episode numbering found");
+    }
+
+    my $category = $programme->look_down('_tag', 'p', 'class', 'category');
+    if ($category and $category->as_text() =~ /\w+/) {
+        $category = trim($category->as_text());
+        $prog{category} = [ [ encode_and_trim($category), $LANG ] ];
+        debug_print("        Found programme genre '" . $category . "'");
+    }
+    else {
+        debug_print("        No category found");
+    }
+
+    my $synopsis = $programme->look_down('_tag', 'p', 'class', 'synopsis');
+    if ($synopsis and $synopsis->as_text() =~ /\w+/) {
+        $synopsis = trim($synopsis->as_text());
+        $prog{desc} = [ [ encode_and_trim($synopsis), $LANG ] ];
+        debug_print("        Found programme short synopsis '" . $synopsis . "'");
+    }
+    else {
+        debug_print("        No synopsis found");
+    }
+
+    my $rating = $programme->look_down('_tag', 'span', 'class', 'pastille csa');
+    if ($rating and trim($rating->as_text()) =~ /^(-(?:10|12|16|18))$/) {
+        $rating = $1;;
+        $prog{rating} = [ [ $rating, "CSA" ] ];
+        debug_print("        Found programme rating '" . $rating . "'");
+    }
+    else {
+        debug_print("        No rating found");
+    }
+
+    my $thumbnail = $programme->look_down('_tag', 'img', 'class', 'thumbnail');
+    if ($thumbnail) {
+        my $url = $thumbnail->attr('src');
+        push @{$prog{icon}}, {src => $url};
+        debug_print("        Found programme icon: '" . $url . "'");
+    }
+
+    if ($opt->{'slow'} && $prog_page) {
+        process_programme_page(\%prog);
+    }
+
+    return \%prog;
+}
+
+sub process_programme_page {
+    my $prog = shift;
+    my $prog_page = $prog->{'_prog_page'};
+
+    debug_print("process_programme_page(): $prog_page");
+
+    # Get the page's tree
+    my $t = get_nice_tree($prog_page, undef, undef, undef);
+    if (not defined $t) {
+        debug_print("        *** Error: Could not get tree for '" . $prog_page . "' ***");
+        return $prog;
+    }
+
+    # constrain searching to main content pane
+    my $c = $t->look_down('_tag', 'div', 'class', qr/content left/);
+
+    my $prog_info = $c->look_down('_tag', 'ul', 'class', 'list-fiche');
+    if ($prog_info) {
+        my @info_fields = $prog_info->look_down('_tag', 'li');
+        if (@info_fields) {
+            # each info field comprises 2 <span> tags giving a key and a value
+            foreach my $info_field (@info_fields) {
+                if ($info_field->as_text() =~ /^Titre : (.+)$/) {
+                    my $episode_name = trim($1);
+                    $prog->{'sub-title'} = [ [ encode_and_trim( $episode_name ), $LANG ] ];
+                    debug_print("          Found programme sub-title: " . $episode_name);
+                }
+                elsif ($info_field->as_text() =~ /de production : (\d{4})$/) {
+                    my $date_created = trim($1);
+                    $prog->{'date'} = $date_created;
+                    debug_print("          Found production year: " . $date_created);
+                }
+                elsif ($info_field->as_text() =~ /^Genre : (.+)$/) {
+                    my $genre = trim($1);
+                    my $subgenre;
+                    ($genre, $subgenre) = split(/,|\s-\s/, $genre);
+                    if (defined $genre && $genre =~ /\w+/) {
+                        $genre = trim($genre);
+                        debug_print("          Found programme genre: " . $genre);
+
+                        if (defined $subgenre && $subgenre =~ /\w+/) {
+                            $subgenre = trim($subgenre);
+                            debug_print("          Found programme sub-genre: " . $subgenre);
+
+                            $prog->{category} = [ [ encode_and_trim( $subgenre ), $LANG ],
+                                                  [ encode_and_trim( $genre ), $LANG ] ];
+                        }
+                        else {
+                            $prog->{category} = [ [ encode_and_trim( $genre ), $LANG ] ];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    my $title_block = $c->look_down('_tag', 'div', 'class', qr/title-block/);
+    if ($title_block) {
+        # Remove <div> containing 'Synopsis' text
+        my $parent = $title_block->parent();
+        $title_block->delete();
+        # Process remaining text
+        my $synopsis = trim($parent->as_text());
+        $prog->{desc} = [ [ encode_and_trim( $synopsis ), $LANG ] ];
+        debug_print("        Found programme long synopsis: " . $synopsis);
+    }
+
+    # Casting information on the default programme information page is
+    # typically limited to series.
+    my $casting = $c->look_down('_tag', 'div', 'id', 'block-casting', 'class', 'block-casting');
+    if ($casting) {
+        my @casting_titles;
+        @casting_titles = $casting->look_down('_tag', 'h3', 'class', 'title');
+        # some page styles (fiche-emission) may use h4 instead
+        unless (@casting_titles) {
+            @casting_titles = $casting->look_down('_tag', 'h4', 'class', 'title');
+        }
+        foreach my $ct (@casting_titles) {
+            if ($ct->as_text() =~ /R.alisateur/) {
+                my $parent = $ct->parent();
+                my @directors = $parent->look_down('_tag', 'span', 'class', 'name');
+                foreach my $director (@directors) {
+                    $director = trim($director->as_text());
+                    push @{$prog->{credits}{director}}, encode_and_trim( $director );
+                    debug_print("        Found programme director: " . $director);
+                }
+            }
+            elsif ($ct->as_text() =~ /Sc.nario/) {
+                my $parent = $ct->parent();
+                my @writers = $parent->look_down('_tag', 'span', 'class', 'name');
+                foreach my $writer (@writers) {
+                    $writer = trim($writer->as_text());
+                    push @{$prog->{credits}{writer}}, encode_and_trim( $writer );
+                    debug_print("        Found programme writer: " . $writer);
+                }
+            }
+            elsif ($ct->as_text() =~ /Acteurs et actrices/) {
+                my $parent = $ct->parent();
+                my @actors = $parent->look_down('_tag', 'span', 'class', 'name');
+                foreach my $actor (@actors) {
+                    $actor = trim($actor->as_text());
+                    push @{$prog->{credits}{actor}}, encode_and_trim( $actor );
+                    debug_print("        Found programme actor: " . $actor);
+                }
+            }
+        }
+    }
+
+    $c->delete(); undef $c;
+    $t->delete(); undef $t;
+
+    return $prog;
+}
+
+sub update_programme_stop_times {
+    my $programmes = shift;
+
+    # Stop at penultimate programme
+    foreach my $i (0 .. (scalar @{$programmes} -2)) {
+        my $p0       = $programmes->[$i];
+        my $p0_stop  = get_datetime_from_start_duration($p0);
+        my $p0_title = decode($ENCODING, $p0->{title}[0][0]);
+
+        my $p1       = $programmes->[$i+1];
+        my $p1_start = get_datetime_from_xmltv_time($p1->{start});
+        my $p1_title = decode($ENCODING, $p1->{title}[0][0]);
+
+        if ($p1_start == $p0_stop) {
+            # "This is good..."
+            debug_print("    No gap detected between '$p0_title' and '$p1_title'");
+            $p0->{stop} = $p1->{start};
+        }
+        elsif ($p1_start < $p0_stop) {
+            # Trust the published start time
+            if ($opt->{debug}) {
+                my $dur = $p0_stop - $p1_start;
+                my $gap = $dur->minutes;
+                debug_print("    Calculated stop time for '$p0_title' is $gap minutes later than start time of '$p1_title'");
+            }
+            $p0->{stop} = $p1->{start};
+        }
+        elsif ($p1_start > $p0_stop) {
+            my $dur = $p1_start - $p0_stop;
+            my $gap = $dur->minutes;
+            if ($gap <= 10) {
+                # For small gaps less than 10 minutes, use the next
+                # programme's start time
+                debug_print("    There is a small gap of $gap minutes between '$p0_title' and '$p1_title'");
+                $p0->{stop} = $p1->{start};
+            }
+            else {
+                # Otherwise, use the current programme's duration
+                debug_print("    There is a large gap of $gap minutes between '$p0_title' and '$p1_title'");
+                $p0->{stop} = get_xmltv_time_from_datetime($p0_stop);
+            }
+        }
+    }
+
+    # Handle final programme separately: add duration to start time
+    my $p_last = $programmes->[-1];
+    my $p_last_stop = get_datetime_from_start_duration($p_last);
+    $p_last->{stop} = get_xmltv_time_from_datetime($p_last_stop);
+
+    # Return updates listref of programmes
+    return $programmes;
+}
+
+sub get_datetime_from_start_duration {
+    my $prog = shift;
+
+    my $dt_start = get_datetime_from_xmltv_time($prog->{'start'});
+    my $dt_duration = DateTime::Duration->new( minutes => $prog->{'_duration_mins'});
+
+    return $dt_start + $dt_duration;
+}
+
+sub get_datetime_from_xmltv_time {
+    my $date_string = shift;
+
+    my ($y, $m, $d, $hh, $mm, $ss) = $date_string =~ /^(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/;
+    my $dt = DateTime->new(
+            year      => $y,  month     => $m,  day       => $d,
+            hour      => $hh, minute    => $mm, second    => $ss,
+            time_zone => 'Europe/Paris', );
+
+    return $dt;
+}
+
+sub get_xmltv_time_from_datetime {
+    my $dt = shift;
+
+    return utc_offset($dt->strftime("%Y%m%d%H%M%S"), "+0100");
+}
+
+sub get_date_today {
+    return DateTime->now( time_zone  => 'Europe/Paris' );
+}
+
+sub get_date_today_with_offset {
+    my $offset = DateTime::Duration->new( days => shift );
+    return get_date_today() + $offset;
+}
+
+sub write_xmltv_footer {
+    my $writer = shift;
+    debug_print("\nWriting XMLTV footer\n");
+    $writer->end;
+}
+
+sub validate_options {
+    if ($opt->{quiet} && $opt->{debug}) {
+        die "Error: You cannot specify --quiet with --debug, exiting";
+    }
+
+    if ($opt->{offset} < 0 or $opt->{offset} > 13) {
+        print STDERR "Invalid value for --offset. Please adjust to a value in range 0-13\n";
+        exit 1;
+    }
+
+    if ($opt->{days} < 1 or $opt->{days} > 14) {
+        print STDERR "Invalid value for --days. Please adjust to a value in range 1-14\n";
+        exit 1;
+    }
+
+    my $max_days_after_offset = 14 - $opt->{offset};
+    if ($opt->{days} > $max_days_after_offset) {
+        print STDERR "Cannot retrieve more than $max_days_after_offset days of listings\n" .
+                     "Please adjust --days and/or --offset.\n";
+        exit 1;
+    }
+}
+
+sub validate_config {
+    my @required_keys = ("cachedir", "bouquet", "channel");
+    foreach my $key (@required_keys) {
+        if (! defined $conf->{$key}) {
+            print STDERR "No configured $key found in config file ($opt->{'config-file'})\n";
+            print STDERR "Please reconfigure the grabber ($GRABBER_NAME --configure)\n";
+            exit 1;
+        }
+    }
+}
+
+sub initialise_cache {
+    init_cachedir( $conf->{cachedir}->[0] );
+    HTTP::Cache::Transparent::init( {
+        'BasePath' => $conf->{cachedir}->[0],
+        'MaxAge'   => 24,
+        'NoUpdate' => 60*60*3,
+        'Verbose'  => $opt->{debug},
+    } );
+}
+
+sub init_cachedir {
+    my $path = shift;
+    if (! -d $path) {
+        mkpath($path) or die "Failed to create cache-directory $path: $@";
+    }
+
+    debug_print("init_cachedir: cache directory created at $path");
+}
+
+sub get_default_dir {
+    my $winhome = $ENV{HOMEDRIVE} . $ENV{HOMEPATH}
+            if (defined $ENV{HOMEDRIVE} and defined $ENV{HOMEPATH});
+
+    my $home = $ENV{HOME} || $winhome || ".";
+
+    debug_print("get_default_dir: home directory found at $home");
+
+    return $home;
+}
+
+sub get_default_cachedir {
+    my $cachedir = get_default_dir() . "/.xmltv/cache";
+
+    debug_print("get_default_cachedir: default cache directory set to $cachedir");
+
+    return $cachedir;
+}
+
+sub print_version_info {
+    debug_print("Program/library version information:\n");
+    debug_print("XMLTV library version: $XMLTV::VERSION");
+    debug_print("      grabber version: $GRABBER_VERSION");
+    debug_print("  libwww-perl version: $LWP::VERSION\n");
+}
+
+sub encode_and_trim {
+    my $s = shift;
+    $s = trim($s);
+    $s = encode( $ENCODING, $s );
+
+    return $s;
+}
+
+sub trim {
+    for (my $s = shift) {
+        s/^\s*//;
+        s/\s*$//;
+
+        return $s;
+    }
+}
+
+sub debug_print {
+    if ($opt->{debug}) {
+        my ($msg) = shift;
+        print STDERR encode_and_trim( $msg ) . "\n";
+    }
+}
+
+__END__
+
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+tv_grab_fr - Grab TV listings for France (Télé Star).
+
+=head1 SYNOPSIS
+
+ To configure:
+   tv_grab_fr --configure [--config-file FILE] [--gui OPTION]
+
+ To list available channels:
+   tv_grab_fr --list-channels
+
+ To grab listings:
+   tv_grab_fr [--config-file FILE] [--output FILE]
+              [--days N] [--offset N] [--slow]
+              [--quiet | --debug]
+
+ To show capabilities:
+   tv_grab_fr --capabilities
+
+ To show version:
+   tv_grab_fr --version
+
+ To display help:
+   tv_grab_fr --help
+
+=head1 DESCRIPTION
+
+Output TV listings for many channels available in France (Orange,
+Free, cable/ADSL/satellite, Canal+ Sat).  The data comes from
+Télé Star (telestar.fr).  The default is to grab 14 days.
+
+B<--configure> Choose which bouquet/channels to grab listings data for.
+
+B<--list-channels> List available channels.
+
+B<--config-file FILE> Use FILE as config file instead of the default config
+file. This allows for different config files for different applications.
+
+B<--gui OPTION> Use this option to enable a graphical interface to be used.
+OPTION may be 'Tk', or left blank for the best available choice.
+Additional allowed values of OPTION are 'Term' for normal terminal output
+(default) and 'TermNoProgressBar' to disable the use of Term::ProgressBar.
+
+B<--output FILE> Write to FILE rather than standard output.
+
+B<--days N> Grab N days (default: 14) starting from today.
+
+B<--offset N> Start grabbing N days from today, rather than starting
+today.
+
+B<--slow> Download additional information (e.g. longer description,
+cast details) for each programme, where available. This option
+significantly slows down the grabber and is disabled by default.
+
+B<--quiet> Suppress the progress messages normally written to standard
+error.
+
+B<--debug> Provide additional debugging messages during processing.
+
+B<--capabilities> Show which capabilities the grabber supports. For more
+information, see L<http://wiki.xmltv.org/index.php/XmltvCapabilities>.
+
+B<--version> Show the version of the grabber.
+
+B<--help> Print a help message and exit.
+
+=head1 SEE ALSO
+
+L<xmltv(5)>
+
+=head1 AUTHOR
+
+The current tv_grab_fr script was rewritten by Nick Morrott,
+knowledgejunkie at gmail dot com, to support the new telestar.fr site.
+
+=cut
+
