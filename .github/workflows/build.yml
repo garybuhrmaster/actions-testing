@@ -2,48 +2,60 @@
 name: build
 
 on:
+
   push:
     branches: [main]
+
   pull_request:
     branches: [main]
 
 jobs:
 
   deb-build:
+
     name: Build on ${{ matrix.container }}
+
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         container:
         - ubuntu:16.04
         - ubuntu:18.04
+        - ubuntu:20.04
+
     container:
       image: ${{ matrix.container }}
+
     steps:
     - run: cat /etc/debian_version
 
   rpm-build:
+
     name: Build on ${{ matrix.container }}
+
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         container:
-        - fedora-latest
+        - fedora:35
         - fedora:34
+        - fedora:33
+
     container:
       image: ${{ matrix.container }}
+
     steps:
     - run: cat /etc/os-release
 
   windows-build:
+
+    name: Build on Windows
+
     runs-on: windows-latest
-    name: "windows"
 
     steps:
-      - name: Set up Perl
-        run: |
-          choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
 
       - name: perl -V
         run: perl -V
