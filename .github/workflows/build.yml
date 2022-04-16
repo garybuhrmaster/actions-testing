@@ -19,21 +19,25 @@ jobs:
         - ubuntu:20.04
         - ubuntu:21.10
         - ubuntu:22.04
+        - debian:jessie
+        - debian:stretch
+        - debian:buster
+        - debian:bullseye
       fail-fast: false
 
     container:
       image: ${{ matrix.container }}
 
     steps:
-    - name: checkout
+    - name: Checkout
       uses: actions/checkout@v3
 
-    - name: update OS
+    - name: Update OS
       run: |
         apt-get update
         apt-get -y upgrade
 
-    - name: install requirements
+    - name: Install requirements
       run: |
         apt-get -y install --no-install-recommends \
         libarchive-zip-perl \
@@ -90,13 +94,95 @@ jobs:
         perl-tk
 
     - name: perl Makefile.PL
-      working-directory: ${{ github.workspace }}
       run: perl Makefile.PL
     - name: make
-      working-directory: ${{ github.workspace }}
       run: make
     - name: make test
-      working-directory: ${{ github.workspace }}
+      run: make test
+
+  fedora-build:
+
+    name: Fedora build on ${{ matrix.container }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        container:
+        - fedora:34
+        - fedora:35
+        - fedora:36
+      fail-fast: false
+
+    container:
+      image: ${{ matrix.container }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Update OS
+      run: dnf -y upgrade
+
+    - name: Install requirements
+      run: |
+        dnf -y install \
+          perl \
+          make \
+          perl-Archive-Zip \
+          perl-CGI \
+          perl-Data-Dump \
+          perl-Date-Calc \
+          perl-Date-Manip \
+          perl-DateTime \
+          perl-DateTime-Format-ISO8601 \
+          perl-DateTime-Format-SQLite \
+          perl-DateTime-Format-Strptime \
+          perl-DBD-SQLite \
+          perl-DBI \
+          perl-File-chdir \
+          perl-File-HomeDir \
+          perl-File-Slurp \
+          perl-File-Which \
+          perl-HTML-Parser \
+          perl-HTML-Tree \
+          perl-HTTP-Cache-Transparent \
+          perl-HTTP-Cookies \
+          perl-HTTP-Message \
+          perl-IO-stringy \
+          perl-JSON \
+          perl-JSON-XS \
+          perl-libwww-perl \
+          perl-Lingua-Preferred \
+          perl-List-MoreUtils \
+          perl-Log-TraceMessages \
+          perl-LWP-Protocol-https \
+          perl-LWP-UserAgent-Determined \
+          perl-PerlIO-gzip \
+          perl-SOAP-Lite \
+          perl-Term-ProgressBar \
+          perl-TermReadKey \
+          perl-TimeDate \
+          perl-Tk \
+          perl-Tk-TableMatrix \
+          perl-Try-Tiny \
+          perl-Unicode-String \
+          perl-URI \
+          perl-URI-Encode \
+          perl-XML-DOM \
+          perl-XML-LibXML \
+          perl-XML-LibXSLT \
+          perl-XML-Parser \
+          perl-XML-Simple \
+          perl-XML-TreePP \
+          perl-XML-Twig \
+          perl-XML-Writer
+
+    - name: perl Makefile.PL
+      run: perl Makefile.PL
+    - name: make
+      run: make
+    - name: make test
       run: make test
 
   windows-build:
