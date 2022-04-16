@@ -31,7 +31,9 @@ jobs:
 
     steps:
     - run: cat /etc/debian_version
-    - run: apt install ansible
+    - run: apt-get update
+    - run: apt-get upgrade
+    - run: apt-get install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
 
   rpm-build:
@@ -43,8 +45,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - redhat/ubi7
-        - redhat/ubi8
+        - redhat/ubi7/ubi
+        - redhat/ubi8/ubi
         - fedora:34
         - fedora:35
         - fedora:36
@@ -54,7 +56,8 @@ jobs:
 
     steps:
     - run: cat /etc/os-release
-    - run: yum -y install ansible
+    - run: dnf -y upgrade
+    - run: dnf -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
 
   windows-build:
