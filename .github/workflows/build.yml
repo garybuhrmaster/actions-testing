@@ -205,7 +205,26 @@ jobs:
     steps:
     - name: Install requirements
       run: |
-        cpanm sssss
+        cpan Date::Manip
+        cpan XML::DOM
+        cpan XML::Twig
+        cpan Tk
+        cpan Tk::TableMatrix
+        cpan HTTP::Cache::Transparent
+        cpan DateTime
+        cpan DateTime::Format::ISO8601
+        cpan DateTime::Format::SQLite
+        cpan XML::Writer
+        cpan XML::TreePP
+        cpan Lingua::EN::Numbers::Ordinate
+        cpan Lingua::Preferred
+        cpan Term::ProgressBar
+        cpan Unicode::String
+        cpan Unicode::UTF8simple
+        cpan Switch
+        cpan HTML::FormatText
+        cpan LWP::UserAgent::Determined
+        cpan URI::Encode
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -213,9 +232,9 @@ jobs:
     - name: perl Makefile.PL
       run: perl Makefile.PL --yes
 
-    - name: make
-      run: make
+    - name: gmake
+      run: gmake
 
-    - name: make test
-      run: make test
+    - name: gmake test
+      run: gmake test
 
