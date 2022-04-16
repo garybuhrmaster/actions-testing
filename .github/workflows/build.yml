@@ -11,6 +11,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: Etc/UTC
+
     strategy:
       matrix:
         container:
@@ -189,80 +193,19 @@ jobs:
     - name: make test
       run: make test
 
-  opensuse-build:
+  windows-build:
 
-    name: Build on ${{ matrix.container }}
+    name: Build on Windows
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     strategy:
-      matrix:
-        container:
-        - opensuse/leap:latest
-        - opensuse/tumbleweed:latest
       fail-fast: false
 
-    container:
-      image: ${{ matrix.container }}
-
     steps:
-    - name: Update OS
-      run: zypper update -y
-
     - name: Install requirements
       run: |
-        zypper install -y \
-          perl \
-          make \
-          tar \
-          perl-Archive-Zip \
-          perl-CGI \
-          perl-Data-Dump \
-          perl-Date-Calc \
-          perl-Date-Manip \
-          perl-DateTime \
-          perl-DateTime-Format-ISO8601 \
-          perl-DateTime-Format-SQLite \
-          perl-DateTime-Format-Strptime \
-          perl-DBD-SQLite \
-          perl-DBI \
-          perl-File-chdir \
-          perl-File-HomeDir \
-          perl-File-Slurp \
-          perl-File-Which \
-          perl-HTML-Parser \
-          perl-HTML-Tree \
-          perl-HTTP-Cache-Transparent \
-          perl-HTTP-Cookies \
-          perl-HTTP-Message \
-          perl-IO-stringy \
-          perl-JSON \
-          perl-JSON-XS \
-          perl-libwww-perl \
-          perl-Lingua-Preferred \
-          perl-List-MoreUtils \
-          perl-Log-TraceMessages \
-          perl-LWP-Protocol-https \
-          perl-LWP-UserAgent-Determined \
-          perl-PerlIO-gzip \
-          perl-SOAP-Lite \
-          perl-Term-ProgressBar \
-          perl-TermReadKey \
-          perl-TimeDate \
-          perl-Tk \
-          perl-Tk-TableMatrix \
-          perl-Try-Tiny \
-          perl-Unicode-String \
-          perl-URI \
-          perl-URI-Encode \
-          perl-XML-DOM \
-          perl-XML-LibXML \
-          perl-XML-LibXSLT \
-          perl-XML-Parser \
-          perl-XML-Simple \
-          perl-XML-TreePP \
-          perl-XML-Twig \
-          perl-XML-Writer
+        cpanm sssss
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -275,16 +218,4 @@ jobs:
 
     - name: make test
       run: make test
-
-  windows-build:
-
-    name: Build on Windows
-
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: perl -V
-        run: perl -V
 
