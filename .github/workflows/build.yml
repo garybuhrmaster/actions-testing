@@ -29,11 +29,12 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Update OS
-      run: apt-get update && apt-get -y upgrade
+      run: apt-get update
+      run: apt-get -y upgrade
 
-    - name: Install dependencies
+    - name: Install requirements
       run: |
-        apt-get -y install \
+        apt-get -y install --no-install-recommends \
         libarchive-zip-perl \
         libcgi-pm-perl \
         libdata-dump-perl \
@@ -85,17 +86,13 @@ jobs:
         libxml-writer-perl \
         make \
         perl \
-        perl-tk \
-        --no-install-recommends
+        perl-tk
 
     - name: perl Makefile.PL
-      working-directory: ./xmltv
       run: perl Makefile.PL
     - name: make
-      working-directory: ./xmltv
       run: make
     - name: make test
-      working-directory: ./xmltv
       run: make test
 
   windows-build:
