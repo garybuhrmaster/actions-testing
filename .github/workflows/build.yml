@@ -18,6 +18,7 @@ jobs:
         container: |
           ubuntu:16.04
           ubuntu:18.04
+
     container:
       image: ${{ matrix.container }}
     steps:
@@ -32,6 +33,7 @@ jobs:
         container: |
           fedora-latest
           fedora:34
+
     container:
       image: ${{ matrix.container }}
     steps:
