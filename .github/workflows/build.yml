@@ -209,6 +209,7 @@ jobs:
     steps:
     - name: Install requirements
       run: |
+        cpan Test::Inter
         cpan Date::Manip
         cpan XML::DOM
         cpan XML::Twig
