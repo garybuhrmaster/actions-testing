@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: |
-          ubuntu:16.04
-          ubuntu:18.04
+        container:
+        - ubuntu:16.04
+        - ubuntu:18.04
     container:
       image: ${{ matrix.container }}
     steps:
@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: |
-          fedora-latest
-          fedora:34
+        container:
+        - fedora-latest
+        - fedora:34
     container:
       image: ${{ matrix.container }}
     steps:
