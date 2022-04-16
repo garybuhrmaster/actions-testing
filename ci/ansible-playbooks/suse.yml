@@ -1,0 +1,11 @@
+# XMLTV build dependencies
+
+- hosts:        all
+  tasks:
+    - name: Package installation
+      dnf:
+        name:
+          perl-XML-TreePP
+        state: present
+      when: ansible_os_family == "RedHat"
+

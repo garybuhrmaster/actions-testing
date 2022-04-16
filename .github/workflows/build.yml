@@ -20,7 +20,6 @@ jobs:
     strategy:
       matrix:
         container:
-        - ubuntu:14:04
         - ubuntu:16.04
         - ubuntu:18.04
         - ubuntu:20.04
@@ -32,6 +31,8 @@ jobs:
 
     steps:
     - run: cat /etc/debian_version
+    - run: apt install ansible
+    - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
 
   rpm-build:
 
@@ -42,9 +43,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - centos:7
+        - redhat/ubi7
         - redhat/ubi8
-        - fedora:33
         - fedora:34
         - fedora:35
         - fedora:36
@@ -54,6 +54,8 @@ jobs:
 
     steps:
     - run: cat /etc/os-release
+    - run: yum -y install ansible
+    - run: ansible-playbook ci/ansible-playbooks/playbook.yaml
 
   windows-build:
 
