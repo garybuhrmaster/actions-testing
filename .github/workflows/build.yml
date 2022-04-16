@@ -46,8 +46,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - centos:7
-        - redhat/ubi8
+        - registry.access.redhat.com/ubi8/ubi8
+        - registry.access.redhat.com/ubi7/ubi7
       fail-fast: false
 
     container:
@@ -55,8 +55,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - run: yum -y epel-release
     - run: yum -y upgrade
-    - run: yum --enablerepo=extras -y install ansible
+    - run: yum -y install ansible
     - run: ansible-playbook ci/ansible-playbooks/playbook.yml
 
   fedora-build:
