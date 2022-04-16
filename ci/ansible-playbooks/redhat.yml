@@ -3,6 +3,6 @@
 - tasks:
     - name: Package installation
       dnf:
-        name:
+        pkg:
         -  perl-XML-TreePP
-        state: present
+        state: latest

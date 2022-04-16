@@ -3,7 +3,7 @@
 - tasks:
     - name: Package installation
       apt:
-        name:
+        pkg:
         - libarchive-zip-perl
         - libcgi-pm-perl
         - libdata-dump-perl
@@ -57,4 +57,4 @@
         - perl
         - perl-tk
         - tzdata
-        state: present
+        state: latest
