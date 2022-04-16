@@ -46,8 +46,8 @@ jobs:
     strategy:
       matrix:
         container:
-        - registry.access.redhat.com/ubi8/ubi8
-        - registry.access.redhat.com/ubi7/ubi7
+        - registry.access.redhat.com/ubi8/ubi
+        - registry.access.redhat.com/ubi7/ubi
       fail-fast: false
 
     container:
