@@ -1,6 +1,6 @@
 # XMLTV build dependencies
 
-- hosts:        all
+- hosts: localhost
 
   tasks:
 
