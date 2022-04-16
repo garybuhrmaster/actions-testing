@@ -12,13 +12,11 @@ jobs:
   deb-build:
     name: Build on ${{ matrix.container }}
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
     strategy:
       matrix:
         container: |
           ubuntu:16.04
           ubuntu:18.04
-
     container:
       image: ${{ matrix.container }}
     steps:
@@ -27,13 +25,11 @@ jobs:
   rpm-build:
     name: Build on ${{ matrix.container }}
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
     strategy:
       matrix:
         container: |
           fedora-latest
           fedora:34
-
     container:
       image: ${{ matrix.container }}
     steps:
