@@ -98,7 +98,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL --yes
+      run: perl Makefile.PL
 
     - name: make
       run: make
@@ -185,7 +185,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL --yes
+      run: perl Makefile.PL
 
     - name: make
       run: make
@@ -198,10 +198,6 @@ jobs:
     name: Build on Windows
 
     runs-on: windows-latest
-
-    env:
-      XXPERL_MM_USE_DEFAULT: 1
-      XXTZ: Etc/UTC
 
     strategy:
       fail-fast: false
@@ -231,7 +227,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL --yes
+      run: perl Makefile.PL
 
     - name: gmake
       run: gmake
