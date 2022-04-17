@@ -194,8 +194,9 @@ jobs:
           perl-SOAP-Lite \
           perl-Term-ProgressBar \
           perl-TermReadKey \
+          perl-Time-HiRes \
+          perl-Time-Local \
           perl-Time-Piece \
-          perl-Time-Seconds \
           perl-TimeDate \
           perl-Tk \
           perl-Tk-TableMatrix \
