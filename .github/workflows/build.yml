@@ -251,22 +251,51 @@ jobs:
 
     steps:
 
-    - name: show path
-      run: $Env:Path
-
-    - name: Strawberry perl path
+    - name: Insure Strawberry perl is first in path
       run: echo "PATH=C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;$Env:Path" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       shell: powershell
 
-    - name: show path
-      run: $Env::Path
-
     - name: Install build requirements
-      run: |
-        ##xxxchoco uninstall mingw
-        cpanm --notest --no-interactive Tk Tk::TableMatrix
-        cpanm --notest --no-interactive Archive::Zip CGI CGI::Carp Date::Manip DateTime DateTime::Format::ISO8601 DateTime::Format::SQLite DBD::SQLite DBI File::HomeDir File::Slurp HTML::FormatText HTTP::Cache::Transparent IO::Scalar JSON Lingua::EN::Numbers::Ordinate Lingua::Preferred List::MoreUtils LWP::Protocol::https LWP::UserAgent::Determined Memoize Module::Install SOAP::Lite Term::ProgressBar Unicode::String Unicode::UTF8simple URI::Encode XML::DOM XML::LibXML XML::LibXSLT XML::Twig XML::Writer XML::TreePP
-        cpanm --notest --no-interactive Tk Tk::TableMatrix
+      run: >
+        cpanm --notest --no-interactive
+        App::PP::Autolink
+        Archive::Zip
+        CGI
+        CGI::Carp
+        Date::Manip
+        DateTime
+        DateTime::Format::ISO8601
+        DateTime::Format::SQLite
+        DBD::SQLite
+        DBI
+        File::HomeDir
+        File::Slurp
+        HTML::FormatText
+        HTTP::Cache::Transparent
+        IO::Scalar
+        JSON
+        Lingua::EN::Numbers::Ordinate
+        Lingua::Preferred
+        List::MoreUtils
+        LWP::Protocol::https
+        LWP::UserAgent::Determined
+        Memoize
+        Module::Install
+        PAR::Packer
+        Params::Validate
+        SOAP::Lite
+        Term::ProgressBar
+        Tk
+        Tk::TableMatrix
+        Unicode::String
+        Unicode::UTF8simple
+        URI::Encode
+        XML::DOM
+        XML::LibXML
+        XML::LibXSLT
+        XML::Twig
+        XML::Writer
+        XML::TreePP
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
@@ -281,9 +310,8 @@ jobs:
     - name: gmake
       run: gmake
 
-    - name: Install exe build requirements
-      run: |
-        cpanm --notest --no-interactive PAR::Packer App::PP::Autolink Params::Validate
+    - name: gmake install
+      run: gmake install
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
