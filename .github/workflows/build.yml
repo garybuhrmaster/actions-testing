@@ -254,12 +254,23 @@ jobs:
     - name: show path
       run: $Env:Path
 
+    - name: Strawberry perl path
+      run: echo "PATH=C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;$Env:Path" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      shell: powershell
+
+    - name: show path
+      run: $Env::Path
+
     - name: Install build requirements
       run: |
-        choco uninstall mingw
+        xxxchoco uninstall mingw
+
+    - name: show path
+      run: $Env:Path
+
         ## cpanm --notest --no-interactive Archive::Zip CGI CGI::Carp Date::Manip DateTime DateTime::Format::ISO8601 DateTime::Format::SQLite DBD::SQLite DBI File::HomeDir File::Slurp HTML::FormatText HTTP::Cache::Transparent IO::Scalar JSON Lingua::EN::Numbers::Ordinate Lingua::Preferred List::MoreUtils LWP::Protocol::https LWP::UserAgent::Determined Memoize Module::Install SOAP::Lite Term::ProgressBar Unicode::String Unicode::UTF8simple URI::Encode XML::DOM XML::LibXML XML::LibXSLT XML::Twig XML::Writer XML::TreePP
         ## cpanm --notest --no-interactive Tk Tk::TableMatrix
-        $Env:Path
+        ## $Env:Path
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
