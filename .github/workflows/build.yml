@@ -209,7 +209,22 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
-        cpanm -v --notest XML::DOM XML::Twig Tk Tk::TableMatrix HTTP::Cache::Transparent DateTime DateTime::Format::ISO8601 DateTime::Format::SQLite XML::Writer XML::TreePP Lingua::EN::Numbers::Ordinate Lingua::Preferred Term::ProgressBar Unicode::String Unicode::UTF8simple HTML::FormatText LWP::UserAgent::Determined URI::Encode
+        cpanm -v --notest --no-interactive XML::DOM
+        cpanm -v --notest --no-interactive XML::Twig
+        cpanm -v --notest --no-interactive Tk
+        cpanm -v --notest --no-interactive Tk::TableMatrix
+        cpanm -v --notest --no-interactive HTTP::Cache::Transparent
+        cpanm -v --notest --no-interactive DateTime DateTime::Format::ISO8601
+        cpanm -v --notest --no-interactive DateTime::Format::SQLite 
+        cpanm -v --notest --no-interactive XML::Writer XML::TreePP
+        cpanm -v --notest --no-interactive Lingua::EN::Numbers::Ordinate 
+        cpanm -v --notest --no-interactive Lingua::Preferred
+        cpanm -v --notest --no-interactive Term::ProgressBar
+        cpanm -v --notest --no-interactive Unicode::String
+        cpanm -v --notest --no-interactive Unicode::UTF8simple
+        cpanm -v --notest --no-interactive HTML::FormatText 
+        cpanm -v --notest --no-interactive LWP::UserAgent::Determined
+        cpanm -v --notest --no-interactive URI::Encode
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -225,7 +240,7 @@ jobs:
 
     - name: Install packaging requirements
       run: |
-        cpanm -v --notest PAR::Packer App::PP::Autolink Params::Validate
+        cpanm -v --notest --no-interactive PAR::Packer App::PP::Autolink Params::Validate
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
