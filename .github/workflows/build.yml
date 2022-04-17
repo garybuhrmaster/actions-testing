@@ -209,22 +209,23 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
-        cpanm -v --notest --no-interactive XML::DOM
-        cpanm -v --notest --no-interactive XML::Twig
-        cpanm -v --notest --no-interactive Tk
-        cpanm -v --notest --no-interactive Tk::TableMatrix
-        cpanm -v --notest --no-interactive HTTP::Cache::Transparent
-        cpanm -v --notest --no-interactive DateTime DateTime::Format::ISO8601
-        cpanm -v --notest --no-interactive DateTime::Format::SQLite 
-        cpanm -v --notest --no-interactive XML::Writer XML::TreePP
-        cpanm -v --notest --no-interactive Lingua::EN::Numbers::Ordinate 
-        cpanm -v --notest --no-interactive Lingua::Preferred
-        cpanm -v --notest --no-interactive Term::ProgressBar
-        cpanm -v --notest --no-interactive Unicode::String
-        cpanm -v --notest --no-interactive Unicode::UTF8simple
-        cpanm -v --notest --no-interactive HTML::FormatText 
-        cpanm -v --notest --no-interactive LWP::UserAgent::Determined
-        cpanm -v --notest --no-interactive URI::Encode
+        cpanm --notest --no-interactive Date::Manip
+        cpanm --notest --no-interactive XML::DOM
+        cpanm --notest --no-interactive XML::Twig
+        cpanm --notest --no-interactive Tk
+        cpanm --notest --no-interactive Tk::TableMatrix
+        cpanm --notest --no-interactive HTTP::Cache::Transparent
+        cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
+        cpanm --notest --no-interactive DateTime::Format::SQLite 
+        cpanm --notest --no-interactive XML::Writer XML::TreePP
+        cpanm --notest --no-interactive Lingua::EN::Numbers::Ordinate 
+        cpanm --notest --no-interactive Lingua::Preferred
+        cpanm --notest --no-interactive Term::ProgressBar
+        cpanm --notest --no-interactive Unicode::String
+        cpanm --notest --no-interactive Unicode::UTF8simple
+        cpanm --notest --no-interactive HTML::FormatText 
+        cpanm --notest --no-interactive LWP::UserAgent::Determined
+        cpanm --notest --no-interactive URI::Encode
 
     - name: Checkout
       uses: actions/checkout@v3
