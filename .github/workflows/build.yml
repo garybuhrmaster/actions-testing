@@ -175,7 +175,7 @@ jobs:
           perl-Digest-SHA \
           perl-ExtUtils-MakeMaker \
           perl-File-chdir \
-          perl-File-Copy
+          perl-File-Copy \
           perl-File-HomeDir \
           perl-File-Slurp \
           perl-File-Temp \
