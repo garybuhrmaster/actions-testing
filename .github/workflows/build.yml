@@ -189,7 +189,7 @@ jobs:
           perl-List-MoreUtils \
           perl-LWP-Protocol-https \
           perl-LWP-UserAgent-Determined \
-          perl-Memorize \
+          perl-Memoize \
           perl-PerlIO-gzip \
           perl-SOAP-Lite \
           perl-Term-ProgressBar \
