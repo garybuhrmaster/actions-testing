@@ -35,12 +35,12 @@ jobs:
     steps:
     - name: Update OS
       run: |
-        apt-get update
-        apt-get -y upgrade
+        apt-get update -q -y
+        apt-get upgrade -q -y
 
     - name: Install build requirements
       run: |
-        apt-get -y install --no-install-recommends \
+        apt-get install -q -y --no-install-recommends \
         libarchive-zip-perl \
         libcgi-pm-perl \
         libdata-dump-perl \
@@ -125,13 +125,13 @@ jobs:
 
     steps:
     - name: Update OS
-      run: dnf -y upgrade
+      run: dnf upgrade -y
 
     - name: Install build requirements
       run: |
-        dnf -y install \
-          perl \
+        dnf install -y \
           make \
+          perl \
           perl-Archive-Zip \
           perl-CGI \
           perl-Data-Dump \
@@ -211,6 +211,7 @@ jobs:
 
       uses: perl-actions/install-with-cpanm@v1
       with:
+        verbose: true
         install: |
           XML::DOM
           XML::Twig
@@ -261,5 +262,5 @@ jobs:
       with:
         name: Windows EXE
         path: artifacts
-        retention-days: 7
+        retention-days: 15
 
