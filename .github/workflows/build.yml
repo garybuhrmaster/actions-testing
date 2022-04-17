@@ -121,6 +121,7 @@ jobs:
         - fedora:34
         - fedora:35
         - fedora:36
+        - registry.access.redhat.com/ubi7/ubi
         - registry.access.redhat.com/ubi8/ubi
 
       fail-fast: false
@@ -129,8 +130,17 @@ jobs:
       image: ${{ matrix.container }}
 
     steps:
+    - name: Detect EL linux
+      run: . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
+      run: . /etc/os-release && echo "OS_RELEASE_VERSION=${VERSION_ID%%.*}" >> $GITHUB_ENV
+
+    - name: Adjust package manager for EL 7
+      run: echo "PKG_MGR=yum" >> $GITHUB_ENV
+      if: $${{env.OS_RELEASE_ID}} != 'fedora' || $${{env.OS_RELEASE_VERSION}} == '7'
+
     - name: Install EPEL for EL linux
       run: . /etc/os-release && ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%%.*}.noarch.rpm
+      if: $${{env.OS_RELEASE_ID}} != 'fedora'
 
     - name: Update OS
       run: ${{env.PKG_MGR}} upgrade -y
