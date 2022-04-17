@@ -223,7 +223,6 @@ jobs:
           Term::ProgressBar \
           Unicode::String \
           Unicode::UTF8simple \
-          Switch \
           HTML::FormatText \
           LWP::UserAgent::Determined \
           URI::Encode
