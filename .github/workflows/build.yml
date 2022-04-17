@@ -115,7 +115,7 @@ jobs:
     - name: make test
       run: make test
 
-  rpmfusion-build:
+  redhat-build:
 
     name: Build on ${{ matrix.name }}
 
@@ -255,8 +255,8 @@ jobs:
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive Tk@804.035
-        cpanm --notest --no-interactive Tk::TableMatrix
+        cpanm --notest --no-interactive -v Tk
+        ### cpanm --notest --no-interactive Tk::TableMatrix
         cpanm --notest --no-interactive HTTP::Cache::Transparent
         cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
         cpanm --notest --no-interactive DateTime::Format::SQLite 
@@ -269,8 +269,8 @@ jobs:
         cpanm --notest --no-interactive HTML::FormatText 
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive PAR::Packer
-        cpanm --notest --no-interactive App::PP::Autolink
+        cpanm --notest --no-interactive -v PAR::Packer
+        ### cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
 
     - name: Checkout
