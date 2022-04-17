@@ -137,11 +137,11 @@ jobs:
 
     - name: Adjust package manager for EL 7
       run: echo "PKG_MGR=yum" >> $GITHUB_ENV
-      if: $${{env.OS_RELEASE_ID}} != 'fedora' && $${{env.OS_RELEASE_VERSION}} == '7'
+      if: ${{env.OS_RELEASE_ID != 'fedora' }} && ${{env.OS_RELEASE_VERSION == '7'}}
 
     - name: Install EPEL for EL linux
       run: . /etc/os-release && ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%%.*}.noarch.rpm
-      if: $${{env.OS_RELEASE_ID}} != 'fedora'
+      if: ${{ env.OS_RELEASE_ID != 'fedora' }}
 
     - name: Update OS
       run: ${{env.PKG_MGR}} upgrade -y
