@@ -147,11 +147,11 @@ jobs:
         env.OS_RELEASE_ID != 'fedora'
 
     - name: Update OS
-      run: ${{env.PKG_MGR}} --enablerepo=* upgrade -y
+      run: ${{env.PKG_MGR}} upgrade -y
 
     - name: Install build requirements
       run: |
-        ${{env.PKG_MGR}} --enablerepo=* install -y \
+        ${{env.PKG_MGR}} install -y \
           make \
           perl \
           perl-Archive-Zip \
