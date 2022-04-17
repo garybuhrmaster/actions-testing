@@ -261,7 +261,7 @@ jobs:
         cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive JSON
-        cpanm --notest --no-interactive Soap::Lite
+        cpanm --notest --no-interactive SOAP::Lite
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
         cpanm --notest --no-interactive XML::LibXSLT
@@ -342,7 +342,7 @@ jobs:
         cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive JSON
-        cpanm --notest --no-interactive Soap::Lite
+        cpanm --notest --no-interactive SOAP::Lite
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
         cpanm --notest --no-interactive XML::LibXSLT
