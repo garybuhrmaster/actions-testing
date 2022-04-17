@@ -244,31 +244,19 @@ jobs:
 
     name: Build on Windows
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     strategy:
       fail-fast: false
 
     steps:
-    - name: perl -V
-      run: perl -V
-
-    - name: Install strawberry perl
-      run: |
-        choco install strawberryperl
-        echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin" >> $GITHUB_PATH
-
-    - name: perl -V
-      run: perl -V
-
     - name: Install build requirements
       run: |
-        cpanm --notest --no-interactive --installdeps .
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive -v Tk
-        ### cpanm --notest --no-interactive Tk::TableMatrix
+        cpanm --notest --no-interactive Tk
+        cpanm --notest --no-interactive Tk::TableMatrix
         cpanm --notest --no-interactive HTTP::Cache::Transparent
         cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
         cpanm --notest --no-interactive DateTime::Format::SQLite 
@@ -281,8 +269,8 @@ jobs:
         cpanm --notest --no-interactive HTML::FormatText 
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive -v PAR::Packer
-        ### cpanm --notest --no-interactive App::PP::Autolink
+        cpanm --notest --no-interactive PAR::Packer
+        cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
 
     - name: Checkout
