@@ -106,11 +106,14 @@ jobs:
     - name: make test
       run: make test
 
-  fedora-build:
+  rpmfusion-build:
 
     name: Build on ${{ matrix.container }}
 
     runs-on: ubuntu-latest
+
+    env:
+      PKG_MGR: dnf
 
     strategy:
       matrix:
@@ -118,18 +121,23 @@ jobs:
         - fedora:34
         - fedora:35
         - fedora:36
+        - registry.access.redhat.com/ubi8/ubi
+
       fail-fast: false
 
     container:
       image: ${{ matrix.container }}
 
     steps:
+    - name: Install EPEL for EL linux
+      run: . /etc/os-release && ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%%.*}.noarch.rpm
+
     - name: Update OS
-      run: dnf upgrade -y
+      run: ${{env.PKG_MGR}} upgrade -y
 
     - name: Install build requirements
       run: |
-        dnf install -y \
+        ${{env.PKG_MGR}} install -y \
           make \
           perl \
           perl-Archive-Zip \
@@ -222,6 +230,9 @@ jobs:
         cpanm --notest --no-interactive HTML::FormatText 
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
+        cpanm --notest --no-interactive PAR::Packer
+        cpanm --notest --no-interactive App::PP::Autolink
+        cpanm --notest --no-interactive Params::Validate
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -231,13 +242,6 @@ jobs:
 
     - name: gmake
       run: gmake
-
-    - name: Install packaging requirements
-      run: |
-        cpanm --notest --no-interactive PAR::Packer
-        cpanm --notest --no-interactive App::PP::Autolink
-        cpanm --notest --no-interactive Params::Validate
-      if: github.event_name == 'push'
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
