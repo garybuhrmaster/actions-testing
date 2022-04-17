@@ -252,6 +252,7 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
+        cpanm --notest --no-interactive Archive::Zip
         cpanm --notest --no-interactive Module::Install
         cpanm --notest --no-interactive CGI
         cpanm --notest --no-interactive CGI::Carp
@@ -260,6 +261,7 @@ jobs:
         cpanm --notest --no-interactive DBI
         cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
+        cpanm --notest --no-interactive File::Slurp
         cpanm --notest --no-interactive JSON
         cpanm --notest --no-interactive SOAP::Lite
         cpanm --notest --no-interactive XML::DOM
@@ -282,6 +284,7 @@ jobs:
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
         cpanm --notest --no-interactive IO::Scalar
+        cpanm --notest --no-interactive Memoize
         cpanm --notest --no-interactive PAR::Packer
         cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
@@ -333,36 +336,38 @@ jobs:
       run: |
         brew install perl
         brew install cpanminus
-        cpanm --notest --no-interactive Module::Install
+        cpanm --notest --no-interactive Archive::Zip
         cpanm --notest --no-interactive CGI
         cpanm --notest --no-interactive CGI::Carp
-        cpanm --notest --no-interactive List::MoreUtils
-        cpanm --notest --no-interactive File::HomeDir
-        cpanm --notest --no-interactive DBI
-        cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
-        cpanm --notest --no-interactive JSON
-        cpanm --notest --no-interactive SOAP::Lite
-        cpanm --notest --no-interactive XML::DOM
-        cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive XML::LibXSLT
-        cpanm --notest --no-interactive XML::LibXML
-        cpanm --notest --no-interactive Tk
-        cpanm --notest --no-interactive Tk::TableMatrix
-        cpanm --notest --no-interactive HTTP::Cache::Transparent
         cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
         cpanm --notest --no-interactive DateTime::Format::SQLite
-        cpanm --notest --no-interactive XML::Writer XML::TreePP
+        cpanm --notest --no-interactive DBD::SQLite
+        cpanm --notest --no-interactive DBI
+        cpanm --notest --no-interactive File::HomeDir
+        cpanm --notest --no-interactive File::Slurp
+        cpanm --notest --no-interactive HTML::FormatText
+        cpanm --notest --no-interactive HTTP::Cache::Transparent
+        cpanm --notest --no-interactive IO::Scalar
+        cpanm --notest --no-interactive JSON
         cpanm --notest --no-interactive Lingua::EN::Numbers::Ordinate
         cpanm --notest --no-interactive Lingua::Preferred
-        cpanm --notest --no-interactive Term::ProgressBar
-        cpanm --notest --no-interactive Unicode::String
-        cpanm --notest --no-interactive Unicode::UTF8simple
-        cpanm --notest --no-interactive HTML::FormatText
+        cpanm --notest --no-interactive List::MoreUtils
         cpanm --notest --no-interactive LWP::Protocol::https
         cpanm --notest --no-interactive LWP::UserAgent::Determined
+        cpanm --notest --no-interactive Memoize
+        cpanm --notest --no-interactive SOAP::Lite
+        cpanm --notest --no-interactive Term::ProgressBar
+        cpanm --notest --no-interactive Tk
+        cpanm --notest --no-interactive Tk::TableMatrix
+        cpanm --notest --no-interactive Unicode::String
+        cpanm --notest --no-interactive Unicode::UTF8simple
         cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive IO::Scalar
+        cpanm --notest --no-interactive XML::DOM
+        cpanm --notest --no-interactive XML::LibXML
+        cpanm --notest --no-interactive XML::LibXSLT
+        cpanm --notest --no-interactive XML::Twig
+        cpanm --notest --no-interactive XML::Writer XML::TreePP
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
@@ -377,5 +382,5 @@ jobs:
     - name: make
       run: make
 
-    - name: make tests
-      run: make tests
+    - name: make test
+      run: make test
