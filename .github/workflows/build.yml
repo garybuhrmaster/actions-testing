@@ -158,6 +158,7 @@ jobs:
       run: |
         ${{env.PKG_MGR}} install -y \
           make \
+          perl \
           perl-interpreter \
           perl-devel \
           perl-Archive-Zip \
@@ -174,13 +175,11 @@ jobs:
           perl-Digest-SHA \
           perl-ExtUtils-MakeMaker \
           perl-File-chdir \
-          perl-File-Copy \
           perl-File-HomeDir \
           perl-File-Slurp \
           perl-File-Temp \
           perl-File-Which \
           perl-Getopt-Long \
-          perl-Getopt-Std \
           perl-HTML-Parser \
           perl-HTML-Tree \
           perl-HTTP-Cache-Transparent \
