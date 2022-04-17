@@ -7,7 +7,7 @@ jobs:
 
   debian-build:
 
-    name: Build on ${{ matrix.container }}
+    name: Build on ${{ matrix.name }}
 
     runs-on: ubuntu-latest
 
@@ -17,16 +17,25 @@ jobs:
 
     strategy:
       matrix:
-        container:
-        - ubuntu:16.04
-        - ubuntu:18.04
-        - ubuntu:20.04
-        - ubuntu:21.10
-        - ubuntu:22.04
-        - debian:stretch
-        - debian:buster
-        - debian:bullseye
-        - debian:bookworm
+        include:
+          - container: ubuntu:16.04
+            name: Ubuntu 16.06 LTS (Xenial Xerus)
+          - container: ubuntu:18.04
+            name: Ubuntu 18.04 LTS (Bionic Beaver)
+          - container: ubuntu:20.04
+            name: Ubuntu 20.04 LTS (Focal Fossa)
+          - container: ubuntu:21.10
+            name: Ubuntu 21.10 (Impish Indri)
+          - container: ubuntu:22.04
+            name: Ubuntu 22.04 LTS (Jammy Jellyfish)
+          - container: debian:stretch
+            name: Debian 9 (Stretch)
+          - container: debian:buster
+            name: Debian 10 (Buster)
+          - container: debian:bullseye
+            name: Debian 11 (Bullseye)
+          - container: debian:bookworm
+            name: Debian 12 (Bookworm)
       fail-fast: false
 
     container:
@@ -108,7 +117,7 @@ jobs:
 
   rpmfusion-build:
 
-    name: Build on ${{ matrix.container }}
+    name: Build on ${{ matrix.name }}
 
     runs-on: ubuntu-latest
 
@@ -118,13 +127,17 @@ jobs:
 
     strategy:
       matrix:
-        container:
-        - fedora:34
-        - fedora:35
-        - fedora:36
-        - quay.io/centos/centos:centos7
-        - quay.io/centos/centos:stream8
-
+        include:
+          - container: fedora:34
+            name: Fedora 34
+          - container: fedora:35
+            name: Fedora 35
+          - container: fedora:36
+            name: Fedora 36
+          - container: quay.io/centos/centos:centos7
+            name: CentOS 7
+          - container: quay.io/centos/centos:stream8
+            name: CentOS Stream 8
       fail-fast: false
 
     container:
