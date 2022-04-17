@@ -319,7 +319,8 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
-        cpan -i App::cpanminus
+        brew install perl
+        brew install cpanminus
         cpanm --notest --no-interactive Module::Install
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
