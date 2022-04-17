@@ -163,9 +163,9 @@ jobs:
           perl-Term-ReadKey \
           perl-Term-ProgressBar \
           perl-Carp \
-          perl-Env) \
+          perl-Env \
           perl-File-Slurp \
-          perl-File-Spec) \
+          perl-File-Spec \
           perl-File-Spec-Functions \
           perl-HTTP-Status \
           perl-Search-Dict \
