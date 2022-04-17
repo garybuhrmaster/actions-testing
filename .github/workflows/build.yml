@@ -253,9 +253,19 @@ jobs:
     - name: Install build requirements
       run: |
         cpanm --notest --no-interactive Module::Install
+        cpanm --notest --no-interactive CGI
+        cpanm --notest --no-interactive CGI::Carp
+        cpanm --notest --no-interactive List::MoreUtils
+        cpanm --notest --no-interactive File::HomeDir
+        cpanm --notest --no-interactive DBI
+        cpanm --notest --no-interactive DBD-SQLite
         cpanm --notest --no-interactive Date::Manip
+        cpanm --notest --no-interactive JSON
+        cpanm --notest --no-interactive Soap::Lite
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
+        cpanm --notest --no-interactive XML::LibXSLT
+        cpanm --notest --no-interactive XML::LibXML
         cpanm --notest --no-interactive Tk
         cpanm --notest --no-interactive Tk::TableMatrix
         cpanm --notest --no-interactive HTTP::Cache::Transparent
@@ -267,9 +277,11 @@ jobs:
         cpanm --notest --no-interactive Term::ProgressBar
         cpanm --notest --no-interactive Unicode::String
         cpanm --notest --no-interactive Unicode::UTF8simple
-        cpanm --notest --no-interactive HTML::FormatText 
+        cpanm --notest --no-interactive HTML::FormatText
+        cpanm --notest --no-interactive LWP::Protocol::https
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
+        cpanm --notest --no-interactive IO::Scalar
         cpanm --notest --no-interactive PAR::Packer
         cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
@@ -322,9 +334,19 @@ jobs:
         brew install perl
         brew install cpanminus
         cpanm --notest --no-interactive Module::Install
+        cpanm --notest --no-interactive CGI
+        cpanm --notest --no-interactive CGI::Carp
+        cpanm --notest --no-interactive List::MoreUtils
+        cpanm --notest --no-interactive File::HomeDir
+        cpanm --notest --no-interactive DBI
+        cpanm --notest --no-interactive DBD-SQLite
         cpanm --notest --no-interactive Date::Manip
+        cpanm --notest --no-interactive JSON
+        cpanm --notest --no-interactive Soap::Lite
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
+        cpanm --notest --no-interactive XML::LibXSLT
+        cpanm --notest --no-interactive XML::LibXML
         cpanm --notest --no-interactive Tk
         cpanm --notest --no-interactive Tk::TableMatrix
         cpanm --notest --no-interactive HTTP::Cache::Transparent
@@ -337,11 +359,10 @@ jobs:
         cpanm --notest --no-interactive Unicode::String
         cpanm --notest --no-interactive Unicode::UTF8simple
         cpanm --notest --no-interactive HTML::FormatText
+        cpanm --notest --no-interactive LWP::Protocol::https
         cpanm --notest --no-interactive LWP::UserAgent::Determined
         cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive PAR::Packer
-        cpanm --notest --no-interactive App::PP::Autolink
-        cpanm --notest --no-interactive Params::Validate
+        cpanm --notest --no-interactive IO::Scalar
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
@@ -353,8 +374,8 @@ jobs:
     - name: perl Makefile.PL
       run: perl Makefile.PL
 
-    - name: gmake
-      run: gmake
+    - name: make
+      run: make
 
-    - name: gmake tests
-      run: gmake tests
+    - name: make tests
+      run: make tests
