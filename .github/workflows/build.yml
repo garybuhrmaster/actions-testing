@@ -200,8 +200,8 @@ jobs:
     runs-on: windows-latest
 
     env:
-      PERL_MM_USE_DEFAULT: 1
-      TZ: Etc/UTC
+      XXPERL_MM_USE_DEFAULT: 1
+      XXTZ: Etc/UTC
 
     strategy:
       fail-fast: false
@@ -236,12 +236,11 @@ jobs:
     - name: gmake
       run: gmake
 
-    - name: gmake test
-      run: gmake test
-
     - name: Install packaging requirements
       run: |
-        cpanm -v --notest --no-interactive PAR::Packer App::PP::Autolink Params::Validate
+        cpanm --notest --no-interactive PAR::Packer
+        cpanm --notest --no-interactive App::PP::Autolink
+        cpanm --notest --no-interactive Params::Validate
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
