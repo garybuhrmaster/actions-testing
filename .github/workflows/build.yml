@@ -244,7 +244,7 @@ jobs:
 
     name: Build on Windows
 
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     strategy:
       fail-fast: false
@@ -273,6 +273,10 @@ jobs:
         cpanm --notest --no-interactive PAR::Packer
         cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
+
+    - name: Show content of log files on failure
+      if: ${{ failure() }}
+      run: cat C:/Users/RUNNER~1/.cpanm/work/*/build.log
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -315,6 +319,7 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
+        cpan -i App::cpanminus
         cpanm --notest --no-interactive Module::Install
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
@@ -336,6 +341,10 @@ jobs:
         cpanm --notest --no-interactive PAR::Packer
         cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
+
+    - name: Show content of log files on failure
+      if: ${{ failure() }}
+      run: cat /Users/runner/.cpanm/work/*/build.log
 
     - name: Checkout
       uses: actions/checkout@v3
