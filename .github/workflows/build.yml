@@ -172,9 +172,6 @@ jobs:
         ${{env.PKG_MGR}} install -y \
           make \
           perl \
-          perl-generators \
-          perl-interpreter \
-          perl-devel \
           perl-Archive-Zip \
           perl-CGI \
           perl-Data-Dumper \
@@ -258,7 +255,7 @@ jobs:
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive Tk
+        cpanm --notest --no-interactive Tk@804.035
         cpanm --notest --no-interactive Tk::TableMatrix
         cpanm --notest --no-interactive HTTP::Cache::Transparent
         cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
