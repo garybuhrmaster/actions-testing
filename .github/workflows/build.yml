@@ -208,29 +208,32 @@ jobs:
 
     steps:
     - name: Install build requirements
-      run: |
-        cpan XML::DOM
-        cpan XML::Twig
-        cpan Tk
-        cpan Tk::TableMatrix
-        cpan HTTP::Cache::Transparent
-        cpan DateTime
-        cpan DateTime::Format::ISO8601
-        cpan DateTime::Format::SQLite
-        cpan XML::Writer
-        cpan XML::TreePP
-        cpan Lingua::EN::Numbers::Ordinate
-        cpan Lingua::Preferred
-        cpan Term::ProgressBar
-        cpan Unicode::String
-        cpan Unicode::UTF8simple
-        cpan Switch
-        cpan HTML::FormatText
-        cpan LWP::UserAgent::Determined
-        cpan URI::Encode
-        cpan Params::Validate
-        cpan PAR::Packer
-        cpan App::PP::Autolink
+
+      uses: perl-actions/install-with-cpanm@v1
+      with:
+        install: |
+          XML::DOM
+          XML::Twig
+          Tk
+          Tk::TableMatrix
+          HTTP::Cache::Transparent
+          DateTime
+          DateTime::Format::ISO8601
+          DateTime::Format::SQLite
+          XML::Writer
+          XML::TreePP
+          Lingua::EN::Numbers::Ordinate
+          Lingua::Preferred
+          Term::ProgressBar
+          Unicode::String
+          Unicode::UTF8simple
+          Switch
+          HTML::FormatText
+          LWP::UserAgent::Determined
+          URI::Encode
+          Params::Validate
+          PAR::Packer
+          App::PP::Autolink
 
     - name: Checkout
       uses: actions/checkout@v3
