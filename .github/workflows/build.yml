@@ -252,6 +252,7 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
+        cpanm --notest --no-interactive Module::Install
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
@@ -302,3 +303,48 @@ jobs:
         retention-days: 15
       if: github.event_name == 'push'
 
+  macos-build:
+
+    name: Build on macOS
+
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Install build requirements
+      run: |
+        cpanm --notest --no-interactive Module::Install
+        cpanm --notest --no-interactive Date::Manip
+        cpanm --notest --no-interactive XML::DOM
+        cpanm --notest --no-interactive XML::Twig
+        cpanm --notest --no-interactive Tk
+        cpanm --notest --no-interactive Tk::TableMatrix
+        cpanm --notest --no-interactive HTTP::Cache::Transparent
+        cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
+        cpanm --notest --no-interactive DateTime::Format::SQLite
+        cpanm --notest --no-interactive XML::Writer XML::TreePP
+        cpanm --notest --no-interactive Lingua::EN::Numbers::Ordinate
+        cpanm --notest --no-interactive Lingua::Preferred
+        cpanm --notest --no-interactive Term::ProgressBar
+        cpanm --notest --no-interactive Unicode::String
+        cpanm --notest --no-interactive Unicode::UTF8simple
+        cpanm --notest --no-interactive HTML::FormatText
+        cpanm --notest --no-interactive LWP::UserAgent::Determined
+        cpanm --notest --no-interactive URI::Encode
+        cpanm --notest --no-interactive PAR::Packer
+        cpanm --notest --no-interactive App::PP::Autolink
+        cpanm --notest --no-interactive Params::Validate
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: perl Makefile.PL
+      run: perl Makefile.PL
+
+    - name: gmake
+      run: gmake
+
+    - name: gmake tests
+      run: gmake tests
