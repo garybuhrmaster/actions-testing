@@ -98,7 +98,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL --yes
+      run: perl Makefile.PL
 
     - name: make
       run: make
@@ -162,7 +162,8 @@ jobs:
           perl-devel \
           perl-Archive-Zip \
           perl-CGI \
-          perl-Data-Dump \
+          perl-Cwd \
+          perl-Data-Dumper \
           perl-Date-Calc \
           perl-Date-Manip \
           perl-DateTime \
@@ -174,9 +175,13 @@ jobs:
           perl-Digest-SHA \
           perl-ExtUtils-MakeMaker \
           perl-File-chdir \
+          perl-File-Copy
           perl-File-HomeDir \
           perl-File-Slurp \
+          perl-File-Temp \
           perl-File-Which \
+          perl-Getopt-Long \
+          perl-Getopt-Std \
           perl-HTML-Parser \
           perl-HTML-Tree \
           perl-HTTP-Cache-Transparent \
@@ -218,7 +223,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL --yes
+      run: perl Makefile.PL
 
     - name: make
       run: make
