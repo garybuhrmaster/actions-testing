@@ -98,7 +98,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL --yes
 
     - name: make
       run: make
@@ -114,6 +114,7 @@ jobs:
 
     env:
       PKG_MGR: dnf
+      TZ: Etc/UTC
 
     strategy:
       matrix:
@@ -138,17 +139,17 @@ jobs:
     - name: Adjust package manager for EL 7
       run: echo "PKG_MGR=yum" >> $GITHUB_ENV
       if: |
-        env.OS_RELEASE_ID != 'fedora' && env.OS_RELEASE_VERSION == '7'
+        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
 
     - name: Add powertools repo for EL 8
       run: ${{env.PKG_MGR}} config-manager --set-enabled powertools
       if: |
-        env.OS_RELEASE_ID != 'fedora' && env.OS_RELEASE_VERSION == '8'
+        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '8'
 
     - name: Add EPEL repo for EL linux
-      run: . /etc/os-release && ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%%.*}.noarch.rpm
+      run: ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION}}.noarch.rpm
       if: |
-        env.OS_RELEASE_ID != 'fedora'
+        env.OS_RELEASE_ID == 'centos'
 
     - name: Update OS
       run: ${{env.PKG_MGR}} upgrade -y
@@ -217,7 +218,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL --yes
 
     - name: make
       run: make
