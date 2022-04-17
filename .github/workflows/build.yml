@@ -252,42 +252,42 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
-        cpanm --notest --no-interactive Archive::Zip
-        cpanm --notest --no-interactive Module::Install
-        cpanm --notest --no-interactive CGI
-        cpanm --notest --no-interactive CGI::Carp
-        cpanm --notest --no-interactive List::MoreUtils
-        cpanm --notest --no-interactive File::HomeDir
-        cpanm --notest --no-interactive DBI
-        cpanm --notest --no-interactive DBD::SQLite
-        cpanm --notest --no-interactive Date::Manip
-        cpanm --notest --no-interactive File::Slurp
-        cpanm --notest --no-interactive JSON
-        cpanm --notest --no-interactive SOAP::Lite
-        cpanm --notest --no-interactive XML::DOM
-        cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive XML::LibXSLT
-        cpanm --notest --no-interactive XML::LibXML
-        cpanm --notest --no-interactive Tk
-        cpanm --notest --no-interactive Tk::TableMatrix
-        cpanm --notest --no-interactive HTTP::Cache::Transparent
-        cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
-        cpanm --notest --no-interactive DateTime::Format::SQLite 
-        cpanm --notest --no-interactive XML::Writer XML::TreePP
-        cpanm --notest --no-interactive Lingua::EN::Numbers::Ordinate 
-        cpanm --notest --no-interactive Lingua::Preferred
-        cpanm --notest --no-interactive Term::ProgressBar
-        cpanm --notest --no-interactive Unicode::String
-        cpanm --notest --no-interactive Unicode::UTF8simple
-        cpanm --notest --no-interactive HTML::FormatText
-        cpanm --notest --no-interactive LWP::Protocol::https
-        cpanm --notest --no-interactive LWP::UserAgent::Determined
-        cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive IO::Scalar
-        cpanm --notest --no-interactive Memoize
-        cpanm --notest --no-interactive PAR::Packer
-        cpanm --notest --no-interactive App::PP::Autolink
-        cpanm --notest --no-interactive Params::Validate
+        choco uninstall mingw
+        cpanm --notest --no-interactive \
+          Archive::Zip \
+          CGI \
+          CGI::Carp \
+          Date::Manip \
+          DateTime DateTime::Format::ISO8601 \
+          DateTime::Format::SQLite \
+          DBD::SQLite \
+          DBI \
+          File::HomeDir \
+          File::Slurp \
+          HTML::FormatText \
+          HTTP::Cache::Transparent \
+          IO::Scalar \
+          JSON \
+          Lingua::EN::Numbers::Ordinate \
+          Lingua::Preferred \
+          List::MoreUtils \
+          LWP::Protocol::https \
+          LWP::UserAgent::Determined \
+          Memoize \
+          Module::Install \
+          SOAP::Lite \
+          Term::ProgressBar \
+          Unicode::String \
+          Unicode::UTF8simple \
+          URI::Encode \
+          XML::DOM \
+          XML::LibXML \
+          XML::LibXSLT \
+          XML::Twig \
+          XML::Writer XML::TreePP
+        cpanm --notest --no-interactive \
+          Tk \
+          Tk-TableMatrix
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
@@ -301,6 +301,13 @@ jobs:
 
     - name: gmake
       run: gmake
+
+    - name: Install exe build requirements
+      run: |
+        cpanm --notest --no-interactive \
+          PAR::Packer \
+          App::PP::Autolink \
+          Params::Validate
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
@@ -334,40 +341,40 @@ jobs:
     steps:
     - name: Install build requirements
       run: |
-        brew install perl
         brew install cpanminus
-        cpanm --notest --no-interactive Archive::Zip
-        cpanm --notest --no-interactive CGI
-        cpanm --notest --no-interactive CGI::Carp
-        cpanm --notest --no-interactive Date::Manip
-        cpanm --notest --no-interactive DateTime DateTime::Format::ISO8601
-        cpanm --notest --no-interactive DateTime::Format::SQLite
-        cpanm --notest --no-interactive DBD::SQLite
-        cpanm --notest --no-interactive DBI
-        cpanm --notest --no-interactive File::HomeDir
-        cpanm --notest --no-interactive File::Slurp
-        cpanm --notest --no-interactive HTML::FormatText
-        cpanm --notest --no-interactive HTTP::Cache::Transparent
-        cpanm --notest --no-interactive IO::Scalar
-        cpanm --notest --no-interactive JSON
-        cpanm --notest --no-interactive Lingua::EN::Numbers::Ordinate
-        cpanm --notest --no-interactive Lingua::Preferred
-        cpanm --notest --no-interactive List::MoreUtils
-        cpanm --notest --no-interactive LWP::Protocol::https
-        cpanm --notest --no-interactive LWP::UserAgent::Determined
-        cpanm --notest --no-interactive Memoize
-        cpanm --notest --no-interactive SOAP::Lite
-        cpanm --notest --no-interactive Term::ProgressBar
-        cpanm --notest --no-interactive Tk
-        cpanm --notest --no-interactive Tk::TableMatrix
-        cpanm --notest --no-interactive Unicode::String
-        cpanm --notest --no-interactive Unicode::UTF8simple
-        cpanm --notest --no-interactive URI::Encode
-        cpanm --notest --no-interactive XML::DOM
-        cpanm --notest --no-interactive XML::LibXML
-        cpanm --notest --no-interactive XML::LibXSLT
-        cpanm --notest --no-interactive XML::Twig
-        cpanm --notest --no-interactive XML::Writer XML::TreePP
+        cpanm --notest --no-interactive \
+          Archive::Zip \
+          CGI \
+          CGI::Carp \
+          Date::Manip \
+          DateTime DateTime::Format::ISO8601 \
+          DateTime::Format::SQLite \
+          DBD::SQLite \
+          DBI \
+          File::HomeDir \
+          File::Slurp \
+          HTML::FormatText \
+          HTTP::Cache::Transparent \
+          IO::Scalar \
+          JSON \
+          Lingua::EN::Numbers::Ordinate \
+          Lingua::Preferred \
+          List::MoreUtils \
+          LWP::Protocol::https \
+          LWP::UserAgent::Determined \
+          Memoize \
+          SOAP::Lite \
+          Term::ProgressBar \
+          Tk \
+          Tk::TableMatrix \
+          Unicode::String \
+          Unicode::UTF8simple \
+          URI::Encode \
+          XML::DOM \
+          XML::LibXML \
+          XML::LibXSLT \
+          XML::Twig \
+          XML::Writer XML::TreePP
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
