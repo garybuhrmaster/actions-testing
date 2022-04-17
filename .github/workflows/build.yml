@@ -123,7 +123,6 @@ jobs:
         - fedora:36
         - quay.io/centos/centos:centos7
         - quay.io/centos/centos:stream8
-        - quay.io/centos/centos:stream9
 
       fail-fast: false
 
@@ -140,6 +139,11 @@ jobs:
       run: echo "PKG_MGR=yum" >> $GITHUB_ENV
       if: |
         env.OS_RELEASE_ID != 'fedora' && env.OS_RELEASE_VERSION == '7'
+
+    - name: Add powertools repo for EL 8
+      run: ${{env.PKG_MGR}} config-manager --set-enabled powertools
+      if: |
+        env.OS_RELEASE_ID != 'fedora' && env.OS_RELEASE_VERSION == '8'
 
     - name: Add EPEL repo for EL linux
       run: . /etc/os-release && ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${VERSION_ID%%.*}.noarch.rpm
@@ -165,6 +169,7 @@ jobs:
           perl-DateTime-Format-Strptime \
           perl-DBD-SQLite \
           perl-DBI \
+          perl-ExtUtils-MakeMaker \
           perl-File-chdir \
           perl-File-HomeDir \
           perl-File-Slurp \
