@@ -241,15 +241,19 @@ jobs:
         cpanm --notest --no-interactive PAR::Packer
         cpanm --notest --no-interactive App::PP::Autolink
         cpanm --notest --no-interactive Params::Validate
+      if: github.event_name == 'push'
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
+      if: github.event_name == 'push'
 
     - name: Create artifacts directory
       run: mkdir artifacts
+      if: github.event_name == 'push'
 
     - name: Copy Windows EXE
       run: copy xmltv.exe artifacts/xmltv.exe
+      if: github.event_name == 'push'
 
     - name: Upload Windows EXE
       uses: actions/upload-artifact@v2
@@ -257,4 +261,5 @@ jobs:
         name: Windows EXE
         path: artifacts
         retention-days: 15
+      if: github.event_name == 'push'
 
