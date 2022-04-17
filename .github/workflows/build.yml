@@ -162,7 +162,6 @@ jobs:
           perl-devel \
           perl-Archive-Zip \
           perl-CGI \
-          perl-Cwd \
           perl-Data-Dumper \
           perl-Date-Calc \
           perl-Date-Manip \
