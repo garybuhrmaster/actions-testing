@@ -209,32 +209,23 @@ jobs:
     steps:
     - name: Install build requirements
 
-      uses: perl-actions/install-with-cpanm@v1
-      with:
-        verbose: true
-        install: |
-          XML::DOM
-          XML::Twig
-          Tk
-          Tk::TableMatrix
-          HTTP::Cache::Transparent
-          DateTime
-          DateTime::Format::ISO8601
-          DateTime::Format::SQLite
-          XML::Writer
-          XML::TreePP
-          Lingua::EN::Numbers::Ordinate
-          Lingua::Preferred
-          Term::ProgressBar
-          Unicode::String
-          Unicode::UTF8simple
-          Switch
-          HTML::FormatText
-          LWP::UserAgent::Determined
+      run: |
+        cpanm -v --notest \
+          XML::DOM \
+          XML::Twig \
+          Tk Tk::TableMatrix \
+          HTTP::Cache::Transparent \
+          DateTime DateTime::Format::ISO8601 \
+          DateTime::Format::SQLite \
+          XML::Writer XML::TreePP \
+          Lingua::EN::Numbers::Ordinate \
+          Lingua::Preferred \
+          Term::ProgressBar \
+          Unicode::String \
+          Unicode::UTF8simple \
+          Switch HTML::FormatText \
+          LWP::UserAgent::Determined \
           URI::Encode
-          Params::Validate
-          PAR::Packer
-          App::PP::Autolink
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -247,6 +238,13 @@ jobs:
 
     - name: gmake test
       run: gmake test
+
+    - name: Install packaging requirements
+      run: |
+        cpanm -v --notest \
+          PAR::Packer \
+          App::PP::Autolink \
+          Params::Validate
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
