@@ -121,8 +121,9 @@ jobs:
         - fedora:34
         - fedora:35
         - fedora:36
-        - registry.access.redhat.com/ubi7/ubi
-        - registry.access.redhat.com/ubi8/ubi
+        - quay.io/centos/centos7
+        - quay.io/centos/stream8
+        - quay.io/centos/stream9
 
       fail-fast: false
 
