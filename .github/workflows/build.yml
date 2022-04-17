@@ -208,12 +208,12 @@ jobs:
 
     steps:
     - name: Install build requirements
-
       run: |
         cpanm -v --notest \
           XML::DOM \
           XML::Twig \
-          Tk Tk::TableMatrix \
+          Tk \
+          Tk::TableMatrix \
           HTTP::Cache::Transparent \
           DateTime DateTime::Format::ISO8601 \
           DateTime::Format::SQLite \
@@ -223,7 +223,8 @@ jobs:
           Term::ProgressBar \
           Unicode::String \
           Unicode::UTF8simple \
-          Switch HTML::FormatText \
+          Switch \
+          HTML::FormatText \
           LWP::UserAgent::Determined \
           URI::Encode
 
