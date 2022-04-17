@@ -253,41 +253,8 @@ jobs:
     - name: Install build requirements
       run: |
         choco uninstall mingw
-        cpanm --notest --no-interactive \
-          Archive::Zip \
-          CGI \
-          CGI::Carp \
-          Date::Manip \
-          DateTime DateTime::Format::ISO8601 \
-          DateTime::Format::SQLite \
-          DBD::SQLite \
-          DBI \
-          File::HomeDir \
-          File::Slurp \
-          HTML::FormatText \
-          HTTP::Cache::Transparent \
-          IO::Scalar \
-          JSON \
-          Lingua::EN::Numbers::Ordinate \
-          Lingua::Preferred \
-          List::MoreUtils \
-          LWP::Protocol::https \
-          LWP::UserAgent::Determined \
-          Memoize \
-          Module::Install \
-          SOAP::Lite \
-          Term::ProgressBar \
-          Unicode::String \
-          Unicode::UTF8simple \
-          URI::Encode \
-          XML::DOM \
-          XML::LibXML \
-          XML::LibXSLT \
-          XML::Twig \
-          XML::Writer XML::TreePP
-        cpanm --notest --no-interactive \
-          Tk \
-          Tk-TableMatrix
+        cpanm --notest --no-interactive Archive::Zip CGI CGI::Carp Date::Manip DateTime DateTime::Format::ISO8601 DateTime::Format::SQLite DBD::SQLite DBI File::HomeDir File::Slurp HTML::FormatText HTTP::Cache::Transparent IO::Scalar JSON Lingua::EN::Numbers::Ordinate Lingua::Preferred List::MoreUtils LWP::Protocol::https LWP::UserAgent::Determined Memoize Module::Install SOAP::Lite Term::ProgressBar Unicode::String Unicode::UTF8simple URI::Encode XML::DOM XML::LibXML XML::LibXSLT XML::Twig XML::Writer XML::TreePP
+        cpanm --notest --no-interactive Tk Tk-TableMatrix
 
     - name: Show content of log files on failure
       if: ${{ failure() }}
@@ -304,10 +271,7 @@ jobs:
 
     - name: Install exe build requirements
       run: |
-        cpanm --notest --no-interactive \
-          PAR::Packer \
-          App::PP::Autolink \
-          Params::Validate
+        cpanm --notest --no-interactive PAR::Packer App::PP::Autolink Params::Validate
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
