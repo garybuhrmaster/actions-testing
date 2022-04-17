@@ -171,6 +171,7 @@ jobs:
       run: |
         ${{env.PKG_MGR}} install -y \
           make \
+          perl \
           perl-generators \
           perl-interpreter \
           perl-devel \
