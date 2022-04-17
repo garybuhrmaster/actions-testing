@@ -258,7 +258,7 @@ jobs:
         cpanm --notest --no-interactive List::MoreUtils
         cpanm --notest --no-interactive File::HomeDir
         cpanm --notest --no-interactive DBI
-        cpanm --notest --no-interactive DBD-SQLite
+        cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive JSON
         cpanm --notest --no-interactive Soap::Lite
@@ -339,7 +339,7 @@ jobs:
         cpanm --notest --no-interactive List::MoreUtils
         cpanm --notest --no-interactive File::HomeDir
         cpanm --notest --no-interactive DBI
-        cpanm --notest --no-interactive DBD-SQLite
+        cpanm --notest --no-interactive DBD::SQLite
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive JSON
         cpanm --notest --no-interactive Soap::Lite
