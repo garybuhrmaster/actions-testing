@@ -250,8 +250,20 @@ jobs:
       fail-fast: false
 
     steps:
+    - name: perl -V
+      run: perl -V
+
+    - name: Install strawberry perl
+      run: |
+        choco install strawberryperl
+        echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin" >> $GITHUB_PATH
+
+    - name: perl -V
+      run: perl -V
+
     - name: Install build requirements
       run: |
+        cpanm --notest --no-interactive --installdeps .
         cpanm --notest --no-interactive Date::Manip
         cpanm --notest --no-interactive XML::DOM
         cpanm --notest --no-interactive XML::Twig
