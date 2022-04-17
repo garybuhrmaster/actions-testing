@@ -131,8 +131,9 @@ jobs:
 
     steps:
     - name: Detect EL linux
-      run: . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
-      run: . /etc/os-release && echo "OS_RELEASE_VERSION=${VERSION_ID%%.*}" >> $GITHUB_ENV
+      run: |
+        . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
+        . /etc/os-release && echo "OS_RELEASE_VERSION=${VERSION_ID%%.*}" >> $GITHUB_ENV
 
     - name: Adjust package manager for EL 7
       run: echo "PKG_MGR=yum" >> $GITHUB_ENV
