@@ -170,6 +170,7 @@ jobs:
           perl-DateTime-Format-Strptime \
           perl-DBD-SQLite \
           perl-DBI \
+          perl-Digest-SHA \
           perl-ExtUtils-MakeMaker \
           perl-File-chdir \
           perl-File-HomeDir \
@@ -186,13 +187,15 @@ jobs:
           perl-libwww-perl \
           perl-Lingua-Preferred \
           perl-List-MoreUtils \
-          perl-Log-TraceMessages \
           perl-LWP-Protocol-https \
           perl-LWP-UserAgent-Determined \
+          perl-Memorize \
           perl-PerlIO-gzip \
           perl-SOAP-Lite \
           perl-Term-ProgressBar \
           perl-TermReadKey \
+          perl-Time-Piece \
+          perl-Time-Seconds \
           perl-TimeDate \
           perl-Tk \
           perl-Tk-TableMatrix \
