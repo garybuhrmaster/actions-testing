@@ -17,7 +17,6 @@ jobs:
 
     strategy:
       matrix:
-        name: "matrix"
         include:
           - container: ubuntu:16.04
             name: Ubuntu 16.06 LTS (Xenial Xerus)
@@ -311,14 +310,13 @@ jobs:
     - name: gmake
       run: gmake
 
-    - name: Create target directories
+    - name: Create target artifact directory
       run: |
-        md "C:\STRAWB~1\perl\site\share\doc"
         md "artifacts"
       if: github.event_name == 'push'
 
     - name: gmake install
-      run: gmake install
+      run: gmake pure_install share_install
       if: github.event_name == 'push'
 
     - name: gmake xmltv.exe
