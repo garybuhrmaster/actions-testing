@@ -310,20 +310,18 @@ jobs:
     - name: gmake
       run: gmake
 
-    - name: Create doc target
+    - name: Create target directories
       run: |
-        mkdir C:\STRAWB~1\perl\site\share
-        mkdir C:\STRAWB~1\perl\site\share\doc
+        md "C:\STRAWB~1\perl\site\share\doc"
+        md "artifacts"
+      if: github.event_name == 'push'
 
     - name: gmake install
       run: gmake install
+      if: github.event_name == 'push'
 
     - name: gmake xmltv.exe
       run: gmake xmltv.exe
-      if: github.event_name == 'push'
-
-    - name: Create artifacts directory
-      run: mkdir artifacts
       if: github.event_name == 'push'
 
     - name: Copy Windows EXE
