@@ -16,7 +16,6 @@ jobs:
       TZ: Etc/UTC
 
     strategy:
-      name: "strategy"
       matrix:
         name: "matrix"
         include:
