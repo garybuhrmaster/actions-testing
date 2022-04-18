@@ -107,7 +107,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
 
     - name: make
       run: make
@@ -232,7 +232,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
 
     - name: make
       run: make
@@ -305,10 +305,16 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
 
     - name: gmake
       run: gmake
+
+    - name: Create doc target
+      run: |
+        mkdir C:\STRAWB~1\perl\site\share
+        mkdir C:\STRAWB~1\perl\site\share\doc
+        mkdir C:\STRAWB~1\perl\site/share/doc/
 
     - name: gmake install
       run: gmake install
@@ -388,7 +394,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: perl Makefile.PL
-      run: perl Makefile.PL
+      run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
 
     - name: make
       run: make
