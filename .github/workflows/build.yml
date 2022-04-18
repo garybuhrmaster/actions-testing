@@ -5,13 +5,14 @@ on: [push, pull_request]
 
 jobs:
 
-  debian-build:
+  linux-build:
 
     name: Build on ${{ matrix.name }}
 
     runs-on: ubuntu-latest
 
     env:
+      RPM_PKG_MGR: dnf
       DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC
 
@@ -36,20 +37,58 @@ jobs:
             name: Debian 11 (Bullseye)
           - container: debian:bookworm
             name: Debian 12 (Bookworm)
+          - container: fedora:34
+            name: Fedora 34
+          - container: fedora:35
+            name: Fedora 35
+          - container: fedora:36
+            name: Fedora 36
+          - container: quay.io/centos/centos:centos7
+            name: CentOS 7
+          - container: quay.io/centos/centos:stream8
+            name: CentOS Stream 8
       fail-fast: false
 
     container:
       image: ${{ matrix.container }}
 
     steps:
-    - name: Update OS
+    - name: Detect OS release
+      run: |
+        . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
+        . /etc/os-release && echo "OS_RELEASE_VERSION=$VERSION_ID" >> $GITHUB_ENV
+        . /etc/os-release && echo "OS_RELEASE_VERSION_MAJOR=${VERSION_ID%%.*}" >> $GITHUB_ENV
+
+    - name: Adjust package manager for EL 7
+      run: echo "RPM_PKG_MGR=yum" >> $GITHUB_ENV
+      if: |
+        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
+
+    - name: Add powertools repo for EL 8
+      run: ${{env.RPM_PKG_MGR}} config-manager --set-enabled powertools
+      if: |
+        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '8'
+
+    - name: Add EPEL repo for EL linux
+      run: ${{env.RPM_PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
+      if: |
+        env.OS_RELEASE_ID == 'centos'
+
+    - name: Update Debian OS
       run: |
         apt-get update -q -y
         apt-get upgrade -q -y
+      if: |
+       env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-    - name: Install build requirements
+    - name: Update Redhat OS
+      run: ${{env.RPM_PKG_MGR}} upgrade -y
+      if: |
+       env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+    - name: Install Debian build requirements
       run: |
-        apt-get install -q -y --no-install-recommends \
+        apt-get install -q -y \
         libarchive-zip-perl \
         libcgi-pm-perl \
         libdata-dump-perl \
@@ -102,74 +141,12 @@ jobs:
         make \
         perl \
         perl-tk
+      if: |
+       env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: perl Makefile.PL
-      run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
-
-    - name: make
-      run: make
-
-    - name: make test
-      run: make test
-
-  redhat-build:
-
-    name: Build on ${{ matrix.name }}
-
-    runs-on: ubuntu-latest
-
-    env:
-      PKG_MGR: dnf
-      TZ: Etc/UTC
-
-    strategy:
-      matrix:
-        include:
-          - container: fedora:34
-            name: Fedora 34
-          - container: fedora:35
-            name: Fedora 35
-          - container: fedora:36
-            name: Fedora 36
-          - container: quay.io/centos/centos:centos7
-            name: CentOS 7
-          - container: quay.io/centos/centos:stream8
-            name: CentOS Stream 8
-      fail-fast: false
-
-    container:
-      image: ${{ matrix.container }}
-
-    steps:
-    - name: Detect EL linux
+    - name: Install Redhat build requirements
       run: |
-        . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
-        . /etc/os-release && echo "OS_RELEASE_VERSION=${VERSION_ID%%.*}" >> $GITHUB_ENV
-
-    - name: Adjust package manager for EL 7
-      run: echo "PKG_MGR=yum" >> $GITHUB_ENV
-      if: |
-        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
-
-    - name: Add powertools repo for EL 8
-      run: ${{env.PKG_MGR}} config-manager --set-enabled powertools
-      if: |
-        env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '8'
-
-    - name: Add EPEL repo for EL linux
-      run: ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION}}.noarch.rpm
-      if: |
-        env.OS_RELEASE_ID == 'centos'
-
-    - name: Update OS
-      run: ${{env.PKG_MGR}} upgrade -y
-
-    - name: Install build requirements
-      run: |
-        ${{env.PKG_MGR}} install -y \
+        ${{env.RPM_PKG_MGR}} install -y \
           make \
           perl \
           perl-Archive-Zip \
@@ -227,6 +204,8 @@ jobs:
           perl-XML-TreePP \
           perl-XML-Twig \
           perl-XML-Writer
+      if: |
+        env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
     - name: Checkout
       uses: actions/checkout@v3
