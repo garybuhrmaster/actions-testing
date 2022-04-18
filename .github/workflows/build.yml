@@ -16,7 +16,9 @@ jobs:
       TZ: Etc/UTC
 
     strategy:
+      name: "strategy"
       matrix:
+        name: "matrix"
         include:
           - container: ubuntu:16.04
             name: Ubuntu 16.06 LTS (Xenial Xerus)
