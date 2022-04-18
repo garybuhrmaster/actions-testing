@@ -291,12 +291,11 @@ jobs:
 
     - name: Create target artifact directory
       run: |
-        md "C:\STRAWB~1\perl\site\share\xmltv"
         md "artifacts"
       if: github.event_name == 'push'
 
     - name: gmake install
-      run: gmake pure_install share_install
+      run: gmake pure_install
       if: github.event_name == 'push'
 
     - name: gmake xmltv.exe
