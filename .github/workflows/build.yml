@@ -314,7 +314,6 @@ jobs:
       run: |
         mkdir C:\STRAWB~1\perl\site\share
         mkdir C:\STRAWB~1\perl\site\share\doc
-        mkdir C:\STRAWB~1\perl\site/share/doc/
 
     - name: gmake install
       run: gmake install
