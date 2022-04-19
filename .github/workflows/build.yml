@@ -218,6 +218,10 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Fetch tags
+        run: |
+          git fetch --prune --unshallow --tags
+
       - name: display env
         run:
           env
@@ -225,8 +229,8 @@ jobs:
       - name: git describe
         run: |
           pwd
-          git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          git checkout ${GITHUB_SHA}
+          #git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          #git checkout ${GITHUB_SHA}
           git describe
 
       - name: perl Makefile.PL
