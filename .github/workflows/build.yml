@@ -237,9 +237,11 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Get all git tags
-        run: git fetch --verbose --unshallow --tags
+        run: git fetch --verbose --tags --force
 
       - name: git describe
         run: |
