@@ -215,23 +215,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-
-      - name: Fetch tags
-        run: |
-          git fetch --prune --unshallow --tags
-
-      - name: display env
-        run:
-          env
-
-      - name: git describe
-        run: |
-          pwd
-          #git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          #git checkout ${GITHUB_SHA}
-          git describe
 
       - name: perl Makefile.PL
         run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
@@ -251,6 +234,26 @@ jobs:
       fail-fast: false
 
     steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Fetch tags
+        run: |
+          git fetch --prune --unshallow --tags
+
+      - name: git describe
+        run: |
+          #git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          #git checkout ${GITHUB_SHA}
+          git describe
+
+      - name: fail early
+        run: |
+          cancelme
+
       - name: Insure Strawberry perl is first in path
         run: echo "PATH=C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;$Env:Path" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         shell: powershell
