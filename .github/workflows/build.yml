@@ -215,8 +215,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
 
       - name: display env
         run:
@@ -225,6 +223,7 @@ jobs:
       - name: git describe
         run: |
           git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          git checkout ${GITHUB_SHA}
           pwd
           git describe
 
