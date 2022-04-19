@@ -222,7 +222,8 @@ jobs:
 
       - name: git describe
         run: |
-          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          # git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          pwd
           git describe
 
       - name: perl Makefile.PL
