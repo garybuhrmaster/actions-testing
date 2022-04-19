@@ -305,13 +305,13 @@ jobs:
         if: github.event_name == 'push'
 
       - name: Copy Windows EXE
-        run: copy xmltv.exe artifacts/xmltv.exe
+        run: copy xmltv.exe artifacts/xmltv-testing.exe
         if: github.event_name == 'push'
 
       - name: Upload xmltv
         uses: actions/upload-artifact@v2
         with:
-          name: xmltv
+          name: Windows EXE
           path: artifacts
           retention-days: 15
         if: github.event_name == 'push'
