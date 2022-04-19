@@ -216,8 +216,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: display env
+        run:
+          env
+
       - name: git describe
-        run: git describe
+        run:
+          git config --global --add safe.directory /__w
+          git describe
 
       - name: perl Makefile.PL
         run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
