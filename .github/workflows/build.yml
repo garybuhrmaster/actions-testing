@@ -142,6 +142,7 @@ jobs:
           libxml-treepp-perl
           libxml-twig-perl
           libxml-writer-perl
+          git
           make
           perl
           perl-tk
@@ -151,6 +152,7 @@ jobs:
       - name: Install perl requirements for Redhat systems
         run: >
           ${{env.RPM_PKG_MGR}} install -y
+          git
           make
           perl
           perl-Archive-Zip
