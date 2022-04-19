@@ -221,8 +221,8 @@ jobs:
           env
 
       - name: git describe
-        run:
-          git config --global --add safe.directory /__w
+        run: |
+          git config --global --add ${{env.GITHUB_WORKSPACE}}
           git describe
 
       - name: perl Makefile.PL
