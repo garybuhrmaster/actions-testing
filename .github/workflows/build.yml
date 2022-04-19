@@ -237,8 +237,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch --unshallow --tags
 
       - name: git describe
         run: |
