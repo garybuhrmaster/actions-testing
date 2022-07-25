@@ -88,7 +88,11 @@ jobs:
       - name: Update Redhat OS and install ansible
         run: |
           ${{env.RPM_PKG_MGR}} upgrade -y
-          ${{env.RPM_PKG_MGR}} install ansible -y
+        if: |
+          env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+      - name: Redhat OS install ansible
+        run: ${{env.RPM_PKG_MGR}} install ansible -y
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
@@ -97,24 +101,25 @@ jobs:
           zypper update -y
           zypper install ansible -y
         if: |
-          env.OS_RELEASE_ID == 'opensuse'
+          env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: Update ArchLinux and install ansible
         run: |
-          pacman -S ansible python2
+          pacman -Syu
+          pacman -Sy ansible 
         if: |
-          env.OS_RELEASE_ID == 'archlinux'
+          env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
            repository: MythTV/ansible
-           path: mythtv-ansible
+           path: ansible
 
       - name: Checkout 
         uses: actions/checkout@v3
 
       - name: Run ansible to install build requirements
         run: |
-          ansible-playbook -i hosts qt5.yml
+          cd ansible && ansible-playbook -i hosts qt5.yml
 
