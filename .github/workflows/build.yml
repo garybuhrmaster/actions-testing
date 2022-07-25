@@ -10,7 +10,7 @@ on:
 
 jobs:
   linux-build:
-    name: Build on ${{ matrix.name }} using ${{ matrix.cc }}
+    name: Build on ${{ matrix.container.name }} using ${{ matrix.compiler.cc }}
 
     runs-on: ubuntu-latest
 
@@ -21,41 +21,15 @@ jobs:
 
     strategy:
       matrix:
-        name: []
-        cc: ['gcc', 'clang']
-        include:
-          - container: ubuntu:18.04
-            name: Ubuntu 18.04 LTS (Bionic Beaver)
-          - container: ubuntu:20.04
-            name: Ubuntu 20.04 LTS (Focal Fossa)
-          - container: ubuntu:22.04
-            name: Ubuntu 22.04 LTS (Jammy Jellyfish)
-          - container: ubuntu:22.10
-            name: Ubuntu 22.10 (Kinetic Kudu)
-          - container: debian:bullseye
-            name: Debian 11 (Bullseye)
-          - container: debian:bookworm
-            name: Debian 12 (Bookworm)
-          - container: fedora:35
-            name: Fedora 35
-          - container: fedora:36
-            name: Fedora 36
-          - container: fedora:rawhide
-            name: Fedora Rawhide
-          - container: archlinux:base
-            name: ArchLinux
-          - container: quay.io/centos/centos:stream8
-            name: CentOS Stream 8
-          - container: opensuse/tumbleweed
-            name: OpenSUSE tumbleweed
-          - container: opensuse/leap
-            name: OpenSUSE leap
+        container: [ { image: 'ubuntu:18.04', name: 'Ubuntu 18.04 LTS (Bionic Beaver)' },
+                     { image: 'ubuntu:20.04', name: 'Ubuntu 20.04 LTS (Focal Fossa)' } ]
+        compiler: [ { cc: 'gcc', cxx: 'g++' }, { cc: 'clang'. cxx: 'clang++'} ]
       fail-fast: false
 
     continue-on-error: true
 
     container:
-      image: ${{ matrix.container }}
+      image: ${{ matrix.container.image }}
 
     steps:
       - name: Detect OS release
