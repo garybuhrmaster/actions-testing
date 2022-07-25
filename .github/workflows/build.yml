@@ -10,7 +10,7 @@ on:
 
 jobs:
   linux-build:
-    name: Build on ${{ matrix.name }}
+    name: Build on ${{ matrix.name }} using $${{ matrix.cc }}
 
     runs-on: ubuntu-latest
 
