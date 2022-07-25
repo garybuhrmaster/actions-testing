@@ -21,8 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        cc: ['gcc', 'clang']
-        container: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:22.10']
+        container: ['']
+        cc: ['gcc'. 'clang']
         include:
           - container: ubuntu:18.04
             name: Ubuntu 18.04 LTS (Bionic Beaver)
@@ -50,6 +50,10 @@ jobs:
             name: OpenSUSE tumbleweed
           - container: opensuse/leap
             name: OpenSUSE leap
+          - cc: 'gcc'
+            cxx: 'g++'
+          - cc: 'clang'
+            cxx: 'clang++'
       fail-fast: false
 
     container:
