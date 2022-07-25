@@ -21,7 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        container: []
+        container: ['']
+        name: ['']
         cc: ['gcc'. 'clang']
         include:
           - container: ubuntu:18.04
