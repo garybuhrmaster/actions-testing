@@ -21,15 +21,12 @@ jobs:
 
     strategy:
       matrix:
-        container:
-          - image: 'ubuntu:18.04'
-          - image: 'ubuntu:20.04'
+        container: >
+          [
+            { image: 'ubuntu:18.04', name: 'Ubuntu 18.04 LTS (Bionic Beaver)' },
+            { image: 'ubuntu:20.04', name: 'Ubuntu 20.04 LTS ()' }
+          ]
         compiler: [ { cc: 'gcc', cxx: 'g++' }, { cc: 'clang'. cxx: 'clang++'} ]
-        include:
-          - image: 'ubuntu:18.04'
-            name: 'Ubuntu 18.04 LTS (Bionic Beaver)'
-          - image: 'ubuntu:20.04'
-            name: 'Ubuntu 20.04 LTS ()'
 
       fail-fast: false
 
