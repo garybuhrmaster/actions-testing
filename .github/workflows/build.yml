@@ -21,8 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        container: ['']
-        name: ['']
+        container: [""]
+        name: [""]
         cc: ['gcc'. 'clang']
         include:
           - container: ubuntu:18.04
@@ -56,6 +56,8 @@ jobs:
           - cc: 'clang'
             cxx: 'clang++'
       fail-fast: false
+
+    continue-on-error: true
 
     container:
       image: ${{ matrix.container }}
