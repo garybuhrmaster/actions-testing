@@ -21,8 +21,6 @@ jobs:
 
     strategy:
       matrix:
-        container: ['']
-        name: ['']
         cc: ['gcc', 'clang']
         include:
           - container: ubuntu:18.04
@@ -51,10 +49,6 @@ jobs:
             name: OpenSUSE tumbleweed
           - container: opensuse/leap
             name: OpenSUSE leap
-          - cc: 'gcc'
-            cxx: 'g++'
-          - cc: 'clang'
-            cxx: 'clang++'
       fail-fast: false
 
     continue-on-error: true
