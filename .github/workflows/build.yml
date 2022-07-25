@@ -24,8 +24,6 @@ jobs:
             name: Ubuntu 18.04 LTS (Bionic Beaver)
           - container: ubuntu:20.04
             name: Ubuntu 20.04 LTS (Focal Fossa)
-          - container: ubuntu:21.10
-            name: Ubuntu 21.10 (Impish Indri)
           - container: ubuntu:22.04
             name: Ubuntu 22.04 LTS (Jammy Jellyfish)
           - container: ubuntu:22.10
@@ -88,25 +86,21 @@ jobs:
       - name: Update Redhat OS and install ansible
         run: |
           ${{env.RPM_PKG_MGR}} upgrade -y
-        if: |
-          env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: Redhat OS install ansible
-        run: ${{env.RPM_PKG_MGR}} install ansible -y
+          ${{env.RPM_PKG_MGR}} install -y ansible
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
         run: |
           zypper update -y
-          zypper install ansible -y
+          zypper install -y ansible 
         if: |
           env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: Update ArchLinux and install ansible
         run: |
-          pacman -Syu
-          pacman -Sy ansible 
+          pacman --noconfirm -Syu
+          pacman --noconfirm -Sy ansible 
         if: |
           env.OS_RELEASE_ID == 'arch'
 
@@ -121,5 +115,5 @@ jobs:
 
       - name: Run ansible to install build requirements
         run: |
-          cd ansible && ansible-playbook -i hosts qt5.yml
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
 
