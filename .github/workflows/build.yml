@@ -22,6 +22,7 @@ jobs:
     strategy:
       matrix:
         cc: ['gcc', 'clang']
+        container: ['ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:22.10']
         include:
           - container: ubuntu:18.04
             name: Ubuntu 18.04 LTS (Bionic Beaver)
