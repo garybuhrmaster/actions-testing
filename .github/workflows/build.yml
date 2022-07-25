@@ -10,7 +10,7 @@ on:
 
 jobs:
   linux-build:
-    name: Build on ${{ matrix.name }} using $${{ matrix.cc }}
+    name: Build on ${{ matrix.name }} using ${{ matrix.cc }}
 
     runs-on: ubuntu-latest
 
@@ -35,7 +35,6 @@ jobs:
             name: Debian 11 (Bullseye)
           - container: debian:bookworm
             name: Debian 12 (Bookworm)
-          ##   reason: missing depends
           - container: fedora:35
             name: Fedora 35
           - container: fedora:36
@@ -44,16 +43,12 @@ jobs:
             name: Fedora Rawhide
           - container: archlinux:base
             name: ArchLinux
-          ##   reason: missing depends
           - container: quay.io/centos/centos:stream8
             name: CentOS Stream 8
-          ##   reason: stream rearrangement
           - container: opensuse/tumbleweed
             name: OpenSUSE tumbleweed
-          ##   reason: missing depends
           - container: opensuse/leap
             name: OpenSUSE leap
-          ##   reason: missing depends
       fail-fast: false
 
     container:
