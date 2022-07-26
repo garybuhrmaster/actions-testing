@@ -21,7 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        container: [ { image: 'ubuntu:18.04', name: 'Ubuntu 18.04 LTS (Bionic Beaver)' } , { image: 'ubuntu:20.04', name: 'Ubuntu 20.04 LTS ()' } ]
+        basis: [ "" ]
+        container: [ { image: 'ubuntu:18.04', name: 'Ubuntu 18.04 LTS (Bionic Beaver)' }, { image: 'ubuntu:20.04', name: 'Ubuntu 20.04 LTS ()' } ]
         compiler: [ { cc: 'gcc', cxx: 'g++' }, { cc: 'clang'. cxx: 'clang++'} ]
 
       fail-fast: false
