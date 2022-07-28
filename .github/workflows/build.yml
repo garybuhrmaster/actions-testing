@@ -69,28 +69,28 @@ jobs:
         run: |
           apt-get update -q -y
           apt-get upgrade -q -y
-          apt-get install ansible ${{ matrix.complier.cc }} ${{matrix.compiler.cxx}} -y
+          apt-get install ansible ${{ matrix.complier.cc }} -y
         if: |
           env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Update Redhat OS and install ansible
         run: |
           ${{env.RPM_PKG_MGR}} upgrade -y
-          ${{env.RPM_PKG_MGR}} install -y ansible ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }} 
+          ${{env.RPM_PKG_MGR}} install -y ansible ${{ matrix.compiler.cc }} 
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
         run: |
           zypper update -y
-          zypper install -y ansible tar gzip ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }}
+          zypper install -y ansible tar gzip ${{ matrix.compiler.cc }}
         if: |
           env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: Update ArchLinux and install ansible
         run: |
           pacman --noconfirm -Syu
-          pacman --noconfirm -Sy ansible ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }}
+          pacman --noconfirm -Sy ansible ${{ matrix.compiler.cc }}
         if: |
           env.OS_RELEASE_ID == 'arch'
 
