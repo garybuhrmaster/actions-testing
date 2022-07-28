@@ -23,7 +23,7 @@ jobs:
       matrix:
         container:
           - { image: 'ubuntu:18.04', desc: 'Ubuntu 18.04 LTS (Bionic Beaver)' }
-          - { image: 'ubuntu:20.04', desc: 'Ubuntu 18.04 LTS (Bionic Beaver)' }
+          - { image: 'ubuntu:20.04', desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           - { image: 'ubuntu:22.04', desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
           - { image: 'ubuntu:22.10', desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
           - { image: 'debian:bullseye', desc: 'Debian 11 (Bullseye)' }
@@ -59,11 +59,16 @@ jobs:
 
       - name: Add EPEL repo for EL linux
         run: ${{env.RPM_PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
-        if: |
-          env.OS_RELEASE_ID == 'centos'
+        if: env.OS_RELEASE_ID == 'centos'
+
+      - name: Debian/Ubuntu OS update
+        run: |
+          apt-get update -y
+          apt-get upgrade -y
+        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install ansible
-        run: apt-get install ansible
+        run: apt-get install ansible -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS update
@@ -73,7 +78,7 @@ jobs:
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Redhat/Fedora OS install ansible
-        run: ${{env.RPM_PKG_MGR}} install -y ansible
+        run: ${{env.RPM_PKG_MGR}} install ansible -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
@@ -97,14 +102,15 @@ jobs:
           path: ansible
 
       - name: Run ansible to install build requirements
-        run: ansible-playbook -i ansible/hosts ansible/qt5.yml
+        working-directory: ./ansible
+        run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (not (yet?) in ansible)
         run: apt-get install ccache libbluray-dev libbluray-bdj ${{ matrix.complier.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages (not (yet?) in ansible)
-        run: ${{env.RPM_PKG_MGR}} install -y ccache libbluray-devel ${{ matrix.compiler.cc }}
+        run: ${{env.RPM_PKG_MGR}} install ccache libbluray-devel libbluray-bdj ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
