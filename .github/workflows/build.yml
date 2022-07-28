@@ -37,8 +37,6 @@ jobs:
 
       fail-fast: false
 
-    continue-on-error: true
-
     container:
       image: ${{ matrix.container.image }}
 
@@ -64,20 +62,19 @@ jobs:
         if: |
           env.OS_RELEASE_ID == 'centos'
 
-      - name: Update Debian OS and install ansible
-        run: |
-          apt-get update -q -y
-          apt-get upgrade -q -y
-          apt-get install ansible ccache ant ${{ matrix.complier.cc }} -y
-        if: |
-          env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
+      - name: Debian/Ubuntu OS install ansible
+        run: apt-get install ansible
+        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Update Redhat OS and install ansible
-        run: |
-          ${{env.RPM_PKG_MGR}} upgrade -y
+      - name: Redhat/Fedora OS update
+        run: ${{env.RPM_PKG_MGR}} upgrade -y
           ${{env.RPM_PKG_MGR}} install -y ansible ccache ant ${{ matrix.compiler.cc }} 
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+      - name: Redhat/Fedora OS install ansible
+        run: ${{env.RPM_PKG_MGR}} install -y ansible
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
         run: |
@@ -100,8 +97,15 @@ jobs:
           path: ansible
 
       - name: Run ansible to install build requirements
-        run: |
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
+        run: ansible-playbook -i ansible/hosts ansible/qt5.yml
+
+      - name: Debian/Ubuntu OS install extra packages (not (yet?) in ansible)
+        run: apt-get install ccache libbluray-dev libbluray-bdj ${{ matrix.complier.cc }} -y
+        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
+
+      - name: Redhat/Fedora OS install extra packages (not (yet?) in ansible)
+        run: ${{env.RPM_PKG_MGR}} install -y ccache libbluray-devel ${{ matrix.compiler.cc }}
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -121,8 +125,7 @@ jobs:
           restore-keys: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache
 
       - name: ccache statistics [pre]
-        run: |
-          ccache -sV
+        run: ccache -sV
 
       - name: Configure core
         working-directory: ./mythtv
