@@ -10,7 +10,7 @@ on:
 
 jobs:
   linux-build:
-    name: Build on ${{ matrix.container.name }} using ${{ matrix.compiler.cc }} 
+    name: Build on ${{ matrix.container.desc }} using ${{ matrix.compiler.desc }} 
 
     runs-on: ubuntu-latest
 
@@ -21,9 +21,12 @@ jobs:
 
     strategy:
       matrix:
-        basis: [ "" ]
-        container: [ { image: 'ubuntu:18.04', name: 'Ubuntu 18.04 LTS (Bionic Beaver)' }, { image: 'ubuntu:20.04', name: 'Ubuntu 20.04 LTS ()' } ]
-        compiler: [ { cc: 'gcc', cxx: 'g++' }, { cc: 'clang'. cxx: 'clang++'} ]
+        container:
+          - { image: 'ubuntu:18.04', desc: 'Ubuntu 18.04 LTS (Bionic Beaver)' }
+          - { image: 'ubuntu:20.04', desc: 'Ubuntu 20.04 LTS ()' }
+        compiler:
+          - { cc: 'gcc', cxx: 'g++', desc: 'gcc' }
+          - { cc: 'clang', cxx: 'clang++', desc: 'clang' }
 
       fail-fast: false
 
