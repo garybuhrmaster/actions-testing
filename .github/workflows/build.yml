@@ -75,16 +75,20 @@ jobs:
         run: ${{env.RPM_PKG_MGR}} install ansible -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
-      - name: OpenSUSE OS update and install ansible
-        run: |
-          zypper update -y
-          zypper install -y ansible tar gzip ccache ant ${{ matrix.compiler.cc }}
+      - name: OpenSUSE OS update
+        run: zypper update -y
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
-      - name: Update ArchLinux and install ansible
-        run: |
-          pacman --noconfirm -Syu
-          pacman --noconfirm -Sy ansible ccache ant ${{ matrix.compiler.cc }}
+      - name: OpenSUSE OS install ansible
+        run: zypper install -y ansible tar gzip
+        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
+
+      - name: ArchLinux OS update
+        run: pacman --noconfirm -Syu
+        if: env.OS_RELEASE_ID == 'arch'
+
+      - name: ArchLinux OS install ansible
+        run: pacman --noconfirm -Sy ansible
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout MythTV/ansible repo
@@ -98,11 +102,11 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages
-        run: apt-get install ant default-jdk ${{ matrix.compiler.cc }} -y
+        run: apt-get install ant default-jdk libwayland-dev qtbase5-private-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages
-        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools ${{ matrix.compiler.cc }} -y
+        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools wayland-devel qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
