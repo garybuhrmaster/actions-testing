@@ -98,7 +98,7 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages
-        run: apt-get install ant libbluray-bdj java-compiler ${{ matrix.compiler.cc }} -y
+        run: apt-get install ant default-jdk ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages
