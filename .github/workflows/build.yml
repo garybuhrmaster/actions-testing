@@ -68,28 +68,28 @@ jobs:
         run: |
           apt-get update -q -y
           apt-get upgrade -q -y
-          apt-get install ansible ccache ${{ matrix.complier.cc }} -y
+          apt-get install ansible ccache ant ${{ matrix.complier.cc }} -y
         if: |
           env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Update Redhat OS and install ansible
         run: |
           ${{env.RPM_PKG_MGR}} upgrade -y
-          ${{env.RPM_PKG_MGR}} install -y ansible ccache ${{ matrix.compiler.cc }} 
+          ${{env.RPM_PKG_MGR}} install -y ansible ccache ant ${{ matrix.compiler.cc }} 
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
         run: |
           zypper update -y
-          zypper install -y ansible tar gzip ccache ${{ matrix.compiler.cc }}
+          zypper install -y ansible tar gzip ccache ant ${{ matrix.compiler.cc }}
         if: |
           env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: Update ArchLinux and install ansible
         run: |
           pacman --noconfirm -Syu
-          pacman --noconfirm -Sy ansible ccache ${{ matrix.compiler.cc }}
+          pacman --noconfirm -Sy ansible ccache ant ${{ matrix.compiler.cc }}
         if: |
           env.OS_RELEASE_ID == 'arch'
 
@@ -110,7 +110,7 @@ jobs:
 
       - name: Setup build environment
         run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.cc }} --cxx=${{ matrix.cxx }}" >> $GITHUB_ENV
+          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
           echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
 
       - name: Check ccache
