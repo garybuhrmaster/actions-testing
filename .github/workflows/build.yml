@@ -106,11 +106,11 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (not (yet?) in ansible)
-        run: apt-get install ccache libbluray-dev libbluray-bdj ${{ matrix.complier.cc }} -y
+        run: apt-get install qt5-qmake ant ${{ matrix.complier.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages (not (yet?) in ansible)
-        run: ${{env.RPM_PKG_MGR}} install ccache libbluray-devel libbluray-bdj ${{ matrix.compiler.cc }} -y
+        run: ${{env.RPM_PKG_MGR}} install ant ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
