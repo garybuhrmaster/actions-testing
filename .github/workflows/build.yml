@@ -108,49 +108,49 @@ jobs:
         with:
           repository: MythTV/mythtv
 
-    - name: Setup build environment
-      run: |
-        echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.cc }} --cxx=${{ matrix.cxx }}" >> $GITHUB_ENV
-        echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+      - name: Setup build environment
+        run: |
+          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.cc }} --cxx=${{ matrix.cxx }}" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
 
-    - name: Check ccache
-      uses: actions/cache@v2
-      with:
-        path: ~/.ccache
-        key: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-        restore-keys: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache
+      - name: Check ccache
+        uses: actions/cache@v2
+        with:
+          path: ~/.ccache
+          key: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache
 
-    - name: ccache statistics [pre]
-      run: |
-        ccache -sV
+      - name: ccache statistics [pre]
+        run: |
+          ccache -sV
 
-    - name: Configure core
-      working-directory: ./mythtv
-      run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+      - name: Configure core
+        working-directory: ./mythtv
+        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
-    - name: Make core
-      working-directory: ./mythtv
-      run: make all_no_test -j4
+      - name: Make core
+        working-directory: ./mythtv
+        run: make all_no_test -j4
 
-    - name: Install core
-      working-directory: ./mythtv
-      run: make install
+      - name: Install core
+        working-directory: ./mythtv
+        run: make install
 
-    # QTest requires a QT SQL plugin - but there are currently none available via brew on macOS
-    - name: Unit test core
-      working-directory: ./mythtv
-      run: make test
-      if: runner.os == 'Linux'
+      # QTest requires a QT SQL plugin - but there are currently none available via brew on macOS
+      - name: Unit test core
+        working-directory: ./mythtv
+        run: make test
+        if: runner.os == 'Linux'
 
-    - name: Configure plugins
-      working-directory: ./mythplugins
-      run: ./configure $MYTHTV_CONFIG
+      - name: Configure plugins
+        working-directory: ./mythplugins
+        run: ./configure $MYTHTV_CONFIG
 
-    - name: Make plugins
-      working-directory: ./mythplugins
-      run: make -j4
+      - name: Make plugins
+        working-directory: ./mythplugins
+        run: make -j4
 
-    - name: ccache statistics [post]
-      run: |
-        ccache -sV
+      - name: ccache statistics [post]
+        run: |
+          ccache -sV
 
