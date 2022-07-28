@@ -26,12 +26,18 @@ jobs:
           - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
           - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
           - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+
+          ## The following is disabled due to ansible not (yet) being correct
+          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+
           - { image: 'fedora:35',                      desc: 'Fedora 35' }
           - { image: 'fedora:36',                      desc: 'Fedora 36' }
           - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
-          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
+
+          ## The following are disabled due to ansible not (yet) being correct
+          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
@@ -92,7 +98,7 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages
-        run: apt-get install ant libbluray-bdj ${{ matrix.compiler.cc }} -y
+        run: apt-get install ant libbluray-bdj java-compiler ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages
