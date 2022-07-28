@@ -23,7 +23,15 @@ jobs:
       matrix:
         container:
           - { image: 'ubuntu:18.04', desc: 'Ubuntu 18.04 LTS (Bionic Beaver)' }
-          - { image: 'ubuntu:20.04', desc: 'Ubuntu 20.04 LTS ()' }
+          - { image: 'ubuntu:20.04', desc: 'Ubuntu 18.04 LTS (Bionic Beaver)' }
+          - { image: 'ubuntu:22.04', desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10', desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
+          - { image: 'debian:bullseye', desc: 'Debian 11 (Bullseye)' }
+          - { image: 'fedora:35', desc: 'Fedora 35' }
+          - { image: 'fedora:36', desc: 'Fedora 36' }
+          - { image: 'fedora:rawhide', desc: 'Fedora Rawhide' }
+          - { image: 'quay.io/centos/centos:stream8', desc: 'CentOS Stream 8' }
+
         compiler:
           - { cc: 'gcc', cxx: 'g++', desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++', desc: 'clang' }
@@ -61,28 +69,28 @@ jobs:
         run: |
           apt-get update -q -y
           apt-get upgrade -q -y
-          apt-get install ansible ${{ matrix.cc }} -y
+          apt-get install ansible ${{ matrix.complier.cc }} ${{matrix.compiler.cxx}} -y
         if: |
           env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Update Redhat OS and install ansible
         run: |
           ${{env.RPM_PKG_MGR}} upgrade -y
-          ${{env.RPM_PKG_MGR}} install -y ansible ${{ matrix.cc }}
+          ${{env.RPM_PKG_MGR}} install -y ansible ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }} 
         if: |
           env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Update OpenSUSE OS and install ansible
         run: |
           zypper update -y
-          zypper install -y ansible tar gzip ${{ matrix.cc }}
+          zypper install -y ansible tar gzip ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }}
         if: |
           env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: Update ArchLinux and install ansible
         run: |
           pacman --noconfirm -Syu
-          pacman --noconfirm -Sy ansible ${{ matrix.cc }}
+          pacman --noconfirm -Sy ansible ${{ matrix.compiler.cc }} ${{ matrix.compiler.cxx }}
         if: |
           env.OS_RELEASE_ID == 'arch'
 
