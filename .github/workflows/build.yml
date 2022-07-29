@@ -28,7 +28,7 @@ jobs:
           - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
 
           ## The following is disabled due to ansible not (yet) being correct
-          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+            { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
           - { image: 'fedora:35',                      desc: 'Fedora 35' }
           - { image: 'fedora:36',                      desc: 'Fedora 36' }
@@ -38,9 +38,9 @@ jobs:
           - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
-          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
+            { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+            { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+            { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
