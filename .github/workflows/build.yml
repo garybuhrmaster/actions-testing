@@ -68,6 +68,14 @@ jobs:
         run: apt-get install ansible -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
+      - name: Redhat OS - adjust package manager for EL 7
+        run: echo "RPM_PKG_MGR=yum" >> $GITHUB_ENV
+        if: env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
+
+      - name: Redhat OS - add EPEL repo for EL linux
+        run: ${{env.PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION}}.noarch.rpm
+        if: env.OS_RELEASE_ID == 'centos'
+
       - name: Redhat/Fedora OS update
         run: ${{env.RPM_PKG_MGR}} upgrade -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
@@ -102,20 +110,12 @@ jobs:
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Debian/Ubuntu OS install extra packages
+      - name: Debian/Ubuntu OS install extra packages (for greater coverage)
         run: apt-get install ant default-jdk qtbase5-private-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Redhat/Fedora OS install extra packages
+      - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: Redhat/Fedora rpm query
-        run: rpm -q -a
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: Redhat/Fedora env display
-        run: set
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
