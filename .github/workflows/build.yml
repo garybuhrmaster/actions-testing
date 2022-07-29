@@ -34,6 +34,9 @@ jobs:
           - { image: 'fedora:36',                      desc: 'Fedora 36' }
           - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+
           ## The following are disabled due to ansible not (yet) being correct
           # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
           # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
@@ -67,9 +70,7 @@ jobs:
 
       - name: Redhat/Fedora OS update
         run: ${{env.RPM_PKG_MGR}} upgrade -y
-          ${{env.RPM_PKG_MGR}} install -y ansible ccache ant ${{ matrix.compiler.cc }} 
-        if: |
-          env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Redhat/Fedora OS install ansible
         run: ${{env.RPM_PKG_MGR}} install ansible -y
@@ -109,6 +110,14 @@ jobs:
         run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
+      - name: Redhat/Fedora rpm query
+        run: rpm -q -a
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+      - name: Redhat/Fedora env display
+        run: set
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
@@ -119,7 +128,7 @@ jobs:
           echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
           echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
 
-      - name: Check ccache
+      - name: Checkout ccache
         uses: actions/cache@v3
         with:
           path: ~/.ccache
@@ -141,11 +150,9 @@ jobs:
         working-directory: ./mythtv
         run: make install
 
-      # QTest requires a QT SQL plugin - but there are currently none available via brew on macOS
       - name: Unit test core
         working-directory: ./mythtv
         run: make test
-        if: runner.os == 'Linux'
 
       - name: Configure plugins
         working-directory: ./mythplugins
