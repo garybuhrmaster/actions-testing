@@ -102,11 +102,11 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages
-        run: apt-get install ant default-jdk libwayland-dev qtbase5-private-dev ${{ matrix.compiler.cc }} -y
+        run: apt-get install ant default-jdk qtbase5-private-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages
-        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools wayland-devel qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
+        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: Checkout Mythtv/mythtv
@@ -120,11 +120,11 @@ jobs:
           echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
 
       - name: Check ccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.ccache
-          key: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.image.os }}-${{ matrix.compiler.cc }}-ccache
+          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
 
       - name: ccache statistics [pre]
         run: ccache -sV
