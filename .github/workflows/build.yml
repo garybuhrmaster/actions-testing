@@ -192,24 +192,40 @@ jobs:
         env
 
   FreeBSD-build:
-    name: Build on FreeBSD
+    # FreeBSD has to run in a VM, and only macOS workers support virtualization
+    name: Build on ${{ matrix.FreeBSD.desc }}
+
+    strategy:
+      matrix:
+        FreeBSD:
+          - { release: '12.3',                         desc: 'FreeBSD 12.3' }
+          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
 
     runs-on: macos-12
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Test in FreeBSD
+    - name: Checkout MythTV/ansible repo
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/ansible
+    - name: Checkout Mythtv/mythtv
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/mythtv
+    - name: Test on FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
       with:
         usesh: true
+        release: ${{ matrix.FreeBSD.release }
         prepare: |
           pkg install -y curl
-
+          pkg install -y ansible
         run: |
           pwd
           ls -lah
           whoami
           env
           freebsd-version
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
 
