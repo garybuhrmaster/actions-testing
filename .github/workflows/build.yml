@@ -217,7 +217,7 @@ jobs:
       uses: vmactions/freebsd-vm@v0
       with:
         usesh: true
-        release: ${{ matrix.FreeBSD.release }
+        release: ${{ matrix.FreeBSD.release }}
         prepare: |
           pkg install -y curl
           pkg install -y ansible
