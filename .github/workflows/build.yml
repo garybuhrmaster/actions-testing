@@ -184,12 +184,69 @@ jobs:
     runs-on: ${{ matrix.macOS.os }}
 
     steps:
-    - name: Test on macOS
-      run: |
-        pwd
-        ls -alt
-        whoami
-        env
+      - name: Test on macOS
+        run: |
+          pwd
+          ls -alt
+          whoami
+          env
+
+      - name: Install ansible
+        run: brew install ansible
+
+      - name: Checkout MythTV/ansible repo
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/ansible
+          path: ansible
+
+      - name: Run ansible to install build requirements
+        working-directory: ./ansible
+        run: ansible-playbook -i hosts qt5.yml
+
+      - name: Checkout Mythtv/mythtv
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
+
+      - name: Setup build environment
+        run: |
+          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+
+      - name: Checkout ccache
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
+
+      - name: ccache statistics [pre]
+        run: ccache -sV
+
+      - name: Configure core
+        working-directory: ./mythtv
+        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+
+      - name: Make core
+        working-directory: ./mythtv
+        run: make all_no_test -j4
+
+      - name: Install core
+        working-directory: ./mythtv
+        run: make install
+
+      - name: Configure plugins
+        working-directory: ./mythplugins
+        run: ./configure $MYTHTV_CONFIG
+
+      - name: Make plugins
+        working-directory: ./mythplugins
+        run: make -j4
+
+      - name: ccache statistics [post]
+        run: |
+          ccache -sV
 
   FreeBSD-build:
     # FreeBSD has to run in a VM, and only macOS workers support virtualization
@@ -210,10 +267,12 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: MythTV/ansible
+
     - name: Checkout Mythtv/mythtv
       uses: actions/checkout@v3
       with:
         repository: MythTV/mythtv
+
     - name: Test on FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
