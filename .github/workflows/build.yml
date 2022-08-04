@@ -112,7 +112,7 @@ jobs:
           repository: MythTV/mythtv
 
       - name: Run ansible to install build requirements
-        working-dir: ./ansible
+        working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
