@@ -112,7 +112,8 @@ jobs:
           repository: MythTV/mythtv
 
       - name: Run ansible to install build requirements
-        run: ansible-playbook -i ansible/hosts ansible/qt5.yml
+        working-dir: ./ansible
+        run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
         run: apt-get install ant default-jdk qtbase5-private-dev ${{ matrix.compiler.cc }} -y
