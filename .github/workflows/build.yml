@@ -107,11 +107,6 @@ jobs:
           repository: MythTV/ansible
           path: ansible
 
-      - name: Checkout Mythtv/mythtv
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-
       - name: Run ansible to install build requirements
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
@@ -123,6 +118,11 @@ jobs:
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+      - name: Checkout Mythtv/mythtv
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
 
       - name: Setup build environment
         run: |
@@ -200,6 +200,8 @@ jobs:
         FreeBSD:
           - { release: '12.3',                         desc: 'FreeBSD 12.3' }
           - { release: '13.1',                         desc: 'FreeBSD 13.1' }
+
+      fail-fast: false
 
     runs-on: macos-12
 
