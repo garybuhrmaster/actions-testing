@@ -1,8 +1,0 @@
-# XMLTV build dependencies
-
-- tasks:
-  - name: Package installation
-    dnf:
-      pkg:
-      -  perl-XML-TreePP
-    state: latest
