@@ -24,10 +24,10 @@ jobs:
 
     steps:
 
-      - name: Fedora OS update
+      - name: Update OS
         run: dnf upgrade -y
 
-      - name: Fedora OS install ansible
+      - name: Install ansible
         run: dnf install ansible -y
 
       - name: Checkout MythTV/ansible repo
@@ -46,8 +46,8 @@ jobs:
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Fedora OS install extra packages (for greater coverage)
-        run: dnf install ant python-setuptools qt5-qtbase-private-devel xvidcore-devel python-oauth python-pycurl clang clang-tools-extra -y
+      - name: Install extra packages (for greater coverage) and for clang-tidy
+        run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
 
       - name: Checkout ccache
         uses: actions/cache@v3
@@ -77,7 +77,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: ./mythtv/mythplugins
-        run: ./configure 
+        run: ./configure --prefix=${{ github.workspace }}/build/install
 
       - name: Make plugins
         working-directory: ./mythtv/mythplugins
