@@ -15,7 +15,7 @@ jobs:
 
     env:
       TZ: Etc/UTC
-      CCACHE_DIR=$HOME/.ccache
+      CCACHE_DIR: $HOME/.ccache
 
     runs-on: ubuntu-latest
 
