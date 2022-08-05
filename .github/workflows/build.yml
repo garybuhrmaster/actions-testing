@@ -13,6 +13,10 @@ jobs:
   clang-tidy:
     name: Clang-tidy
 
+    env:
+      TZ: Etc/UTC
+      CCACHE_DIR=$HOME/.ccache
+
     runs-on: ubuntu-latest
 
     container:
@@ -42,13 +46,8 @@ jobs:
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Redhat/Fedora OS install extra packages (for greater coverage)
-        run: dnf install ant python-setuptools qt5-qtbase-private-devel clang -y
-
-      - name: Setup build environment
-        run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
-          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+      - name: Fedora OS install extra packages (for greater coverage)
+        run: dnf install ant python-setuptools qt5-qtbase-private-devel xvidcore-devel python-oauth python-pycurl clang clang-tools-extra -y
 
       - name: Checkout ccache
         uses: actions/cache@v3
@@ -62,7 +61,7 @@ jobs:
 
       - name: Configure core
         working-directory: ./mythtv/mythtv
-        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan
 
       - name: Make core
         working-directory: ./mythtv/mythtv
@@ -78,13 +77,25 @@ jobs:
 
       - name: Configure plugins
         working-directory: ./mythtv/mythplugins
-        run: ./configure $MYTHTV_CONFIG
+        run: ./configure 
 
       - name: Make plugins
         working-directory: ./mythtv/mythplugins
         run: make -j4
 
+      - name: Install plugins
+        working-directory: ./mythtv/mythplugins
+        run: make install
+
+      - name: Make compilation database
+        working-directory: ./mythtv/mythtv
+        run: make compdb
+
       - name: ccache statistics [post]
         run: |
           ccache -sV
+
+      - name: Run clang-tidy
+        working-directory: ./mythtv/mythtv
+        run: run-clang-tidy -j4
 
