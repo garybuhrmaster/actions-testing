@@ -61,27 +61,27 @@ jobs:
         run: ccache -sV
 
       - name: Configure core
-        working-directory: ./mythtv
+        working-directory: ./mythtv/mythtv
         run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
       - name: Make core
-        working-directory: ./mythtv
+        working-directory: ./mythtv/mythtv
         run: make all_no_test -j4
 
       - name: Install core
-        working-directory: ./mythtv
+        working-directory: ./mythtv/mythtv
         run: make install
 
       - name: Unit test core
-        working-directory: ./mythtv
+        working-directory: ./mythtv/mythtv
         run: make test
 
       - name: Configure plugins
-        working-directory: ./mythplugins
+        working-directory: ./mythtv/mythplugins
         run: ./configure $MYTHTV_CONFIG
 
       - name: Make plugins
-        working-directory: ./mythplugins
+        working-directory: ./mythtv/mythplugins
         run: make -j4
 
       - name: ccache statistics [post]
