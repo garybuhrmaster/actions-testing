@@ -11,11 +11,12 @@ on:
 jobs:
 
   clang-tidy:
-    name: Clang-tidy
+    name: clang-tidy
 
     env:
       TZ: Etc/UTC
       CCACHE_DIR: $HOME/.ccache
+      MYTHTV_CONFIGURE_PREFIX: --prefix=${{ github.workspace }}/build/install
 
     runs-on: ubuntu-latest
 
@@ -46,7 +47,7 @@ jobs:
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Install extra packages (for greater coverage) and for clang-tidy
+      - name: Install extra packages for greater coverage and clang-tidy
         run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
 
       - name: Checkout ccache
@@ -61,7 +62,7 @@ jobs:
 
       - name: Configure core
         working-directory: ./mythtv/mythtv
-        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan
+        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan
 
       - name: Make core
         working-directory: ./mythtv/mythtv
@@ -77,7 +78,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: ./mythtv/mythplugins
-        run: ./configure --prefix=${{ github.workspace }}/build/install
+        run: ./configure $MYTHTV_CONFIGURE_PREFIX
 
       - name: Make plugins
         working-directory: ./mythtv/mythplugins
