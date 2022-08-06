@@ -50,16 +50,6 @@ jobs:
       - name: Install extra packages for greater coverage and clang-tidy
         run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
 
-      - name: Checkout ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: fedora-rawhide-clang-tidy-ccache-${{ github.sha }}
-          restore-keys: fedora-rawhide-clang-tidy-ccache
-
-      - name: ccache statistics [pre]
-        run: ccache -sV
-
       - name: Configure core
         working-directory: ./mythtv/mythtv
         run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan
@@ -92,11 +82,7 @@ jobs:
         working-directory: ./mythtv/mythtv
         run: make compdb
 
-      - name: ccache statistics [post]
-        run: |
-          ccache -sV
-
       - name: Run clang-tidy
         working-directory: ./mythtv/mythtv
-        run: run-clang-tidy -j4
+        run: run-clang-tidy -j4 -q
 
