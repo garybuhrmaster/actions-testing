@@ -84,5 +84,5 @@ jobs:
 
       - name: Run clang-tidy
         working-directory: ./mythtv/mythtv
-        run: run-clang-tidy -j4 --quiet 
+        run: run-clang-tidy -j4 -quiet 
 
