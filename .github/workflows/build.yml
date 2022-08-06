@@ -50,9 +50,15 @@ jobs:
       - name: Install extra packages for greater coverage and clang-tidy
         run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
 
+      - name: Get clang version
+        run: clang --version
+
+      - name: Get Qt version
+        run: qmake-qt5 --version || qmake6 --version || qmake --version
+
       - name: Configure core
         working-directory: ./mythtv/mythtv
-        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan
+        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava
 
       - name: Make core
         working-directory: ./mythtv/mythtv
@@ -64,7 +70,7 @@ jobs:
 
       - name: Unit test core
         working-directory: ./mythtv/mythtv
-        run: make test
+        run: make test -j4
 
       - name: Configure plugins
         working-directory: ./mythtv/mythplugins
@@ -84,5 +90,5 @@ jobs:
 
       - name: Run clang-tidy
         working-directory: ./mythtv/mythtv
-        run: run-clang-tidy -j4 -quiet 
+        run: run-clang-tidy 
 
