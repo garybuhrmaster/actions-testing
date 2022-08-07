@@ -18,44 +18,15 @@ jobs:
       - name: Install cpanm
         run: |
           brew install cpanminus
+
       - name: Install dependencies
         run: |
           brew install libxslt
+
       - name: Install perl requirements
         run: >
           cpanm --notest --no-interactive
-          Archive::Zip
-          CGI
-          CGI::Carp
-          Date::Manip
-          DateTime DateTime::Format::ISO8601
-          DateTime::Format::SQLite
-          DBD::SQLite
-          DBI
-          File::HomeDir
-          File::Slurp
-          HTML::FormatText
-          HTTP::Cache::Transparent
-          IO::Scalar
-          JSON
-          Lingua::EN::Numbers::Ordinate
-          Lingua::Preferred
-          List::MoreUtils
-          LWP::Protocol::https
-          LWP::UserAgent::Determined
-          Memoize
-          SOAP::Lite
-          Term::ProgressBar
-          Tk
-          Tk::TableMatrix
-          Unicode::String
-          Unicode::UTF8simple
-          URI::Encode
-          XML::DOM
-          XML::LibXML
           XML::LibXSLT
-          XML::Twig
-          XML::Writer XML::TreePP
 
       - name: Show content of log files on failure
         if: ${{ failure() }}
