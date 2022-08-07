@@ -1,94 +1,65 @@
----
 name: build
 
 on:
-  push:
-    branches: [ main ]
-
   pull_request:
-    branches: [ main ]
+
+  push:
+    branches:
+      - master
 
 jobs:
+  macos-build:
+    name: Build on macOS
 
-  clang-tidy:
-    name: clang-tidy
+    runs-on: macos-latest
 
-    env:
-      TZ: Etc/UTC
-      CCACHE_DIR: $HOME/.ccache
-      MYTHTV_CONFIGURE_PREFIX: --prefix=${{ github.workspace }}/build/install
-
-    runs-on: ubuntu-latest
-
-    container:
-      image: fedora:rawhide
+    strategy:
+      fail-fast: false
 
     steps:
+      - name: Install cpanm
+        run: |
+          brew install cpanminus
+      - name: Install dependencies
+        run: |
+          brew install libxslt
+      - name: Install perl requirements
+        run: >
+          cpanm --notest --no-interactive
+          Archive::Zip
+          CGI
+          CGI::Carp
+          Date::Manip
+          DateTime DateTime::Format::ISO8601
+          DateTime::Format::SQLite
+          DBD::SQLite
+          DBI
+          File::HomeDir
+          File::Slurp
+          HTML::FormatText
+          HTTP::Cache::Transparent
+          IO::Scalar
+          JSON
+          Lingua::EN::Numbers::Ordinate
+          Lingua::Preferred
+          List::MoreUtils
+          LWP::Protocol::https
+          LWP::UserAgent::Determined
+          Memoize
+          SOAP::Lite
+          Term::ProgressBar
+          Tk
+          Tk::TableMatrix
+          Unicode::String
+          Unicode::UTF8simple
+          URI::Encode
+          XML::DOM
+          XML::LibXML
+          XML::LibXSLT
+          XML::Twig
+          XML::Writer XML::TreePP
 
-      - name: Update OS
-        run: dnf upgrade -y
-
-      - name: Install ansible
-        run: dnf install ansible -y
-
-      - name: Checkout MythTV/ansible repo
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/ansible
-          path: ansible
-
-      - name: Checkout MythTV/mythtv repo
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-          path: mythtv
-
-      - name: Run ansible to install build requirements
-        working-directory: ./ansible
-        run: ansible-playbook -i hosts qt5.yml
-
-      - name: Install extra packages for greater coverage and clang-tidy
-        run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
-
-      - name: Get clang version
-        run: clang --version
-
-      - name: Get Qt version
-        run: qmake-qt5 --version || qmake6 --version || qmake --version
-
-      - name: Configure core
-        working-directory: ./mythtv/mythtv
-        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava
-
-      - name: Make core
-        working-directory: ./mythtv/mythtv
-        run: make all_no_test -j4
-
-      - name: Install core
-        working-directory: ./mythtv/mythtv
-        run: make install
-
-      - name: Unit test core
-        working-directory: ./mythtv/mythtv
-        run: make test -j4
-
-      - name: Configure plugins
-        working-directory: ./mythtv/mythplugins
-        run: ./configure $MYTHTV_CONFIGURE_PREFIX
-
-      - name: Make plugins
-        working-directory: ./mythtv/mythplugins
-        run: make -j4
-
-      - name: Install plugins
-        working-directory: ./mythtv/mythplugins
-        run: make install
-
-      - name: Make compilation database
-        working-directory: ./mythtv/mythtv
-        run: make compdb
-
-      - name: Run clang-tidy
-        working-directory: ./mythtv/mythtv
-        run: run-clang-tidy 
+      - name: Show content of log files on failure
+        if: ${{ failure() }}
+        run: cat /Users/runner/.cpanm/work/*/build.log
 
