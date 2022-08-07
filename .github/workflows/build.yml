@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install libxslt
+          xcode-select --install
 
       - name: Install perl requirements
         run: >
