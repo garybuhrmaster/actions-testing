@@ -22,7 +22,7 @@ jobs:
           brew install cpanminus
       - name: Install perl requirements
         run: >
-          cpanm --notest --no-interactive --sudo
+          cpanm --notest --no-interactive --sudo --force
           Archive::Zip
           CGI
           CGI::Carp
