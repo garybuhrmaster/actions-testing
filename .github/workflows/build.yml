@@ -29,8 +29,8 @@ jobs:
           Date::Manip
           DateTime DateTime::Format::ISO8601
           DateTime::Format::SQLite
-          DBD::SQLite
           DBI
+          DBD::SQLite
           File::HomeDir
           File::Slurp
           HTML::FormatText
