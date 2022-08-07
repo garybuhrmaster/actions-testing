@@ -37,8 +37,6 @@ jobs:
           LWP::UserAgent::Determined
           SOAP::Lite
           Term::ProgressBar
-          Tk
-          Tk::TableMatrix
           Unicode::String
           Unicode::UTF8simple
           URI::Encode
