@@ -61,7 +61,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        repository: XMLTV/xmltv
+        with:
+          repository: XMLTV/xmltv
 
       - name: perl Makefile.PL
         run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
