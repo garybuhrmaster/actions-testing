@@ -24,25 +24,17 @@ jobs:
         run: >
           cpanm --notest --no-interactive --sudo --force
           Archive::Zip
-          CGI
-          CGI::Carp
           Date::Manip
           DateTime DateTime::Format::ISO8601
           DateTime::Format::SQLite
           DBI
-          DBD::SQLite
           File::HomeDir
-          File::Slurp
           HTML::FormatText
           HTTP::Cache::Transparent
           IO::Scalar
-          JSON
           Lingua::EN::Numbers::Ordinate
           Lingua::Preferred
-          List::MoreUtils
-          LWP::Protocol::https
           LWP::UserAgent::Determined
-          Memoize
           SOAP::Lite
           Term::ProgressBar
           Tk
@@ -51,9 +43,8 @@ jobs:
           Unicode::UTF8simple
           URI::Encode
           XML::DOM
-          XML::LibXML
           XML::Twig
-          XML::Writer XML::TreePP
+          XML::TreePP
 
       - name: Show content of log files on failure
         if: ${{ failure() }}
