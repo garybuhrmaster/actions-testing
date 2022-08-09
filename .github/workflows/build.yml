@@ -17,8 +17,9 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Install cpanm
+      - name: Install perl and cpanm
         run: |
+          brew install perl
           brew install cpanminus
       - name: Install perl requirements
         run: >
