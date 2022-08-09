@@ -169,13 +169,16 @@ jobs:
           ccache -sV
 
   macOS-build:
-    name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
+    name: Build on macOS ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
+
+    env:
+      MACPORTS_VERSION: 2.7.2
 
     strategy:
       matrix:
         macOS:
-          - { os: 'macos-11',                          desc: 'macOS 11' }
-          - { os: 'macos-12',                          desc: 'macOS 12' }
+          - { os: 'macos-11',                          desc: '11-BigSur' }
+          - { os: 'macos-12',                          desc: '12-Monterey' }
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
@@ -192,8 +195,13 @@ jobs:
           whoami
           env
 
+      - name: install macports
+        run: |
+          wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.desc }}.pkg
+          sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.desc }}.pkg -target /
+
       - name: Install ansible
-        run: brew install ansible
+        run: sudo port install py310-ansible-core
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -203,10 +211,10 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ./ansible
-        run: ansible-playbook -i hosts qt5.yml
+        run: sudo ansible-playbook -i hosts qt5.yml
 
       - name: Install additional software
-        run: brew install ccache
+        run: sudo port install ccache
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -271,11 +279,13 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: MythTV/ansible
+        path: ansible
 
     - name: Checkout Mythtv/mythtv
       uses: actions/checkout@v3
       with:
         repository: MythTV/mythtv
+        path: mythtv
 
     - name: Test on FreeBSD
       id: test
@@ -286,7 +296,7 @@ jobs:
         prepare: |
           pkg install -y curl
           curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python get-pip.py
+          python3 get-pip.py
           pip install ansible
         run: |
           pwd
