@@ -19,11 +19,10 @@ jobs:
     steps:
       - name: Install perl and cpanm
         run: |
-          brew install perl
           brew install cpanminus
       - name: Install perl requirements
         run: >
-          cpanm --notest --no-interactive --sudo --force
+          cpanm --notest --no-interactive 
           Archive::Zip
           Date::Manip
           DateTime DateTime::Format::ISO8601
