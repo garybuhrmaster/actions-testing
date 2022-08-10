@@ -296,6 +296,7 @@ jobs:
         prepare: |
           pkg install -y curl
           pkg install -y python3
+          pkg install -y rust
           curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
           python3 get-pip.py
           pip install ansible
