@@ -208,7 +208,10 @@ jobs:
         run: echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
 
       - name: Install ansible
-        run: sudo port install py310-ansible-core
+        run: sudo port install py-ansible
+
+      - name: Show py-ansible contents
+        run: sudo port contents py-ansible
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
