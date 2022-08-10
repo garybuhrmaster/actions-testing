@@ -208,10 +208,7 @@ jobs:
         run: echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
 
       - name: Install ansible
-        run: sudo port install py-ansible
-
-      - name: Show py-ansible contents
-        run: sudo port contents py-ansible
+        run: sudo port install py310-ansible
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -221,7 +218,7 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ./ansible
-        run: sudo ansible-playbook -i hosts qt5.yml
+        run: sudo ansible-playbook-3.10 -i hosts qt5.yml
 
       - name: Install additional software
         run: sudo port install ccache
