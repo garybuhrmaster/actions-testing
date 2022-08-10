@@ -22,26 +22,26 @@ jobs:
     strategy:
       matrix:
         container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
           - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
 
           ## The following are disabled due to ansible not (yet) being correct
           - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
-          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
@@ -154,7 +154,7 @@ jobs:
 
       - name: Unit test core
         working-directory: ./mythtv
-        run: make test
+        run: make test -j4
 
       - name: Configure plugins
         working-directory: ./mythplugins
@@ -164,12 +164,16 @@ jobs:
         working-directory: ./mythplugins
         run: make -j4
 
+      - name: Install plugins
+        working-directory: ./mythplugins
+        run: make install
+
       - name: ccache statistics [post]
         run: |
           ccache -sV
 
   macOS-build:
-    name: Build on macOS ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
+    name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
 
     env:
       MACPORTS_VERSION: 2.7.2
@@ -177,8 +181,8 @@ jobs:
     strategy:
       matrix:
         macOS:
-          - { os: 'macos-11',                          desc: '11-BigSur' }
-          - { os: 'macos-12',                          desc: '12-Monterey' }
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
+          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
@@ -197,11 +201,11 @@ jobs:
 
       - name: install macports
         run: |
-          wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.desc }}.pkg
-          sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.desc }}.pkg -target /
+          wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
+          installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
 
       - name: Install ansible
-        run: sudo port install py310-ansible-core
+        run: port install py310-ansible-core
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -211,10 +215,10 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ./ansible
-        run: sudo ansible-playbook -i hosts qt5.yml
+        run: ansible-playbook -i hosts qt5.yml
 
       - name: Install additional software
-        run: sudo port install ccache
+        run: port install ccache
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -264,6 +268,10 @@ jobs:
     # FreeBSD has to run in a VM, and only macOS workers support virtualization
     name: Build on ${{ matrix.FreeBSD.desc }}
 
+    env:
+      PAGER: cat
+      ASSUME_ALWAYS_YES: YES
+
     strategy:
       matrix:
         FreeBSD:
@@ -293,19 +301,21 @@ jobs:
       with:
         usesh: true
         release: ${{ matrix.FreeBSD.release }}
+        envs: 'PAGER ASSUME_ALWAYS_YES'
+        mem: 2048
         prepare: |
-          portsnap fetch
+          portsnap fetch update
           pkg install -y curl
           pkg install -y python3
           pkg install -y rust
           curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
           python3 get-pip.py
           pip install ansible
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
         run: |
           pwd
           ls -lah
           whoami
           env
           freebsd-version
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
 
