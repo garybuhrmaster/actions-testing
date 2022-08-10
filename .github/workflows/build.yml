@@ -294,6 +294,7 @@ jobs:
         usesh: true
         release: ${{ matrix.FreeBSD.release }}
         prepare: |
+          portsnap fetch
           pkg install -y curl
           pkg install -y python3
           pkg install -y rust
