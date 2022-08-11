@@ -217,6 +217,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          repository: XMLTV/xmltv
 
       - name: perl Makefile.PL
         run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
@@ -305,6 +307,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          repository: XMLTV/xmltv
 
       - name: Checkout tags
         # need to avoid a shallow clone for git describe to work
@@ -504,6 +508,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          repository: XMLTV/xmltv
 
       - name: perl Makefile.PL
         run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
