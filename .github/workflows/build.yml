@@ -17,16 +17,16 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Install perl and dependencies
+      - name: Install dependencies
         run: |
-          brew install perl perl-build cpanminus libx11 openssl sqlite tcl-tk
+          brew install cpanminus openssl sqlite 
       - name: show a few vars
         run: set
       - name: Insure path is correct
         run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
       - name: Install perl requirements
         run: >
-          /usr/local/bin/perl cpanm --notest --no-interactive 
+          /usr/local/bin/perl /usr/local/bin/cpanm --notest --no-interactive 
           Archive::Zip
           CGI
           CGI::Carp
