@@ -1,324 +1,76 @@
----
 name: build
 
 on:
-  push:
-    branches: [ main ]
-
   pull_request:
-    branches: [ main ]
+
+  push:
 
 jobs:
-  linux-build:
-    name: Build on ${{ matrix.container.desc }} using ${{ matrix.compiler.desc }} 
 
-    runs-on: ubuntu-latest
 
-    env:
-      RPM_PKG_MGR: dnf
-      DEBIAN_FRONTEND: noninteractive
-      TZ: Etc/UTC
+  macos-build:
+    name: Build on macOS
+
+    runs-on: macos-latest
 
     strategy:
-      matrix:
-        container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-
-          ## The following are disabled due to ansible not (yet) being correct
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
-
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
-
-          ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
-
-          ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
-          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
-
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
-
       fail-fast: false
 
-    container:
-      image: ${{ matrix.container.image }}
-
     steps:
-      - name: Detect OS release
+      - name: Install perl and dependencies
         run: |
-          . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
-          . /etc/os-release && echo "OS_RELEASE_VERSION=$VERSION_ID" >> $GITHUB_ENV
-          . /etc/os-release && echo "OS_RELEASE_VERSION_MAJOR=${VERSION_ID%%.*}" >> $GITHUB_ENV
+          brew install perl perl-build cpanminus libx11 openssl tcl-tk 
+      - name: Install perl requirements
+        run: >
+          cpanm --notest --no-interactive 
+          Archive::Zip
+          CGI
+          CGI::Carp
+          Date::Manip
+          DateTime
+          DateTime::Format::ISO8601
+          DateTime::Format::SQLite
+          DBI
+          DBD::SQLite
+          File::HomeDir
+          File::Slurp
+          HTML::FormatText
+          HTTP::Cache::Transparent
+          IO::Scalar
+          JSON
+          Lingua::EN::Numbers::Ordinate
+          Lingua::Preferred
+          List::MoreUtils
+          LWP::Protocol::https
+          LWP::UserAgent::Determined
+          SOAP::Lite
+          Term::ProgressBar
+          Tk
+          Tk::TableMatrix
+          Unicode::String
+          Unicode::UTF8simple
+          URI::Encode
+          XML::DOM
+          XML::LibXML
+          XML::Twig
+          XML::TreePP
+          XML::Writer
 
-      - name: Debian/Ubuntu OS update
-        run: |
-          apt-get update -y
-          apt-get upgrade -y
-        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
+      - name: Show content of log files on failure
+        if: ${{ failure() }}
+        run: cat /Users/runner/.cpanm/work/*/build.log
 
-      - name: Debian/Ubuntu OS install ansible
-        run: apt-get install ansible -y
-        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
-
-      - name: Redhat OS - adjust package manager for EL 7
-        run: echo "RPM_PKG_MGR=yum" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
-
-      - name: Redhat OS - add EPEL repo for EL linux
-        run: ${{env.RPM_PKG_MGR}} -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION}}.noarch.rpm
-        if: env.OS_RELEASE_ID == 'centos'
-
-      - name: Redhat/Fedora OS update
-        run: ${{env.RPM_PKG_MGR}} upgrade -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: Redhat/Fedora OS install ansible
-        run: ${{env.RPM_PKG_MGR}} install ansible -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: OpenSUSE OS update
-        run: zypper update -y
-        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
-
-      - name: OpenSUSE OS install ansible
-        run: zypper install -y ansible tar gzip
-        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
-
-      - name: ArchLinux OS update
-        run: pacman --noconfirm -Syu
-        if: env.OS_RELEASE_ID == 'arch'
-
-      - name: ArchLinux OS install ansible
-        run: pacman --noconfirm -Sy ansible
-        if: env.OS_RELEASE_ID == 'arch'
-
-      - name: Checkout MythTV/ansible repo
+      - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: garybuhrmaster/ansible
-          ref: debian12
-          path: ansible
+          repository: XMLTV/xmltv
 
-      - name: Run ansible to install build requirements
-        working-directory: ./ansible
-        run: ansible-playbook -i hosts qt5.yml
+      - name: perl Makefile.PL
+        run: perl Makefile.PL -default NO_PACKLIST=1 NO_PERLLOCAL=1
 
-      - name: Debian/Ubuntu OS install extra packages (for greater coverage)
-        run: apt-get install ant default-jdk qtbase5-private-dev ${{ matrix.compiler.cc }} -y
-        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
+      - name: make
+        run: make
 
-      - name: Redhat/Fedora OS install extra packages (for greater coverage)
-        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
-
-      - name: Checkout Mythtv/mythtv
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-
-      - name: Setup build environment
-        run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
-          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-
-      - name: Checkout ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
-
-      - name: ccache statistics [pre]
-        run: ccache -sV
-
-      - name: Configure core
-        working-directory: ./mythtv
-        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
-
-      - name: Make core
-        working-directory: ./mythtv
-        run: make all_no_test -j4
-
-      - name: Install core
-        working-directory: ./mythtv
-        run: make install
-
-      - name: Unit test core
-        working-directory: ./mythtv
-        run: make test -j4
-
-      - name: Configure plugins
-        working-directory: ./mythplugins
-        run: ./configure $MYTHTV_CONFIG
-
-      - name: Make plugins
-        working-directory: ./mythplugins
-        run: make -j4
-
-      - name: Install plugins
-        working-directory: ./mythplugins
-        run: make install
-
-      - name: ccache statistics [post]
-        run: |
-          ccache -sV
-
-  macOS-build:
-    name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
-
-    env:
-      MACPORTS_VERSION: 2.7.2
-
-    strategy:
-      matrix:
-        macOS:
-          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
-          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
-
-      fail-fast: false
-
-    runs-on: ${{ matrix.macOS.os }}
-
-    steps:
-      - name: Test on macOS
-        run: |
-          pwd
-          ls -alt
-          whoami
-          env
-
-      - name: install macports
-        run: |
-          wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
-          sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
-
-      - name: Add macports to path
-        run: echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
-
-      - name: Install ansible
-        run: sudo port install py310-ansible
-
-      - name: Checkout MythTV/ansible repo
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/ansible
-          path: ansible
-
-      - name: Run ansible to install build requirements
-        working-directory: ./ansible
-        run: sudo ansible-playbook-3.10 -i hosts qt5.yml
-
-      - name: Install additional software
-        run: sudo port install ccache
-
-      - name: Checkout Mythtv/mythtv
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-
-      - name: Setup build environment
-        run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
-          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-
-      - name: Checkout ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
-
-      - name: ccache statistics [pre]
-        run: ccache -sV
-
-      - name: Configure core
-        working-directory: ./mythtv
-        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
-
-      - name: Make core
-        working-directory: ./mythtv
-        run: make all_no_test -j4
-
-      - name: Install core
-        working-directory: ./mythtv
-        run: make install
-
-      - name: Configure plugins
-        working-directory: ./mythplugins
-        run: ./configure $MYTHTV_CONFIG
-
-      - name: Make plugins
-        working-directory: ./mythplugins
-        run: make -j4
-
-      - name: ccache statistics [post]
-        run: |
-          ccache -sV
-
-  FreeBSD-build:
-    # FreeBSD has to run in a VM, and only macOS workers support virtualization
-    name: Build on ${{ matrix.FreeBSD.desc }}
-
-    env:
-      PAGER: cat
-      ASSUME_ALWAYS_YES: YES
-
-    strategy:
-      matrix:
-        FreeBSD:
-          - { release: '12.3',                         desc: 'FreeBSD 12.3' }
-          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
-
-      fail-fast: false
-
-    runs-on: macos-12
-
-    steps:
-    - name: Checkout MythTV/ansible repo
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/ansible
-        path: ansible
-
-    - name: Checkout Mythtv/mythtv
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/mythtv
-        path: mythtv
-
-    - name: Test on FreeBSD
-      id: test
-      uses: vmactions/freebsd-vm@v0
-      with:
-        usesh: true
-        release: ${{ matrix.FreeBSD.release }}
-        envs: 'PAGER ASSUME_ALWAYS_YES'
-        mem: 2048
-        prepare: |
-          portsnap fetch update
-          pkg install -y curl
-          pkg install -y python3
-          pkg install -y rust
-          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py
-          pip install ansible
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
-        run: |
-          pwd
-          ls -lah
-          whoami
-          env
-          freebsd-version
+      - name: make test
+        run: make test
 
