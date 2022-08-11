@@ -23,7 +23,7 @@ jobs:
       - name: show a few vars
         run: set
       - name: Insure path is correct
-        run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> .GITHUB.ENV
+        run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
       - name: Install perl requirements
         run: >
           cpanm --notest --no-interactive 
