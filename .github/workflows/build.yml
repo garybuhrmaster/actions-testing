@@ -11,31 +11,27 @@ jobs:
   macos-build:
     name: Build on macOS
 
-    runs-on: macos-12
+    runs-on: macos-latest
 
     strategy:
       fail-fast: false
 
     steps:
       - name: Install dependencies
-        run: |
-          brew install cpanminus openssl sqlite 
-      - name: show a few vars
-        run: set
-      - name: Insure path is correct
-        run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
+        run: brew install perl cpanminus openssl sqlite tcl-tk
+
       - name: Install perl requirements
         run: >
-          /usr/local/bin/perl /usr/local/bin/cpanm --notest --no-interactive 
+          perl /usr/local/bin/cpanm --notest --no-interactive
           Archive::Zip
           CGI
           CGI::Carp
           Date::Manip
           DateTime
-          DateTime::Format::ISO8601
+          DateTime DateTime::Format::ISO8601
           DateTime::Format::SQLite
-          DBI
           DBD::SQLite
+          DBI
           File::HomeDir
           File::Slurp
           HTML::FormatText
@@ -47,6 +43,7 @@ jobs:
           List::MoreUtils
           LWP::Protocol::https
           LWP::UserAgent::Determined
+          Memoize
           SOAP::Lite
           Term::ProgressBar
           Tk
@@ -56,8 +53,9 @@ jobs:
           URI::Encode
           XML::DOM
           XML::LibXML
-          XML::Twig
+          XML::LibXSLT
           XML::TreePP
+          XML::Twig
           XML::Writer
 
       - name: Show content of log files on failure
