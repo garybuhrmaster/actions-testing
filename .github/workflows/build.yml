@@ -24,11 +24,11 @@ jobs:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           ## The following are disabled due to ansible not (yet) being correct
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
           # { image: 'fedora:35',                      desc: 'Fedora 35' }
           # { image: 'fedora:36',                      desc: 'Fedora 36' }
@@ -43,7 +43,7 @@ jobs:
           # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
           # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
 
-          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
@@ -113,7 +113,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: garybuhrmaster/ansible
-          ref: main
+          ref: archlinux
           path: ansible
 
       - name: Run ansible to install build requirements
@@ -127,6 +127,10 @@ jobs:
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+
+      - name: ArchLinux OS install extra packages (for greater coverage)
+        run: pacman --noconfirm -Sy ant python-setuptools jdk-openjdk ${{ matrix.compiler.cc }}
+        if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -221,6 +225,10 @@ jobs:
         run: sudo port install py310-ansible
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
+      - name: Install ansible for homebrew
+        run: brew install ansible
+        if: ${{ matrix.pkg-mgr.mgr }} == 'homebrew'
+
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
@@ -235,6 +243,11 @@ jobs:
         working-directory: ./ansible
         run: sudo ansible-playbook-3.10 -i hosts qt5.yml
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
+
+      - name: Run ansible to install build requirements for homebrew
+        working-directory: ./ansible
+        run: sudo ansible-playbook -i hosts qt5.yml
+        if: ${{ matrix.pkg-mgr.mgr }} == 'homebrew'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
