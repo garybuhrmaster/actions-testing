@@ -17,20 +17,18 @@ jobs:
       - name: Update OS
         run: dnf upgrade -y
 
-      - name: Install cppcheck
-        run: dnf install cppcheck -y
+      - name: Install cppcheck and dependencies
+        run: dnf install cppcheck perl pkgconf -y
 
       - name: Checkout buildbot-utils
         uses: actions/checkout@v3
         with:
           repository: MythTV/buildbot-utils
-          path: buildbot-utils
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
           repository: MythTV/mythtv
-          path: mythtv
 
       - name: show vars
         run: |
