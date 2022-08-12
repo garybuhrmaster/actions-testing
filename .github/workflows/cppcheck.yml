@@ -1,0 +1,39 @@
+---
+name: cppcheck
+
+on:
+  push:
+
+jobs:
+  cppcheck:
+    name: Run cppcheck
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Update OS
+        run: dnf upgrade -y
+
+      - name: Install cppcheck
+        run: dnf install cppcheck -y
+
+      - name: Checkout buildbot-utils
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/buildbot-utils
+
+      - name: Checkout Mythtv/mythtv
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
+
+      - name: Run cppcheck
+        working-directory: ./mythtv
+        run: ../buildbot-utils/cppcheck/run-cppcheck.sh
+
+      - name: Generate report
+        working-directory: ./mythtv
+        run: ../buildbot/cppcheck/generate_cppcheck_report.pl cppcheck.xml index.html
