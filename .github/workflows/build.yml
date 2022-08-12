@@ -24,9 +24,9 @@ jobs:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           ## The following are disabled due to ansible not (yet) being correct
           - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
@@ -57,11 +57,15 @@ jobs:
     steps:
       - name: Detect OS release
         run: |
-          cat /etc/os-release
           . /etc/os-release && echo "OS_RELEASE_ID=$ID" >> $GITHUB_ENV
           . /etc/os-release && echo "OS_RELEASE_VERSION=$VERSION_ID" >> $GITHUB_ENV
           . /etc/os-release && echo "OS_RELEASE_VERSION_MAJOR=${VERSION_ID%%.*}" >> $GITHUB_ENV
           . /etc/os-release && echo "OS_RELEASE_VERSION_CODENAME=$VERSION_CODENAME" >> $GITHUB_ENV
+
+      - name: Debian obtain codename for prerelease vesions
+        run: |
+          echo "OS_RELEASE_CODENAME=`dpkg --status tzdata | grep 'Provides' | cut -f2 -d'-'`" >> $GITHUB_ENV
+        if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_CODENAME == ''
 
       - name: Debian/Ubuntu OS update
         run: |
@@ -191,8 +195,8 @@ jobs:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
-          - { mgr: 'macports',                         desc: 'macports' }
-          # { mgr: 'homebrew',                         desc: 'homebrew' }
+          # { mgr: 'macports',                         desc: 'macports' }
+          - { mgr: 'homebrew',                         desc: 'homebrew' }
 
 
       fail-fast: false
@@ -213,7 +217,7 @@ jobs:
           set
           whereis port
 
-      - name: Install ansible and compiler for macports
+      - name: Install ansible for macports
         run: sudo port install py310-ansible
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
