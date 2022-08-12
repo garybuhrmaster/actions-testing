@@ -22,26 +22,28 @@ jobs:
     strategy:
       matrix:
         container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 LTS (Kinetic Kudu)' }
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           ## The following are disabled due to ansible not (yet) being correct
           - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
-          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+
+          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
@@ -197,19 +199,28 @@ jobs:
     runs-on: ${{ matrix.macOS.os }}
 
     steps:
-      - name: Test on macOS
-        run: |
-          pwd
-          ls -alt
-          whoami
-          env
-
       - name: Install macports
         run: |
           wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
           sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
+        if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
+
+      - name: Display some vars
+        run: |
+          env
+          set
+          whereis port
+
+      - name: Install macports
+        run: |
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
+
+      - name: Distplay some vars
+        run: |
+          env
+          set
+          whereis port
 
       - name: Install ansible and compiler for macports
         run: sudo port install py310-ansible ${{ matrix.compiler.cc }}
@@ -220,6 +231,10 @@ jobs:
         with:
           repository: MythTV/ansible
           path: ansible
+
+      - name: Request ansible facts
+        working-directory: ./ansible
+        run: sudo ansible-3.10 localhost -m ansible.builtin.gather_facts
 
       - name: Run ansible to install build requirements for macports
         working-directory: ./ansible
