@@ -32,10 +32,17 @@ jobs:
           repository: MythTV/mythtv
           path: mythtv
 
+      - name: show vars
+        run: |
+          pwd
+          ls -alt
+          ls -alt mythtv
+          ls -alt buildbot-utils
+
       - name: Run cppcheck
         working-directory: ./mythtv
-        run: ../buildbot-utils/cppcheck/run-cppcheck.sh
+        run: ../buildbot-utils/cppcheck/run_cppcheck.sh
 
       - name: Generate report
         working-directory: ./mythtv
-        run: ../buildbot/cppcheck/generate_cppcheck_report.pl cppcheck.xml index.html
+        run: ../buildbot-utils/cppcheck/generate_cppcheck_report.pl cppcheck.xml index.html
