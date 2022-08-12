@@ -18,7 +18,7 @@ jobs:
         run: dnf upgrade -y
 
       - name: Install cppcheck and dependencies
-        run: dnf install cppcheck perl pkgconf qt5-qtbase-devel -y
+        run: dnf install cppcheck perl perl-XML-Simple perl-HTML-Entities perl-Switch pkgconf qt5-qtbase-devel -y
 
       - name: Checkout buildbot-utils
         uses: actions/checkout@v3
@@ -42,7 +42,11 @@ jobs:
 
       - name: Run cppcheck
         working-directory: ./mythtv
-        run: ../buildbot-utils/cppcheck/run_cppcheck.sh
+        run: |
+          pwd
+          ls -alt
+          ls -alt ../buildbot-utils/cppcheck
+          ../buildbot-utils/cppcheck/run_cppcheck.sh
 
       - name: Generate report
         working-directory: ./mythtv
