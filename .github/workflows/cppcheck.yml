@@ -24,11 +24,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: MythTV/buildbot-utils
+          path: buildbot-utils
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
           repository: MythTV/mythtv
+          path: mythtv
 
       - name: show vars
         run: |
@@ -36,6 +38,7 @@ jobs:
           ls -alt
           ls -alt mythtv
           ls -alt buildbot-utils
+          ls -alt buildbot-utils/cppcheck
 
       - name: Run cppcheck
         working-directory: ./mythtv
