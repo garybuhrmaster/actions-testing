@@ -18,7 +18,7 @@ jobs:
         run: dnf upgrade -y
 
       - name: Install cppcheck and dependencies
-        run: dnf install cppcheck perl perl-XML-Simple perl-HTML-Entities perl-Switch pkgconf qt5-qtbase-devel -y
+        run: dnf install cppcheck perl perl-XML-Simple perl-HTML-Parser perl-Switch pkgconf qt5-qtbase-devel -y
 
       - name: Checkout buildbot-utils
         uses: actions/checkout@v3
