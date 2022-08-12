@@ -10,7 +10,7 @@ on:
 
 jobs:
   linux-build:
-    name: Build on ${{ matrix.container.desc }} using ${{ matrix.compiler.desc }} 
+    name: Build on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
 
     runs-on: ubuntu-latest
 
@@ -174,7 +174,7 @@ jobs:
           ccache -sV
 
   macOS-build:
-    name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.compiler.desc }}
+    name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
 
     env:
       MACPORTS_VERSION: 2.7.2
@@ -187,6 +187,9 @@ jobs:
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+        pgk-mgr:
+          # { mgr: 'homebrew'                          desc: 'homebrew' }
+          - { mgr: 'macports'                          desc: 'macports' }
 
       fail-fast: false
 
@@ -204,12 +207,12 @@ jobs:
         run: |
           wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
           sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
+          echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
+        if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
-      - name: Add macports to path
-        run: echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
-
-      - name: Install ansible
+      - name: Install ansible for macports
         run: sudo port install py310-ansible
+        if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -223,6 +226,7 @@ jobs:
 
       - name: Install additional software
         run: sudo port install ${{ matrix.compiler.cc }}
+        if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
