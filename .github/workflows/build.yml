@@ -188,8 +188,9 @@ jobs:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pgk-mgr:
-          # { mgr: 'homebrew'                          desc: 'homebrew' }
-          - { mgr: 'macports'                          desc: 'macports' }
+          - { mgr: 'macports',                         desc: 'macports' }
+          # { mgr: 'homebrew',                         desc: 'homebrew' }
+
 
       fail-fast: false
 
