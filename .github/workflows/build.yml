@@ -187,7 +187,7 @@ jobs:
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
-        pgk-mgr:
+        pkg-mgr:
           - { mgr: 'macports',                         desc: 'macports' }
           # { mgr: 'homebrew',                         desc: 'homebrew' }
 
@@ -204,15 +204,15 @@ jobs:
           whoami
           env
 
-      - name: install macports
+      - name: Install macports
         run: |
           wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
           sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
-      - name: Install ansible for macports
-        run: sudo port install py310-ansible
+      - name: Install ansible and compiler for macports
+        run: sudo port install py310-ansible ${{ matrix.compiler.cc }}
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Checkout MythTV/ansible repo
@@ -221,12 +221,9 @@ jobs:
           repository: MythTV/ansible
           path: ansible
 
-      - name: Run ansible to install build requirements
+      - name: Run ansible to install build requirements for macports
         working-directory: ./ansible
         run: sudo ansible-playbook-3.10 -i hosts qt5.yml
-
-      - name: Install additional software
-        run: sudo port install ${{ matrix.compiler.cc }}
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Checkout Mythtv/mythtv
@@ -243,8 +240,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.ccache
-          key: ${{ matrix.macOS.os }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.macOS.os }}-${{ matrix.compiler.cc }}-ccache
+          key: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache
 
       - name: ccache statistics [pre]
         run: ccache -sV
