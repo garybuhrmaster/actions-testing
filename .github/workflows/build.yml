@@ -193,8 +193,8 @@ jobs:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
-          - { mgr: 'macports',                         desc: 'macports' }
-          # { mgr: 'homebrew',                         desc: 'homebrew' }
+          # { mgr: 'macports',                         desc: 'macports' }
+          - { mgr: 'homebrew',                         desc: 'homebrew' }
 
 
       fail-fast: false
@@ -306,6 +306,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
+    - name: Install virtualbox
+      run: brew install --cask virtualbox
+
     - name: Checkout MythTV/ansible repo
       uses: actions/checkout@v3
       with:
