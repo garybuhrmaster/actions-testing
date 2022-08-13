@@ -22,17 +22,17 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          # { image: 'fedora:35',                      desc: 'Fedora 35' }
+          # { image: 'fedora:36',                      desc: 'Fedora 36' }
+          # { image: 'fedora:37',                      desc: 'Fedora 37' }
+          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
           # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
@@ -46,7 +46,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
       fail-fast: false
 
@@ -198,8 +198,8 @@ jobs:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
           # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
-          # { mgr: 'macports',                         desc: 'macports' }
-          - { mgr: 'homebrew',                         desc: 'homebrew' }
+          - { mgr: 'macports',                         desc: 'macports' }
+          # { mgr: 'homebrew',                         desc: 'homebrew' }
 
 
       fail-fast: false
@@ -236,12 +236,12 @@ jobs:
 
       - name: Request ansible facts
         working-directory: ./ansible
-        run: sudo ansible-3.10 localhost -m ansible.builtin.gather_facts
+        run: sudo ansible-3.10 localhost -m ansible.builtin.gather_facts -e ansible_pkg_mgr=macports
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Run ansible to install build requirements for macports
         working-directory: ./ansible
-        run: sudo ansible-playbook-3.10 -i hosts qt5.yml
+        run: sudo ansible-playbook-3.10 -i hosts qt5.yml -e ansible_pkg_mgr=macports
         if: ${{ matrix.pkg-mgr.mgr }} == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
