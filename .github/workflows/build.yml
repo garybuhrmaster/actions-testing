@@ -108,6 +108,7 @@ jobs:
         with:
           repository: garybuhrmaster/ansible
           ref: archlinux
+          path: ansible
 
       - name: Run ansible to install build requirements
         working-directory: ./ansible
@@ -129,6 +130,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: MythTV/mythtv
+          path: mythtv
 
       - name: Checkout ccache
         uses: actions/cache@v3
@@ -221,6 +223,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: MythTV/ansible
+          path: ansible
 
       - name: Request ansible facts
         working-directory: ./ansible
@@ -241,6 +244,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: MythTV/mythtv
+          path: mythtv
 
       - name: Setup build environment
         run: |
