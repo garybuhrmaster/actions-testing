@@ -184,13 +184,13 @@ jobs:
     strategy:
       matrix:
         macOS:
-          # { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
           - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
-          # { mgr: 'macports',                         desc: 'macports' }
+          - { mgr: 'macports',                         desc: 'macports' }
           - { mgr: 'homebrew',                         desc: 'homebrew' }
 
       fail-fast: false
@@ -199,10 +199,10 @@ jobs:
 
     steps:
       - name: Uninstall homebrew if using macports (package conflicts)
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+        run: /bin/bash -c "$(NONINTERACTIVE=1 curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
         if: matrix.pkg-mgr.mgr == 'macports'
 
-      - name: Install macports
+      - name: Install macports if using macports
         run: |
           wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
           sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
@@ -223,11 +223,6 @@ jobs:
           repository: MythTV/ansible
           path: ansible
 
-      - name: Request ansible facts
-        working-directory: ansible
-        run: sudo ansible-3.10 localhost -e ansible_pkg_mgr=macports -m ansible.builtin.gather_facts 
-        if: matrix.pkg-mgr.mgr == 'macports'
-
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
         run: sudo ansible-playbook-3.10 -e ansible_pkg_mgr=macports -i hosts qt5.yml
@@ -236,11 +231,11 @@ jobs:
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
         run: sudo ansible-playbook -i hosts qt5.yml
-        if: matrix.pkg-mgr.mgr == 'homebrewfuture'
+        if: matrix.pkg-mgr.mgr == 'homebrew'
 
-      - name: Install core dependencies (macOS)
+      - name: Install core dependencies (macOS) if using homebrew
         run: |
-          brew install pkg-config ccache qt5 nasm libsamplerate taglib lzo libcec libbluray fftw libass libhdhomerun dav1d x264 x265 libvpx openssl sound-touch ${{ matrix.compiler.cc }} 
+          brew install pkg-config ccache qt5 nasm libsamplerate taglib lzo libcec libbluray fftw libass libhdhomerun dav1d x264 x265 libvpx openssl sound-touch
           brew link qt5 --force
         if: matrix.pkg-mgr.mgr == 'homebrew'
 
@@ -296,7 +291,7 @@ jobs:
     strategy:
       matrix:
         FreeBSD:
-          # { release: '12.3',                         desc: 'FreeBSD 12.3' }
+          - { release: '12.3',                         desc: 'FreeBSD 12.3' }
           - { release: '13.1',                         desc: 'FreeBSD 13.1' }
 
       fail-fast: false
@@ -317,7 +312,7 @@ jobs:
         repository: MythTV/mythtv
         path: mythtv
 
-    - name: Test on FreeBSD
+    - name: Testing on FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
       with:
