@@ -21,20 +21,20 @@ jobs:
     strategy:
       matrix:
         container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
           # { image: 'fedora:37',                      desc: 'Fedora 37' }
           # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
           # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
 
           ## The following are disabled due to ansible not (yet) being correct
@@ -76,7 +76,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux
-        run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION}}.noarch.rpm
+        run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
         if: env.OS_RELEASE_ID == 'centos'
 
       - name: Redhat/Fedora OS update
@@ -174,6 +174,7 @@ jobs:
         run: |
           ccache -sV
 
+
   macOS-build:
     name: Build on ${{ matrix.macOS.desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
 
@@ -187,29 +188,26 @@ jobs:
           - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
           # { mgr: 'macports',                         desc: 'macports' }
           - { mgr: 'homebrew',                         desc: 'homebrew' }
-
 
       fail-fast: false
 
     runs-on: ${{ matrix.macOS.os }}
 
     steps:
+      - name: Uninstall homebrew if using macports (package conflicts)
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+        if: matrix.pkg-mgr.mgr == 'macports'
+
       - name: Install macports
         run: |
           wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
           sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Display some vars
-        run: |
-          env
-          set
-          whereis port
 
       - name: Install ansible for macports
         run: sudo port install py310-ansible
@@ -238,6 +236,12 @@ jobs:
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
         run: sudo ansible-playbook -i hosts qt5.yml
+        if: matrix.pkg-mgr.mgr == 'homebrewfuture'
+
+      - name: Install core dependencies (macOS)
+        run: |
+          brew install pkg-config ccache qt5 nasm libsamplerate taglib lzo libcec libbluray fftw libass libhdhomerun dav1d x264 x265 libvpx openssl sound-touch ${{ matrix.compiler.cc }} 
+          brew link qt5 --force
         if: matrix.pkg-mgr.mgr == 'homebrew'
 
       - name: Checkout Mythtv/mythtv
@@ -245,10 +249,6 @@ jobs:
         with:
           repository: MythTV/mythtv
           path: mythtv
-
-      - name: Setup build environment
-        run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
 
       - name: Checkout ccache
         uses: actions/cache@v3
@@ -262,7 +262,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan --extra-cxxflags='-I/usr/local/include -I/opt/local/include' --extra-ldflags='-L/usr/local/lib -L/opt/local/lib'
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -274,7 +274,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: mythtv/mythplugins
-        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }}
+        run: ./configure --prefix=${{ github.workspace }}/build/install
 
       - name: Make plugins
         working-directory: mythtv/mythplugins
@@ -283,4 +283,70 @@ jobs:
       - name: ccache statistics [post]
         run: |
           ccache -sV
+
+
+  FreeBSD-build:
+    # FreeBSD has to run in a VM, and only macOS workers support virtualization
+    name: Build on ${{ matrix.FreeBSD.desc }}
+
+    env:
+      PAGER: cat
+      ASSUME_ALWAYS_YES: YES
+
+    strategy:
+      matrix:
+        FreeBSD:
+          # { release: '12.3',                         desc: 'FreeBSD 12.3' }
+          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
+
+      fail-fast: false
+
+    # macos-latest (aka macos-11) does not support virtualbox.
+    runs-on: macos-12
+
+    steps:
+    - name: Checkout MythTV/ansible repo
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/ansible
+        path: ansible
+
+    - name: Checkout Mythtv/mythtv
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/mythtv
+        path: mythtv
+
+    - name: Test on FreeBSD
+      id: test
+      uses: vmactions/freebsd-vm@v0
+      with:
+        usesh: true
+        release: ${{ matrix.FreeBSD.release }}
+        envs: 'PAGER ASSUME_ALWAYS_YES'
+        mem: 2048
+        prepare: |
+          portsnap fetch update
+          pkg install -y curl
+          pkg install -y python3
+          pkg install -y rust
+          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python3 get-pip.py
+          pip install ansible
+          ansible localhost -m ansible.builtin.gather_facts
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
+        run: |
+          pwd
+          ls -lah
+          whoami
+          env
+          freebsd-version
+          cd mythtv/mythtv
+          ./configure --prefix=${{ github.workspace }}/build/install
+          make -j4
+          make install
+          cd ../mythplugins
+          ./configure --prefix=${{ github.workspace }}/build/install
+          make -j4
+          make install
 
