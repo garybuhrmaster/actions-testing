@@ -111,7 +111,7 @@ jobs:
           path: ansible
 
       - name: Run ansible to install build requirements
-        working-directory: ./ansible
+        working-directory: ansible
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
@@ -143,31 +143,31 @@ jobs:
         run: ccache -sV
 
       - name: Configure core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
       - name: Make core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: make all_no_test -j4
 
       - name: Install core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: make install
 
       - name: Unit test core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: make test -j4
 
       - name: Configure plugins
-        working-directory: ./mythplugins
+        working-directory: mythtv/mythplugins
         run: ./configure --prefix=${{ github.workspace }}/build/install
 
       - name: Make plugins
-        working-directory: ./mythplugins
+        working-directory: mythtv/mythplugins
         run: make -j4
 
       - name: Install plugins
-        working-directory: ./mythplugins
+        working-directory: mythtv/mythplugins
         run: make install
 
       - name: ccache statistics [post]
@@ -226,17 +226,17 @@ jobs:
           path: ansible
 
       - name: Request ansible facts
-        working-directory: ./ansible
+        working-directory: ansible
         run: sudo ansible-3.10 localhost -e ansible_pkg_mgr=macports -m ansible.builtin.gather_facts 
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for macports
-        working-directory: ./ansible
+        working-directory: ansible
         run: sudo ansible-playbook-3.10 -e ansible_pkg_mgr=macports -i hosts qt5.yml
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
-        working-directory: ./ansible
+        working-directory: ansible
         run: sudo ansible-playbook -i hosts qt5.yml
         if: matrix.pkg-mgr.mgr == 'homebrew'
 
@@ -261,23 +261,23 @@ jobs:
         run: ccache -sV
 
       - name: Configure core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
       - name: Make core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: make all_no_test -j4
 
       - name: Install core
-        working-directory: ./mythtv
+        working-directory: mythtv/mythtv
         run: make install
 
       - name: Configure plugins
-        working-directory: ./mythplugins
+        working-directory: mythtv/mythplugins
         run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }}
 
       - name: Make plugins
-        working-directory: ./mythplugins
+        working-directory: mythtv/mythplugins
         run: make -j4
 
       - name: ccache statistics [post]
