@@ -34,7 +34,8 @@ jobs:
           # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          ## and the entire stream and qt5webkit issue is still open
+          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
           # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
 
           ## The following are disabled due to ansible not (yet) being correct
@@ -225,15 +226,19 @@ jobs:
           repository: MythTV/ansible
           path: ansible
 
-      - name: Run ansible to install build requirements for macports
+      - name: Run ansible
         working-directory: ansible
-        run: sudo ansible-playbook -i hosts qt5.yml
+        run: |
+          ansible --version
+
+      - name: Run ansible to install build requirements
+        working-directory: ansible
+        run: sudo ansible-playbook --verbose -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
 
-      - name: Run ansible to install build requirements for homebrew
-        working-directory: ansible
-        run: sudo ansible-playbook -i hosts qt5.yml
-        if: matrix.pkg-mgr.mgr == 'homebrew'
+      - name: Add qt5 qmake path to for macports
+        run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Install core dependencies (macOS) if using homebrew
         run: |
@@ -282,68 +287,4 @@ jobs:
           ccache -sV
 
 
-  FreeBSD-build:
-    # FreeBSD has to run in a VM, and only macOS workers support virtualization
-    name: Build on ${{ matrix.FreeBSD.desc }}
-
-    env:
-      PAGER: cat
-      ASSUME_ALWAYS_YES: YES
-
-    strategy:
-      matrix:
-        FreeBSD:
-          - { release: '12.3',                         desc: 'FreeBSD 12.3' }
-          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
-
-      fail-fast: false
-
-    # macos-latest (aka macos-11) does not support virtualbox.
-    runs-on: macos-12
-
-    steps:
-    - name: Checkout MythTV/ansible repo
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/ansible
-        path: ansible
-
-    - name: Checkout Mythtv/mythtv
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/mythtv
-        path: mythtv
-
-    - name: Testing on FreeBSD
-      id: test
-      uses: vmactions/freebsd-vm@v0
-      with:
-        usesh: true
-        release: ${{ matrix.FreeBSD.release }}
-        envs: 'PAGER ASSUME_ALWAYS_YES'
-        mem: 2048
-        prepare: |
-          portsnap fetch update
-          pkg install -y curl
-          pkg install -y python3
-          pkg install -y rust
-          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py
-          pip install ansible
-          ansible localhost -m ansible.builtin.gather_facts
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
-        run: |
-          pwd
-          ls -lah
-          whoami
-          env
-          freebsd-version
-          cd mythtv/mythtv
-          ./configure --prefix=${{ github.workspace }}/build/install
-          make -j4
-          make install
-          cd ../mythplugins
-          ./configure --prefix=${{ github.workspace }}/build/install
-          make -j4
-          make install
 
