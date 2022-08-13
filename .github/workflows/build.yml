@@ -210,7 +210,9 @@ jobs:
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Install ansible for macports
-        run: sudo port install py-ansible
+        run: |
+          sudo port install py310-ansible
+          sudo port select --set ansible py310-ansible
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Install ansible for homebrew
@@ -225,7 +227,7 @@ jobs:
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
-        run: sudo ansible-playbook -e ansible_pkg_mgr=macports -i hosts qt5.yml
+        run: sudo ansible-playbook -i hosts qt5.yml
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
