@@ -129,7 +129,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: ArchLinux OS install extra packages (for greater coverage)
-        run: pacman --noconfirm -Sy ant python-setuptools jdk-openjdk ${{ matrix.compiler.cc }}
+        run: pacman --noconfirm -Sy ant python-setuptools jdk-openjdk vulkan-headers ${{ matrix.compiler.cc }}
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout Mythtv/mythtv
