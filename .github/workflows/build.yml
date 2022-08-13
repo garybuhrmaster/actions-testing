@@ -22,18 +22,17 @@ jobs:
     strategy:
       matrix:
         container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          ## The following are disabled due to ansible not (yet) being correct
-          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:37',                      desc: 'Fedora 37' }
-          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
           # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
@@ -121,11 +120,11 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
-        run: apt-get install ant default-jdk qtbase5-private-dev ${{ matrix.compiler.cc }} -y
+        run: apt-get install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
-        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel ${{ matrix.compiler.cc }} -y
+        run: ${{env.RPM_PKG_MGR}} install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: ArchLinux OS install extra packages (for greater coverage)
