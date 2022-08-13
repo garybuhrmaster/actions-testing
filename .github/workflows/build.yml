@@ -21,16 +21,16 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
           # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
           # { image: 'fedora:35',                      desc: 'Fedora 35' }
           # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37' }
+          # { image: 'fedora:37',                      desc: 'Fedora 37' }
           # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
@@ -45,7 +45,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
       fail-fast: false
 
@@ -108,7 +108,6 @@ jobs:
         with:
           repository: garybuhrmaster/ansible
           ref: archlinux
-          path: ansible
 
       - name: Run ansible to install build requirements
         working-directory: ./ansible
@@ -131,11 +130,6 @@ jobs:
         with:
           repository: MythTV/mythtv
 
-      - name: Setup build environment
-        run: |
-          echo "MYTHTV_CONFIG=--prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }}" >> $GITHUB_ENV
-          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
@@ -148,7 +142,7 @@ jobs:
 
       - name: Configure core
         working-directory: ./mythtv
-        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
       - name: Make core
         working-directory: ./mythtv
@@ -164,7 +158,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: ./mythplugins
-        run: ./configure $MYTHTV_CONFIG
+        run: ./configure --prefix=${{ github.workspace }}/build/install
 
       - name: Make plugins
         working-directory: ./mythplugins
@@ -227,7 +221,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: MythTV/ansible
-          path: ansible
 
       - name: Request ansible facts
         working-directory: ./ansible
@@ -265,7 +258,7 @@ jobs:
 
       - name: Configure core
         working-directory: ./mythtv
-        run: ./configure $MYTHTV_CONFIG --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
 
       - name: Make core
         working-directory: ./mythtv
@@ -277,7 +270,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: ./mythplugins
-        run: ./configure $MYTHTV_CONFIG
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }}
 
       - name: Make plugins
         working-directory: ./mythplugins
@@ -286,63 +279,4 @@ jobs:
       - name: ccache statistics [post]
         run: |
           ccache -sV
-
-  FreeBSD-build:
-    # FreeBSD has to run in a VM, and only macOS workers support virtualization
-    name: Build on ${{ matrix.FreeBSD.desc }}
-
-    env:
-      PAGER: cat
-      ASSUME_ALWAYS_YES: YES
-
-    strategy:
-      matrix:
-        FreeBSD:
-          # { release: '12.3',                         desc: 'FreeBSD 12.3' }
-          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
-
-      fail-fast: false
-
-    runs-on: macos-latest
-
-    steps:
-    - name: Install virtualbox
-      run: brew install --cask virtualbox
-
-    - name: Checkout MythTV/ansible repo
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/ansible
-        path: ansible
-
-    - name: Checkout Mythtv/mythtv
-      uses: actions/checkout@v3
-      with:
-        repository: MythTV/mythtv
-        path: mythtv
-
-    - name: Test on FreeBSD
-      id: test
-      uses: vmactions/freebsd-vm@v0
-      with:
-        usesh: true
-        release: ${{ matrix.FreeBSD.release }}
-        envs: 'PAGER ASSUME_ALWAYS_YES'
-        mem: 2048
-        prepare: |
-          portsnap fetch update
-          pkg install -y curl
-          pkg install -y python3
-          pkg install -y rust
-          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py
-          pip install ansible
-          ansible localhost -m ansible.builtin.gather_facts
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
-        run: |
-          pwd
-          ls -lah
-          whoami
-          env
-          freebsd-version
 
