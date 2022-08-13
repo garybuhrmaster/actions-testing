@@ -204,13 +204,13 @@ jobs:
 
       - name: Install macports if using macports
         run: |
-          wget https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg
-          sudo installer -pkg ./MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg -target /
+          curl https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg --output MacPorts.pkg
+          sudo installer -pkg ./MacPorts.pkg -target /
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Install ansible for macports
-        run: sudo port install py310-ansible
+        run: sudo port install py-ansible
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Install ansible for homebrew
@@ -225,7 +225,7 @@ jobs:
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
-        run: sudo ansible-playbook-3.10 -e ansible_pkg_mgr=macports -i hosts qt5.yml
+        run: sudo ansible-playbook -e ansible_pkg_mgr=macports -i hosts qt5.yml
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
