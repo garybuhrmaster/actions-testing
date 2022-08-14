@@ -30,8 +30,8 @@ jobs:
 
           - { image: 'fedora:35',                      desc: 'Fedora 35' }
           - { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:37',                      desc: 'Fedora 37' }
-          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
           ## and the entire stream and qt5webkit issue is still open
@@ -145,7 +145,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable libxvid --enable-bdjava --enable-vulkan
 
       - name: Make core
         working-directory: mythtv/mythtv
