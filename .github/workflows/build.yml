@@ -119,6 +119,10 @@ jobs:
         run: apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
+      - name: Debian/Ubuntu OS install extra packages (for greater coverage)
+        run: apt install libdav1d-dev -y
+        if: env.OS_RELEASE_ID == 'debian' || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
+
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
