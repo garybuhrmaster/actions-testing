@@ -144,6 +144,9 @@ jobs:
           key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
 
+      - name: Try to keep the ccache size under the github cache limits
+        run: ccache -M 1G
+
       - name: ccache statistics [pre]
         run: ccache -sV
 
