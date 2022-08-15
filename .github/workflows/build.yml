@@ -140,7 +140,7 @@ jobs:
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: ~/.ccache
+          path: .ccache
           key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
 
@@ -265,7 +265,7 @@ jobs:
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: ~/Library/Caches/ccache
+          path: Library/Caches/ccache
           key: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache
 
