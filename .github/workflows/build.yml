@@ -144,11 +144,14 @@ jobs:
           key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
 
-      - name: Try to keep the ccache size under the github cache limits
-        run: ccache -M 1G
-
       - name: ccache statistics [pre]
         run: ccache -sV
+
+      - name: ccache limit total size
+        # Needed because github limits the total size of all
+        # caches to 10G, and with all of the distro variants
+        # we are building on, we can exceed that easily
+        run: ccache -M 800M
 
       - name: Configure core
         working-directory: mythtv/mythtv
@@ -268,6 +271,9 @@ jobs:
 
       - name: ccache statistics [pre]
         run: ccache -sV
+
+      - name: ccache limit total size
+        run: ccache -M 800M
 
       - name: Configure core
         working-directory: mythtv/mythtv
