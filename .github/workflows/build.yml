@@ -128,7 +128,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: apt install libdav1d-dev -y
-        if: env.OS_RELEASE_ID == 'debian' || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
+        if: (env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR != 10) || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
 
       - name: Debian OS backports for Debian Buster
         env:
