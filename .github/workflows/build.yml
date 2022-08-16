@@ -295,7 +295,14 @@ jobs:
         run: ccache -sV
 
       - name: ccache limit total size
-        run: ccache -M 700M
+        # Needed because github limits the total size of all
+        # caches to 10G, and with all of the distro variants
+        # we are building on, we can exceed that easily
+        run: ccache -M 800M
+
+      - name: ccache limit total size for clang
+        run: ccache -M 600M
+        if: ${{ matrix.compiler.cc }} == 'clang'
 
       - name: Configure core
         working-directory: mythtv/mythtv
