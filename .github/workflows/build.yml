@@ -80,15 +80,6 @@ jobs:
         run: apt install ansible -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Debian OS install recent ansible for Debian Buster
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
-          apt update -y
-          apt upgrade -y
-        if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR == 10
-
       - name: Redhat OS - add EPEL repo for EL linux
         run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
         if: env.OS_RELEASE_ID == 'centos'
@@ -125,7 +116,7 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook -i hosts qt5.yml
+        run: ansible-playbook -e ansible_python_interpreter=/usr/bin/python3 -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
         env:
@@ -138,6 +129,15 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: apt install libdav1d-dev -y
         if: env.OS_RELEASE_ID == 'debian' || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
+
+      - name: Debian OS backports for Debian Buster
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
+          apt update -y
+          apt upgrade -y
+        if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR == 10
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
@@ -175,7 +175,7 @@ jobs:
 
       - name: ccache limit total size for clang
         run: ccache -M 600M
-        if: ${{ matrix.compiler.cc }} == 'clang'
+        if: matrix.compiler.cc == 'clang'
 
       - name: Configure core
         working-directory: mythtv/mythtv
