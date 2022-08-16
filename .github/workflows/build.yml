@@ -295,7 +295,7 @@ jobs:
 
       - name: ccache limit total size for clang
         run: ccache -M 600M
-        if: ${{ matrix.compiler.cc }} == 'clang'
+        if: matrix.compiler.cc == 'clang'
 
       - name: Configure core
         working-directory: mythtv/mythtv
