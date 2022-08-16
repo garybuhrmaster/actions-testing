@@ -84,7 +84,7 @@ jobs:
         run: |
           echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
           apt update -y
-          apt install -t buster-backports ansible -y
+          apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR == 10
 
       - name: Redhat OS - add EPEL repo for EL linux
@@ -168,7 +168,11 @@ jobs:
         # Needed because github limits the total size of all
         # caches to 10G, and with all of the distro variants
         # we are building on, we can exceed that easily
-        run: ccache -M 700M
+        run: ccache -M 800M
+
+      - name: ccache limit total size for clang
+        run: ccache -M 600M
+        if: ${{ matrix.compiler.cc }} == 'clang'
 
       - name: Configure core
         working-directory: mythtv/mythtv
