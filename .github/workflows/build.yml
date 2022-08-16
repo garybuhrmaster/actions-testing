@@ -17,6 +17,7 @@ jobs:
     env:
       DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC
+      CCACHE_DIR: $HOME/.ccache
 
     strategy:
       matrix:
@@ -140,12 +141,9 @@ jobs:
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: ~/.ccache
+          path: $HOME/.ccache
           key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
-
-      - name: ccache insure using correct directory
-        run: echo "CCACHE_DIR=~/.ccache" >> $GITHUB_ENV
 
       - name: ccache statistics [pre]
         run: ccache -sV
@@ -268,7 +266,7 @@ jobs:
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: ~/Library/Caches/ccache
+          path: $HOME/Library/Caches/ccache
           key: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache
 
