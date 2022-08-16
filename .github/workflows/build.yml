@@ -20,16 +20,16 @@ jobs:
     strategy:
       matrix:
         container:
-          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
-          # { image: 'fedora:37',                      desc: 'Fedora 37' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37' }
           - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           ## The following are disabled due to ansible not (yet) being correct
@@ -160,7 +160,7 @@ jobs:
         # Needed because github limits the total size of all
         # caches to 10G, and with all of the distro variants
         # we are building on, we can exceed that easily
-        run: ccache -M 800M
+        run: ccache -M 700M
 
       - name: Configure core
         working-directory: mythtv/mythtv
@@ -204,11 +204,11 @@ jobs:
     strategy:
       matrix:
         macOS:
-          # { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
           - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
         pkg-mgr:
           # { mgr: 'macports',                         desc: 'macports' }
           - { mgr: 'homebrew',                         desc: 'homebrew' }
@@ -282,7 +282,7 @@ jobs:
         run: ccache -sV
 
       - name: ccache limit total size
-        run: ccache -M 800M
+        run: ccache -M 700M
 
       - name: Configure core
         working-directory: mythtv/mythtv
