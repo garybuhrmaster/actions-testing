@@ -160,7 +160,7 @@ jobs:
         # Needed because github limits the total size of all
         # caches to 10G, and with all of the distro variants
         # we are building on, we can exceed that easily
-        run: ccache -M 800M
+        run: ccache -M 900M
 
       - name: ccache limit total size for clang
         run: ccache -M 600M
@@ -289,7 +289,7 @@ jobs:
         # Needed because github limits the total size of all
         # caches to 10G, and with all of the distro variants
         # we are building on, we can exceed that easily
-        run: ccache -M 800M
+        run: ccache -M 900M
 
       - name: ccache limit total size for clang
         run: ccache -M 600M
