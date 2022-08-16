@@ -15,9 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEBIAN_FRONTEND: noninteractive
       TZ: Etc/UTC
-      CCACHE_DIR: $HOME/.ccache
 
     strategy:
       matrix:
@@ -68,12 +66,16 @@ jobs:
         if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_CODENAME == ''
 
       - name: Debian/Ubuntu OS update
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           apt update -y
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install ansible
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: apt install ansible -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
@@ -117,10 +119,14 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: apt install libdav1d-dev -y
         if: env.OS_RELEASE_ID == 'debian' || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
 
@@ -138,10 +144,13 @@ jobs:
           repository: MythTV/mythtv
           path: mythtv
 
+      - name: set ccache directory
+        run: echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: $HOME/.ccache
+          path: ~/.ccache
           key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
 
@@ -266,7 +275,7 @@ jobs:
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
-          path: $HOME/Library/Caches/ccache
+          path: ~/Library/Caches/ccache
           key: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
           restore-keys: ${{ matrix.macOS.os }}-${{ matrix.pkg-mgr.mgr }}-${{ matrix.compiler.cc }}-ccache
 
