@@ -81,7 +81,10 @@ jobs:
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian OS install recent ansible for Debian Buster
-        run: apt install -t buster-backports ansible -y
+        run: |
+          echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
+          apt update -y
+          apt install -t buster-backports ansible -y
         if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR == 10
 
       - name: Redhat OS - add EPEL repo for EL linux
