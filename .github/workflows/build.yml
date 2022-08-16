@@ -121,7 +121,7 @@ jobs:
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
+        run: apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} python3-setuptools -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
@@ -129,15 +129,6 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: apt install libdav1d-dev -y
         if: (env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR != 10) || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
-
-      - name: Debian OS backports for Debian Buster
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
-          apt update -y
-          apt upgrade -y
-        if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR == 10
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
