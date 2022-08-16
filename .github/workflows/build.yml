@@ -81,6 +81,8 @@ jobs:
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian OS install recent ansible for Debian Buster
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/backports.list
           apt update -y
