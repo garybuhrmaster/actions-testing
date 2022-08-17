@@ -23,14 +23,14 @@ jobs:
       matrix:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
           # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
           # { image: 'fedora:35',                      desc: 'Fedora 35' }
-          # { image: 'fedora:36',                      desc: 'Fedora 36' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36' }
           # { image: 'fedora:37',                      desc: 'Fedora 37' }
           # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
@@ -123,7 +123,9 @@ jobs:
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
+        run: |
+          apt install ant default-jdk qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
+          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan" >> $GITHUB_ENV
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install extra packages (for greater coverage)
@@ -133,15 +135,21 @@ jobs:
         if: (env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR != 10) || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
-        run: dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
+        run: |
+          dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
+          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan" >> $GITHUB_ENV
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
 
       - name: OpenSUSE OS install extra packages (for greater coverage)
-        run: zypper install -y ant vulkan-headers ${{ matrix.compiler.cc }}
+        run: |
+          zypper install -y ant vulkan-headers ${{ matrix.compiler.cc }}
+          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-bdjava --enable-vulkan" >> $GITHUB_ENV
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: ArchLinux OS install extra packages (for greater coverage)
-        run: pacman --noconfirm -Sy ant python-setuptools jdk-openjdk vulkan-headers ${{ matrix.compiler.cc }}
+        run: |
+          pacman --noconfirm -Sy ant python-setuptools jdk-openjdk vulkan-headers ${{ matrix.compiler.cc }}
+          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan" >> $GITHUB_ENV
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout Mythtv/mythtv
@@ -175,7 +183,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ github.workspace }}/build/install --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} --enable-libmp3lame --enable-bdjava --enable-vulkan
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -191,7 +199,7 @@ jobs:
 
       - name: Configure plugins
         working-directory: mythtv/mythplugins
-        run: ./configure --prefix=${{ github.workspace }}/build/install
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }}
 
       - name: Make plugins
         working-directory: mythtv/mythplugins
