@@ -16,6 +16,8 @@ jobs:
 
     env:
       TZ: Etc/UTC
+      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
+      MYTHTV_CONFIG_EXTRA:
 
     strategy:
       matrix:
@@ -45,7 +47,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
       fail-fast: false
 
