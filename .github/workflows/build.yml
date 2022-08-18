@@ -38,6 +38,8 @@ jobs:
           ## and the entire stream and qt5webkit issue is still open
           - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
           # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          
+          - { image" 'rockylinux:8',                   desc: 'Rocky 8' }
 
           ## The following are disabled due to ansible not (yet) being correct
           # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
