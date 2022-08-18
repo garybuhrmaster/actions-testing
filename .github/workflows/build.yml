@@ -92,7 +92,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS install ansible
-        run: dnf install ansible dnf-command\(config-manager\) -y
+        run: dnf install ansible dnf-plugins-core -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
@@ -138,9 +138,9 @@ jobs:
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: |
-          dnf install ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
+          dnf install which ant python-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
           echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-bdjava --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora'
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS install extra packages (for greater coverage)
         run: |
