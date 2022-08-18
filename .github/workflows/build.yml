@@ -84,17 +84,17 @@ jobs:
         run: apt install ansible -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Redhat OS - add EPEL repo for EL linux
+      - name: Redhat OS - add EPEL repo for EL linux (for ansible)
         run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS update
         run: dnf upgrade -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
+        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS install ansible
         run: dnf install ansible dnf-plugins-core -y
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
+        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
         run: zypper update -y
@@ -139,9 +139,15 @@ jobs:
 
       - name: Redhat/Fedora OS install extra packages (for greater coverage)
         run: |
-          dnf install which ant python3-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
+          dnf install which python3-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
           echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
+        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
+
+      - name: Redhat/Fedora OS install extra packages (for greater coverage)
+        run: |
+          dnf install ant -y
+          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-bdjava" >> $GITHUB_ENV
+        if: env.OS_RELEASE_ID == 'fedora' || ( ( env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky' ) && env.OS_RELEASE_VERSION_MAJOR > 8 )
 
       - name: OpenSUSE OS install extra packages (for greater coverage)
         run: |
