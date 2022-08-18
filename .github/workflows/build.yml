@@ -85,7 +85,7 @@ jobs:
 
       - name: Redhat OS - add EPEL repo for EL linux
         run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
-        if: env.OS_RELEASE_ID == 'centos'
+        if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS update
         run: dnf upgrade -y
