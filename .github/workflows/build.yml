@@ -92,7 +92,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS install ansible
-        run: dnf install ansible -y
+        run: dnf install ansible dnf-command\(config-manager\) -y
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
