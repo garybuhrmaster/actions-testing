@@ -9,6 +9,15 @@ on:
     branches: [ main ]
 
 jobs:
+  #
+  # Note that in theory we should use github cache for ccache
+  # in order to (substantially) improve build time, but as
+  # github limits the total number of cache files to 10GB,
+  # and for MythTV ccache to be useful it needs to be rather
+  # large, and we are building a lot of versions, the github
+  # cache ends up being too small to be helpful, so we do
+  # no use it for this workflow
+  #
   linux-build:
     name: Building ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
 
@@ -127,66 +136,12 @@ jobs:
         working-directory: ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Debian/Ubuntu OS install extra packages (for greater coverage)
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          apt install qtbase5-private-dev libvulkan-dev ${{ matrix.compiler.cc }} -y
-          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
-
-      - name: Debian/Ubuntu OS install extra packages (for greater coverage)
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: apt install libdav1d-dev -y
-        if: (env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_MAJOR != 10) || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR > 20)
-
-      - name: Redhat/Fedora OS install extra packages (for greater coverage)
-        run: |
-          dnf install which python3-setuptools qt5-qtbase-private-devel vulkan-headers ${{ matrix.compiler.cc }} -y
-          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
-
-      - name: OpenSUSE OS install extra packages (for greater coverage)
-        run: |
-          zypper install -y vulkan-headers ${{ matrix.compiler.cc }}
-          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
-
-      - name: ArchLinux OS install extra packages (for greater coverage)
-        run: |
-          pacman --noconfirm -Sy python-setuptools vulkan-headers ${{ matrix.compiler.cc }}
-          echo "MYTHTV_CONFIG_EXTRA=$MYTHTV_CONFIG_EXTRA --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-vulkan" >> $GITHUB_ENV
-        if: env.OS_RELEASE_ID == 'arch'
-
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
           repository: MythTV/mythtv
+          ref: ${{ matrix.branch.ref }}
           path: mythtv
-
-      - name: set ccache directory
-        run: echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-
-      - name: Checkout ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
-
-      - name: ccache statistics [pre]
-        run: ccache -sV
-
-      - name: ccache limit total size
-        # Needed because github limits the total size of all
-        # caches to 10G, and with all of the distro variants
-        # we are building on, we can exceed that easily
-        run: ccache -M 900M
-
-      - name: ccache limit total size for clang
-        run: ccache -M 600M
-        if: matrix.compiler.cc == 'clang'
 
       - name: Configure core
         working-directory: mythtv/mythtv
@@ -216,6 +171,3 @@ jobs:
         working-directory: mythtv/mythplugins
         run: make install
 
-      - name: ccache statistics [post]
-        run: |
-          ccache -sV
