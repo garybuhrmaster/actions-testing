@@ -3,18 +3,19 @@ name: build
 
 on:
   push:
-    branches: [ main ]
 
   pull_request:
-    branches: [ main ]
+
+permissions:
+  contents: read
 
 jobs:
   #
   # Note that in theory we should use github cache for ccache
   # in order to (substantially) improve build time, but as
-  # github limits the total number of cache files to 10GB,
+  # github limits the total size of cache files to 10GB,
   # and for MythTV ccache to be useful it needs to be rather
-  # large, and we are building a lot of versions, the github
+  # large, and we are building a lot of variants, the github
   # cache ends up being too small to be helpful, so we do
   # not use it for this workflow
   #
@@ -32,7 +33,7 @@ jobs:
       matrix:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
           # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
           - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
@@ -45,11 +46,11 @@ jobs:
 
           ## The following are disabled due to ansible not (yet) being correct
           ## and the entire stream and qt5webkit issue is still open
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          # { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
+          # { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
           
-          - { image: 'rockylinux:8',                   desc: 'Rocky 8' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky 9' }
+          # { image: 'rockylinux:8',                   desc: 'Rocky 8' }
+          # { image: 'rockylinux:9',                   desc: 'Rocky 9' }
 
           ## The following are disabled due to ansible not (yet) being correct
           # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
@@ -59,7 +60,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
@@ -135,6 +136,24 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook -i hosts qt5.yml
+
+      - name: Debian/Ubuntu OS install clang if requested
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: apt install ${{ matrix.compiler.cc }} -y
+        if: ( env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu' ) && matrix.compiler.cc == 'clang'
+
+      - name: Redhat/Fedora OS install clang if requested
+        run: dnf install ${{ matrix.compiler.cc }} -y
+        if: ( env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky' ) && matrix.compiler.cc == 'clang'
+      - name: OpenSUSE OS install clang if requested
+        run: |
+          zypper install -y ${{ matrix.compiler.cc }}
+        if: ( env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed' ) && matrix.compiler.cc == 'clang'
+
+      - name: ArchLinux OS install clang if requested
+        run: pacman --noconfirm -Sy ${{ matrix.compiler.cc }}
+        if: env.OS_RELEASE_ID == 'arch' && matrix.compiler.cc == 'clang'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
