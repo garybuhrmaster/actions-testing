@@ -32,17 +32,17 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
+          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
+          # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          # { image: 'fedora:35',                      desc: 'Fedora 35' }
+          # { image: 'fedora:36',                      desc: 'Fedora 36' }
+          # { image: 'fedora:37',                      desc: 'Fedora 37' }
+          # { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
 
           - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
           - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
@@ -54,7 +54,7 @@ jobs:
           # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
           # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
 
-          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          # { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
