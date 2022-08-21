@@ -86,6 +86,5 @@ jobs:
         working-directory: ./mythtv
         run: run-clang-tidy 2>&1 | tee /tmp/tidy.out
 
-      - name: Cat tidy.stderr
-        run: grep "warning: " /tmp/tidy.out
-
+      - name: Report on relevant warnings
+        run: grep "warning:\u0020" /tmp/tidy.out
