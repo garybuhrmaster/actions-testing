@@ -1,12 +1,13 @@
 ---
-name: build
+name: clang-tidy
 
 on:
   push:
-    branches: [ main ]
 
   pull_request:
-    branches: [ main ]
+
+permissions:
+  contents: read
 
 jobs:
 
@@ -37,61 +38,54 @@ jobs:
           repository: MythTV/ansible
           path: ansible
 
-      - name: Checkout MythTV/mythtv repo
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-          path: mythtv
-
       - name: Run ansible to install build requirements
         working-directory: ./ansible
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Install extra packages for greater coverage and clang-tidy
-        run: dnf install ant python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
+        run: dnf install python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
 
-      - name: Get clang version
-        run: clang --version
-
-      - name: Get Qt version
-        run: qmake-qt5 --version || qmake6 --version || qmake --version
+      - name: Checkout MythTV/mythtv repo
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
 
       - name: Configure core
-        working-directory: ./mythtv/mythtv
-        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid $MYTHTV_CONFIGURE_EXTRA
+        working-directory: ./mythtv
+        run: ./configure $MYTHTV_CONFIGURE_PREFIX --cc=clang --cxx=clang++ --enable-symbol-visibility --enable-compdb --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid $MYTHTV_CONFIGURE_EXTRA
 
       - name: Make core
-        working-directory: ./mythtv/mythtv
+        working-directory: ./mythtv
         run: make all_no_test -j4
 
       - name: Install core
-        working-directory: ./mythtv/mythtv
+        working-directory: ./mythtv
         run: make install
 
       - name: Unit test core
-        working-directory: ./mythtv/mythtv
+        working-directory: ./mythtv
         run: make test -j4
 
       - name: Configure plugins
-        working-directory: ./mythtv/mythplugins
+        working-directory: ./mythplugins
         run: ./configure $MYTHTV_CONFIGURE_PREFIX
 
       - name: Make plugins
-        working-directory: ./mythtv/mythplugins
+        working-directory: ./mythplugins
         run: make -j4
 
       - name: Install plugins
-        working-directory: ./mythtv/mythplugins
+        working-directory: ./mythplugins
         run: make install
 
       - name: Make compilation database
-        working-directory: ./mythtv/mythtv
+        working-directory: ./mythtv
         run: make compdb
 
       - name: Run clang-tidy
-        working-directory: ./mythtv/mythtv
-        run: run-clang-tidy 2> >(tee /tmp/tidy.stderr)
+        working-directory: ./mythtv
+        run: run-clang-tidy 2>&1 | tee /tmp/tidy.out
 
       - name: Cat tidy.stderr
-        run: cat /tmp/tidy.stderr
+        run: grep "warning: " /tmp/tidy.out
 
