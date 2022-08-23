@@ -58,11 +58,11 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
-          # { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
 
       fail-fast: false
 
@@ -151,4 +151,39 @@ jobs:
       - name: ArchLinux OS install clang if requested
         run: pacman --noconfirm -Sy ${{ matrix.compiler.cc }}
         if: env.OS_RELEASE_ID == 'arch' && matrix.compiler.cc == 'clang'
+
+      - name: Checkout Mythtv/mythtv
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
+          ref: ${{ matrix.branch.ref }}
+          path: mythtv
+
+      - name: Configure core
+        working-directory: mythtv/mythtv
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
+
+      - name: Make core
+        working-directory: mythtv/mythtv
+        run: make all_no_test -j4
+
+      - name: Install core
+        working-directory: mythtv/mythtv
+        run: make install
+
+      - name: Unit test core
+        working-directory: mythtv/mythtv
+        run: make test -j4
+
+      - name: Configure plugins
+        working-directory: mythtv/mythplugins
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }}
+
+      - name: Make plugins
+        working-directory: mythtv/mythplugins
+        run: make -j4
+
+      - name: Install plugins
+        working-directory: mythtv/mythplugins
+        run: make install
 
