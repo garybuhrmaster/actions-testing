@@ -85,7 +85,5 @@ jobs:
 
       - name: Run clang-tidy
         working-directory: ./mythtv
-        run: run-clang-tidy 2>&1 | tee /tmp/tidy.out
+        run: run-clang-tidy 
 
-      - name: Report on relevant warnings
-        run: grep "warning:\u0020" /tmp/tidy.out
