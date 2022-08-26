@@ -1,5 +1,5 @@
 ---
-name: clang-tidy
+name: Run clang-tidy
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 jobs:
 
   clang-tidy:
-    name: clang-tidy
+    name: Run clang-tidy
 
     env:
       TZ: Etc/UTC
@@ -25,7 +25,6 @@ jobs:
       image: fedora:rawhide
 
     steps:
-
       - name: Update OS
         run: dnf upgrade -y
 
@@ -43,7 +42,7 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Install extra packages for greater coverage and clang-tidy
-        run: dnf install python-setuptools qt5-qtbase-private-devel python-oauth python-pycurl clang clang-tools-extra -y
+        run: dnf install qt5-qtbase-private-devel clang clang-tools-extra -y
 
       - name: Checkout MythTV/mythtv repo
         uses: actions/checkout@v3
@@ -83,7 +82,13 @@ jobs:
         working-directory: ./mythtv
         run: make compdb
 
+      - name:
+        run: touch /tmp/stderr.txt
+
       - name: Run clang-tidy
         working-directory: ./mythtv
-        run: run-clang-tidy 
+        run: stdbuf --error=0 --output=0 run-clang-tidy 2> >(stdbuf --error=0 --output=0 tee -a /tmp/stderr.txt >&2)
+
+      - name: Report any errors
+        run: cat /tmp/stderr.txt
 
