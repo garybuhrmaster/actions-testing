@@ -70,20 +70,13 @@ jobs:
           ref: homebrew
           path: ansible
 
-      - name: Run ansible to install build requirements
+      - name: Run ansible to install build requirements for macports
         working-directory: ansible
         run: sudo ansible-playbook --verbose -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
-        if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Add qt5 qmake path to for macports
         run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Install core dependencies (macOS) if using homebrew
-        run: |
-          brew install pkg-config ccache qt5 nasm libsamplerate taglib lzo libcec libbluray fftw libass libhdhomerun dav1d x264 x265 libvpx openssl sound-touch
-          brew link qt5 --force
-        if: matrix.pkg-mgr.mgr == 'homebrew'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
