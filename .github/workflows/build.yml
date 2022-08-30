@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   macOS-build:
-    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS..desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
+    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
 
     env:
       MACPORTS_VERSION: 2.7.2
