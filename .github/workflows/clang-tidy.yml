@@ -88,6 +88,7 @@ jobs:
       - name: Run clang-tidy
         working-directory: ./mythtv
         run: stdbuf --error=0 --output=0 run-clang-tidy 2> >(stdbuf --error=0 --output=0 tee -a /tmp/stderr.txt >&2)
+        shell: bash
 
       - name: Report any errors
         run: cat /tmp/stderr.txt
