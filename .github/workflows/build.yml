@@ -11,15 +11,29 @@ permissions:
 
 jobs:
   #
+  # For MythTV plugin configuration results it is necessary
+  # to have first compiled the core, and installed it.  This
+  # is unfortunate due to the resources needed to compile
+  # the core, but it is the way MythTV is currently designed.
+  # There is no requirement to make or install the plugins,
+  # but it might produce some other error that indicates an
+  # issue.
+  #
   # Note that in theory we should use github cache for ccache
   # in order to (substantially) improve build time, but as
   # github limits the total size of cache files to 10GB,
   # and for MythTV ccache to be useful it needs to be rather
   # large, and we are building a lot of variants, the github
   # cache ends up being too small to be helpful, so we do
-  # not use it for this workflow
+  # not use it for this workflow.
   #
-  linux-build:
+  # We test both the master and fixes branches, as there
+  # can be divergence in their requirements.
+  #
+  # Compiling with clang is commented out for now, although
+  # it may be an interesting addition for better coverage.
+  #
+  linux:
     name: Building ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
 
     runs-on: ubuntu-latest
@@ -50,14 +64,14 @@ jobs:
           # { image: 'rockylinux:8',                   desc: 'Rocky 8' }
           # { image: 'rockylinux:9',                   desc: 'Rocky 9' }
 
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
           - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
 
           # { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
@@ -169,10 +183,6 @@ jobs:
         working-directory: mythtv/mythtv
         run: make install
 
-      - name: Unit test core
-        working-directory: mythtv/mythtv
-        run: make test -j4
-
       - name: Configure plugins
         working-directory: mythtv/mythplugins
         run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }}
@@ -184,4 +194,109 @@ jobs:
       - name: Install plugins
         working-directory: mythtv/mythplugins
         run: make install
+
+  macOS:
+    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS..desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
+
+    env:
+      MACPORTS_VERSION: 2.7.2
+      TZ: Etc/UTC
+      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
+      MYTHTV_CONFIG_EXTRA:
+
+    strategy:
+      matrix:
+        macOS:
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
+          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
+
+        compiler:
+          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+
+        pkg-mgr:
+          - { mgr: 'macports',                         desc: 'macports' }
+          # { mgr: 'homebrew',                         desc: 'homebrew' }
+
+        branch:
+          - { ref: 'master',                           desc: 'MythTV master' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+
+      fail-fast: false
+
+    runs-on: ${{ matrix.macOS.os }}
+
+    steps:
+      - name: Uninstall homebrew if using macports (package conflicts)
+        run: /bin/bash -c "$(NONINTERACTIVE=1 curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: Install macports if using macports
+        run: |
+          curl --location https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_V
+ERSION }}-${{ matrix.macOS.portspkg }}.pkg --output MacPorts.pkg
+          sudo installer -pkg ./MacPorts.pkg -target /
+          echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: Install ansible for macports
+        run: |
+          sudo port install py310-ansible
+          sudo port select --set ansible py310-ansible
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: Install ansible for homebrew
+        run: brew install ansible
+        if: matrix.pkg-mgr.mgr == 'homebrew'
+
+      - name: Checkout MythTV/ansible repo
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/ansible
+          path: ansible
+
+      - name: Run ansible to install build requirements
+        working-directory: ansible
+        run: sudo ansible-playbook --verbose -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: Add qt5 qmake path to for macports
+        run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: Add extra flags for macports
+        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/opt/local/include' --extra-ldflags='-L/opt/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'macports'
+
+      - name: add extra flags for homebrew
+        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'homebrew'
+
+      - name: Checkout Mythtv/mythtv
+        uses: actions/checkout@v3
+        with:
+          repository: MythTV/mythtv
+          ref: ${{ matrix.branch.ref }}
+          path: mythtv
+
+      - name: Configure core
+        working-directory: mythtv/mythtv
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTH
+TV_CONFIG_EXTRA }}
+
+      - name: Make core
+        working-directory: mythtv/mythtv
+        run: make all_no_test -j4
+
+      - name: Install core
+        working-directory: mythtv/mythtv
+        run: make install
+
+      - name: Configure plugins
+        working-directory: mythtv/mythplugins
+        run: ./configure --prefix=${{ github.workspace }}/build/install
+
+      - name: Make plugins
+        working-directory: mythtv/mythplugins
+        run: make -j4
 
