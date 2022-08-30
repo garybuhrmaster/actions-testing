@@ -233,8 +233,7 @@ jobs:
 
       - name: Install macports if using macports
         run: |
-          curl --location https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_V
-ERSION }}-${{ matrix.macOS.portspkg }}.pkg --output MacPorts.pkg
+          curl --location https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg --output MacPorts.pkg
           sudo installer -pkg ./MacPorts.pkg -target /
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
