@@ -304,7 +304,7 @@ jobs:
 
   FreeBSD:
     # FreeBSD has to run in a VM, and only macOS workers support virtualization
-    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }}
+    name: Building ${{ matrix.branch.desc }} on ${{ matrix.FreeBSD.desc }}
 
     env:
       TZ: Etc/UTC
@@ -346,6 +346,9 @@ jobs:
       with:
         envs: 'PAGER ASSUME_ALWAYS_YES TZ MYTHTV_CONFIG_PREFIX MYTHTV_CONFIG_EXTRA'
         usesh: true
+        sync: rsync
+        copyback: false
+        mem: 3072
         release: ${{ matrix.FreeBSD.release }}
         prepare: |
           portsnap fetch update
@@ -355,7 +358,6 @@ jobs:
           curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
           python3 get-pip.py
           pip install ansible
-          ansible-playbook -i ansible/hosts ansible/qt5.yml
         run: |
           pwd
           ls -lah
