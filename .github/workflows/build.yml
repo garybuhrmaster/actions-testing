@@ -259,7 +259,7 @@ jobs:
         run: sudo ansible-playbook --verbose -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
 
-      - name: Add qt5 qmake path to for macports
+      - name: Add qt5 qmake path for macports
         run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
 
@@ -297,4 +297,72 @@ jobs:
       - name: Make plugins
         working-directory: mythtv/mythplugins
         run: make -j4
+
+      - name: Install plugins
+        working-directory: mythtv/mythplugins
+        run: make install
+
+  FreeBSD:
+    # FreeBSD has to run in a VM, and only macOS workers support virtualization
+    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }}
+
+    env:
+      TZ: Etc/UTC
+      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
+      MYTHTV_CONFIG_EXTRA:
+      PAGER: cat
+      ASSUME_ALWAYS_YES: YES
+
+    strategy:
+      matrix:
+        FreeBSD:
+          - { release: '12.3',                         desc: 'FreeBSD 12.3' }
+          - { release: '13.1',                         desc: 'FreeBSD 13.1' }
+
+        branch:
+          - { ref: 'master',                           desc: 'MythTV master' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+
+      fail-fast: false
+
+    runs-on: macos-12
+
+    steps:
+    - name: Checkout MythTV/ansible repo
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/ansible
+        path: ansible
+
+    - name: Checkout Mythtv/mythtv
+      uses: actions/checkout@v3
+      with:
+        repository: MythTV/mythtv
+        ref: ${{ matrix.branch.ref }}
+        path: mythtv
+
+    - name: Test on FreeBSD
+      uses: vmactions/freebsd-vm@v0
+      with:
+        envs: 'PAGER ASSUME_ALWAYS_YES TZ MYTHTV_CONFIG_PREFIX MYTHTV_CONFIG_EXTRA'
+        usesh: true
+        release: ${{ matrix.FreeBSD.release }}
+        prepare: |
+          portsnap fetch update
+          pkg install -y curl
+          pkg install -y python3
+          pkg install -y rust
+          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python3 get-pip.py
+          pip install ansible
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
+        run: |
+          pwd
+          ls -lah
+          whoami
+          env
+          freebsd-version
+          ansible-playbook -i ansible/hosts ansible/qt5.yml
+          cd mythtv
+          ./configure --cc=clang --cxx=clang++
 
