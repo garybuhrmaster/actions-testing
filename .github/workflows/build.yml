@@ -47,8 +47,8 @@ jobs:
       matrix:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
           # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
@@ -238,6 +238,10 @@ jobs:
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'macports'
 
+      - name: Adjust path for homebrew
+        run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
+        if: matrix.pkg-mgr.mgr == 'homebrew'
+
       - name: Install ansible for macports
         run: |
           sudo port install py310-ansible
@@ -280,6 +284,11 @@ jobs:
       - name: Add extra flags for homebrew
         run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'homebrew'
+
+      - name: try a few wheres
+        run: |
+          whereis qmake
+          whereis qmake-qt5
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
