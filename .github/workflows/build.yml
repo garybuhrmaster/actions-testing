@@ -140,7 +140,8 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: MythTV/ansible
+          repository: garybuhrmaster/ansible
+          ref: homebrew
           path: ansible
 
       - name: Run ansible to install build requirements
