@@ -40,7 +40,6 @@ jobs:
 
     env:
       TZ: Etc/UTC
-      DEBIAN_FRONTEND: noninteractive
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
       MYTHTV_CONFIG_EXTRA:
 
@@ -97,13 +96,17 @@ jobs:
         if: env.OS_RELEASE_ID == 'debian' && env.OS_RELEASE_VERSION_CODENAME == ''
 
       - name: Debian/Ubuntu OS update
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           apt update -y
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Debian/Ubuntu OS install ansible
-        run: apt install ansible -y
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: apt install ansible apt-utils -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux (for ansible)
@@ -145,6 +148,8 @@ jobs:
         run: ansible-playbook -i hosts qt5.yml
 
       - name: Debian/Ubuntu OS install clang if requested
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: apt install ${{ matrix.compiler.cc }} -y
         if: ( env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu' ) && matrix.compiler.cc == 'clang'
 
