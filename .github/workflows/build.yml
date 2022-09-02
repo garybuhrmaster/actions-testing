@@ -27,8 +27,8 @@ jobs:
   # cache ends up being too small to be helpful, so we do
   # not use it for this workflow.
   #
-  # We test both the master and fixes branches, as there
-  # can be divergence in their requirements.
+  # We test both the master and the current fixes branches,
+  # as there can be divergence in their requirements.
   #
   # Compiling with clang is commented out for now, although
   # it may be an interesting addition for better coverage.
@@ -48,7 +48,8 @@ jobs:
         container:
           # { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           # { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          ## Pre-beta, currently broken container
+          # { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
           # { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
           # { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
@@ -64,8 +65,8 @@ jobs:
           # { image: 'rockylinux:8',                   desc: 'Rocky 8' }
           # { image: 'rockylinux:9',                   desc: 'Rocky 9' }
 
-          # { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          # { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
+          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
 
           # { image: 'archlinux:latest',               desc: 'ArchLinux' }
 
@@ -75,7 +76,7 @@ jobs:
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
-          # { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
 
       fail-fast: false
 
@@ -140,8 +141,7 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: garybuhrmaster/ansible
-          ref: homebrew
+          repository: MythTV/ansible
           path: ansible
 
       - name: Run ansible to install build requirements
@@ -216,12 +216,13 @@ jobs:
           # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         pkg-mgr:
-          # { mgr: 'macports',                         desc: 'macports' }
-          - { mgr: 'homebrew',                         desc: 'homebrew' }
+          - { mgr: 'macports',                         desc: 'macports' }
+          ## Homebrew ansible tasks are still a work in progress
+          # { mgr: 'homebrew',                         desc: 'homebrew' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
-          # { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
 
       fail-fast: false
 
@@ -256,8 +257,7 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: garybuhrmaster/ansible
-          ref: homebrew
+          repository: MythTV/ansible
           path: ansible
 
       - name: Run ansible to install build requirements for macports
@@ -285,11 +285,6 @@ jobs:
       - name: Add extra flags for homebrew
         run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
         if: matrix.pkg-mgr.mgr == 'homebrew'
-
-      - name: try a few wheres
-        run: |
-          whereis qmake
-          whereis qmake-qt5
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
