@@ -72,7 +72,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master' }
@@ -168,8 +168,8 @@ jobs:
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
-          repository: garybuhrmaster/mythtv
-          ref: limits
+          repository: MythTV/mythtv
+          ref: ${{ matrix.branch.ref }}
           path: mythtv
 
       - name: Configure core
@@ -213,7 +213,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
 
         pkg-mgr:
           - { mgr: 'macports',                         desc: 'macports' }
