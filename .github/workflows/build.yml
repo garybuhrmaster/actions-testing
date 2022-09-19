@@ -1,5 +1,11 @@
 ---
-name: Test ansible installation for MythTV builds
+name: Run ansible-playbook
+
+  #
+  # This simply tests that ansible can successfully run
+  # on Linux (macOS ansible is extremely slow to install
+  # and run, so we defer it to the full build workflow).
+  #
 
 on:
   push:
@@ -10,45 +16,19 @@ permissions:
   contents: read
 
 jobs:
-  #
-  # For MythTV plugin configuration results it is necessary
-  # to have first compiled the core, and installed it.  This
-  # is unfortunate due to the resources needed to compile
-  # the core, but it is the way MythTV is currently designed.
-  # There is no requirement to make or install the plugins,
-  # but it might produce some other error that indicates an
-  # issue.
-  #
-  # Note that in theory we should use github cache for ccache
-  # in order to (substantially) improve build time, but as
-  # github limits the total size of cache files to 10GB,
-  # and for MythTV ccache to be useful it needs to be rather
-  # large, and we are building a lot of variants, the github
-  # cache ends up being too small to be helpful, so we do
-  # not use it for this workflow.
-  #
-  # We test both the master and the current fixes branches,
-  # as there can be divergence in their requirements.
-  #
-  # Compiling with clang is commented out for now, although
-  # it may be an interesting addition for better coverage.
-  #
-  linux:
-    name: Building ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
+  ansible-playbook:
+    name: Running ansible-playbook on ${{ matrix.container.desc }} 
 
     runs-on: ubuntu-latest
 
     env:
       TZ: Etc/UTC
-      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
-      MYTHTV_CONFIG_EXTRA:
 
     strategy:
       matrix:
         container:
           - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
           - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          ## Pre-beta, currently broken container
           - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
 
           - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
@@ -69,14 +49,6 @@ jobs:
           - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
 
           - { image: 'archlinux:latest',               desc: 'ArchLinux' }
-
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
-
-        branch:
-          - { ref: 'master',                           desc: 'MythTV master' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
 
       fail-fast: false
 
@@ -141,69 +113,19 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: MythTV/ansible
+          repository: garybuhrmaster/ansible
           path: ansible
 
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook -i hosts qt5.yml
 
-      - name: Debian/Ubuntu OS install clang if requested
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: apt install ${{ matrix.compiler.cc }} -y
-        if: ( env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu' ) && matrix.compiler.cc == 'clang'
-
-      - name: Redhat/Fedora OS install clang if requested
-        run: dnf install ${{ matrix.compiler.cc }} -y
-        if: ( env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky' ) && matrix.compiler.cc == 'clang'
-      - name: OpenSUSE OS install clang if requested
-        run: zypper install -y ${{ matrix.compiler.cc }}
-        if: ( env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed' ) && matrix.compiler.cc == 'clang'
-
-      - name: ArchLinux OS install clang if requested
-        run: pacman --noconfirm -Sy ${{ matrix.compiler.cc }}
-        if: env.OS_RELEASE_ID == 'arch' && matrix.compiler.cc == 'clang'
-
-      - name: Checkout Mythtv/mythtv
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-          ref: ${{ matrix.branch.ref }}
-          path: mythtv
-
-      - name: Configure core
-        working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
-
-      - name: Make core
-        working-directory: mythtv/mythtv
-        run: make all_no_test -j4
-
-      - name: Install core
-        working-directory: mythtv/mythtv
-        run: make install
-
-      - name: Configure plugins
-        working-directory: mythtv/mythplugins
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }}
-
-      - name: Make plugins
-        working-directory: mythtv/mythplugins
-        run: make -j4
-
-      - name: Install plugins
-        working-directory: mythtv/mythplugins
-        run: make install
-
   macOS:
-    name: Building ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }} using ${{ matrix.pkg-mgr.desc }} with ${{ matrix.compiler.desc }}
+    name: Running ansible-playbook on ${{ matrix.macos.desc }} using ${{ matrix.pkg-mgr.desc }}
 
     env:
       MACPORTS_VERSION: 2.7.2
       TZ: Etc/UTC
-      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
-      MYTHTV_CONFIG_EXTRA:
 
     strategy:
       matrix:
@@ -211,18 +133,10 @@ jobs:
           - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
           - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
 
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
-
         pkg-mgr:
-          - { mgr: 'macports',                         desc: 'macports' }
+          # { mgr: 'macports',                         desc: 'macports' }
           ## Homebrew ansible tasks are still a work in progress
-          # { mgr: 'homebrew',                         desc: 'homebrew' }
-
-        branch:
-          - { ref: 'master',                           desc: 'MythTV master' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { mgr: 'homebrew',                         desc: 'homebrew' }
 
       fail-fast: false
 
@@ -257,64 +171,11 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: MythTV/ansible
-          path: ansible
+          repository: garybuhrmaster/ansible
+          path: homebrew
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
         run: sudo ansible-playbook -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Run ansible to install build requirements for homebrew
-        working-directory: ansible
-        run: ansible-playbook -i hosts qt5.yml
-        if: matrix.pkg-mgr.mgr == 'homebrew'
-
-      - name: Add qt5 qmake path for macports
-        run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Add extra flags for macports
-        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/opt/local/include' --extra-ldflags='-L/opt/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Force qt5 for homebrew
-        run: brew link qt5 --force
-        if: matrix.pkg-mgr.mgr == 'homebrew'
-
-      - name: Add extra flags for homebrew
-        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'homebrew'
-
-      - name: Checkout Mythtv/mythtv
-        uses: actions/checkout@v3
-        with:
-          repository: MythTV/mythtv
-          ref: ${{ matrix.branch.ref }}
-          path: mythtv
-
-      - name: Configure core
-        working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
-
-      - name: Make core
-        working-directory: mythtv/mythtv
-        run: make all_no_test -j4
-
-      - name: Install core
-        working-directory: mythtv/mythtv
-        run: make install
-
-      - name: Configure plugins
-        working-directory: mythtv/mythplugins
-        run: ./configure --prefix=${{ github.workspace }}/build/install
-
-      - name: Make plugins
-        working-directory: mythtv/mythplugins
-        run: make -j4
-
-      - name: Install plugins
-        working-directory: mythtv/mythplugins
-        run: make install
-
 
