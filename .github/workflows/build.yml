@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  ansible-playbook:
+  linux:
     name: Running ansible-playbook on ${{ matrix.container.desc }} 
 
     runs-on: ubuntu-latest
@@ -172,7 +172,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: garybuhrmaster/ansible
-          path: homebrew
+          path: ansible
+          ref: homebrew
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
