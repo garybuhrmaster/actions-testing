@@ -179,3 +179,8 @@ jobs:
         run: sudo ansible-playbook -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
 
+      - name: Run ansible to install build requirements for homebrew
+        working-directory: ansible
+        run: ansible-playbook -i hosts qt5.yml
+        if: matrix.pkg-mgr.mgr == 'homebrew'
+
