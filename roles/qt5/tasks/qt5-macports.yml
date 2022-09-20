@@ -1,0 +1,56 @@
+- name: check to see if qtwebkit is requested
+  set_fact:
+    install_qtwebkit=false
+  when:
+    install_qtwebkit is undefined
+
+# parse out database name and major/minor version
+# database_version is set in the macports main.yml
+- name: specify mysql/mariadb database version to compile against
+  set_fact:  qt_mysql_variant="{{ database_version | regex_replace('-') | regex_replace('\.', '_') }}"
+
+- name: create list of qt5 libraries
+  set_fact:
+    macports_pkg_list:
+      - qt5
+      - qt5-qtscript
+  tags:
+    - qt5
+
+# optionally install qtwebkit
+- name: Check it qtwebkit was requested
+  set_fact:
+    macports_pkg_list:
+      - '{{ macports_pkg_list }}'
+      - qt5-qtwebkit
+  when: install_qtwebkit == "true"
+  tags:
+    - qt5
+
+- name: print final qt5 list of ports
+  debug:
+    msg:
+      '{{ lookup("flattened", macports_pkg_list) }}'
+
+- name: install port qt5 packages
+  become: yes
+  become_user: root
+  become_method: sudo
+  macports:
+    name:
+      '{{ lookup("flattened", macports_pkg_list) }}'
+    update_cache: yes
+  tags:
+    - qt5
+
+- name: install qt5-mysql-plugin for previously specified mariadb/mysql version
+  become: yes
+  become_user: root
+  become_method: sudo
+  macports:
+    name: qt5-mysql-plugin
+    variant: +{{ qt_mysql_variant }}
+  tags:
+    - qt5
+
+# vim: set expandtab tabstop=2 shiftwidth=2 smartindent noautoindent colorcolumn=2:
