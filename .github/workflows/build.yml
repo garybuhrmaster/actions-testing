@@ -8,7 +8,7 @@ name: Run ansible-playbook
   #
 
 on:
-  push:
+# push:
 
   pull_request:
 
