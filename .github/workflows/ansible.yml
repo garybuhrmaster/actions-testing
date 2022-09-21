@@ -186,6 +186,9 @@ jobs:
           pkg install -y python3
           pkg install -y rust
           pkg install -y ansible
+          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python3 get-pip.py
+          pip install ansible
           ansible localhost -m ansible.builtin.gather_facts
         run: |
           ansible-playbook ${{ matrix.FreeBSD.opts }} mythtv.yml
