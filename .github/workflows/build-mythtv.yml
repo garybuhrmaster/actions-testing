@@ -3,7 +3,7 @@ name: Build MythTV
 
 on:
   workflow_run:
-    workflows: ["Run ansible-playbook"]
+    workflows: ["XXXRun ansible-playbook"]
     types:
       - completed
 
