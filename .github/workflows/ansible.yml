@@ -114,16 +114,28 @@ jobs:
         run: pacman --noconfirm -Sy ansible
         if: env.OS_RELEASE_ID == 'arch'
 
+      - name: AmazonLinux 2 OS update
+        run: yum upgrade -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
+
+      - name: AmazonLinux 2 install ansible
+        run: yum install ansible tar gzip -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
+
+      - name: AmazonLinux 2022+ OS update
+        run: dnf upgrade -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
+
+      - name: AmazonLinux 2022+ install ansible
+        run: dnf install ansible tar gzip -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
+
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
           path: ansible
 
-      - name: ls
-        working-directory: ansible
-        run: ls -alt
-
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.opts }} ./mythtv.yml
+        run: ansible-playbook ${{ matrix.container.opts }} mythtv.yml
 
