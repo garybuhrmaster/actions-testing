@@ -28,28 +28,31 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       opts: '--limit localhost' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   opts: '--limit localhost' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          opts: '--limit localhost' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 opts: '--limit localhost' }
+          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 opts: '--limit localhost' }
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35',                            opts: '--limit localhost' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36',                            opts: '--limit localhost' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37',                            opts: '--limit localhost' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       opts: '--limit localhost' }
 
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          - { image: 'amazonlinux:2',                  desc: 'Amazon Linux 2',                       opts: '--limit f30' }
+          - { image: 'amazonlinux:2022',               desc: 'Amazon Linux 2022',                    opts: '--limit localhost' }
+
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      opts: '--limit localhost' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      opts: '--limit localhost' }
           
-          - { image: 'rockylinux:8',                   desc: 'Rocky 8' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky 9' }
+          - { image: 'rockylinux:8',                   desc: 'Rocky 8',                              opts: '--limit localhost' }
+          - { image: 'rockylinux:9',                   desc: 'Rocky 9',                              opts: '--limit localhost' }
 
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed',                  opts: '--limit localhost' }
+          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap',                        opts: '--limit localhost' }
 
-          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          - { image: 'archlinux:latest',               desc: 'ArchLinux',                            opts: '--limit localhost' }
 
       fail-fast: false
 
@@ -118,5 +121,5 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook -i hosts qt5.yml
+        run: ansible-playbook ${{ matrix.container.opts }} mythtv.yml
 
