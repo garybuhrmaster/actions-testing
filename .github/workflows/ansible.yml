@@ -119,7 +119,11 @@ jobs:
         with:
           path: ansible
 
+      - name: ls
+        working-directory: ansible
+        run: ls -alt
+
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.opts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.container.opts }} ./mythtv.yml
 
