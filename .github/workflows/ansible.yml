@@ -118,13 +118,21 @@ jobs:
         run: yum upgrade -y
         if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
 
+      - name: AmazonLinux 2 install amazon-linux-extras
+        run: yum install amazon-linux-extras -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
+
       - name: AmazonLinux 2 install ansible
-        run: yum install ansible tar gzip -y
+        run: yum install ansible2 tar gzip -y
         if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
 
       - name: AmazonLinux 2022+ OS update
         run: dnf upgrade -y
         if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
+
+      - name: AmazonLinux 2022+ install amazon-linux-extras
+        run: dnf install amazon-linux-extras -y
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
 
       - name: AmazonLinux 2022+ install ansible
         run: dnf install ansible tar gzip -y
