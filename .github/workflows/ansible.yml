@@ -132,10 +132,10 @@ jobs:
 
       - name: AmazonLinux 2022+ install amazon-linux-extras
         run: dnf install amazon-linux-extras -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
+        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
 
       - name: AmazonLinux 2022+ install ansible
-        run: dnf install ansible tar gzip -y
+        run: dnf install ansible2 tar gzip -y
         if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
 
       - name: Checkout MythTV/ansible repo
