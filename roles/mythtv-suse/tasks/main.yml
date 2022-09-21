@@ -103,7 +103,6 @@
     - ansible_distribution == "openSUSE Leap"
     - ansible_distribution_release|int < 4,
 
-
 - name: determine devel:languages:perl repository url (Leap)
   set_fact:
     perl_repo:
