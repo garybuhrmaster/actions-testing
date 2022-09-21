@@ -4,8 +4,9 @@ name: Run ansible-playbook
   #
   # This simply tests that ansible can successfully run
   # on Linux (macOS ansible with macports is extremely
-  # slow to install and run, so we defer it to the full
-  # build workflow).
+  # slow to install and run, and FreeBSD running in a
+  # macos vm is especially fragile, so we defer to the
+  # full build workflow).
   #
 
 on:
@@ -39,9 +40,6 @@ jobs:
           - { image: 'fedora:36',                      desc: 'Fedora 36',                            opts: '--limit localhost' }
           - { image: 'fedora:37',                      desc: 'Fedora 37',                            opts: '--limit localhost' }
           - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       opts: '--limit localhost' }
-
-          # { image: 'amazonlinux:2',                  desc: 'Amazon Linux 2',                       opts: '--limit f30' }
-          # { image: 'amazonlinux:2022',               desc: 'Amazon Linux 2022',                    opts: '--limit localhost' }
 
           - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      opts: '--limit localhost' }
           - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      opts: '--limit localhost' }
@@ -146,50 +144,4 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.opts }} mythtv.yml
-
-  ansible-FreeBSD:
-    # FreeBSD has to run in a VM, and only macOS workers support virtualization
-    name: Running ansible-playbook on ${{ matrix.FreeBSD.desc }}
-
-    env:
-      PAGER: cat
-      ASSUME_ALWAYS_YES: YES
-
-    strategy:
-      matrix:
-        FreeBSD:
-          - { release: '12.3',                         desc: 'FreeBSD 12.3',                         opts: '--limit localhost' }
-          - { release: '13.1',                         desc: 'FreeBSD 13.1',                         opts: '--limit localhost' }
-
-      fail-fast: false
-
-    # macos-latest (aka macos-11) does not support virtualbox.
-    runs-on: macos-12
-
-    steps:
-    - name: Checkout MythTV/ansible repo
-      uses: actions/checkout@v3
-      with:
-        path: ansible
-
-    - name: Testing on FreeBSD
-      id: test
-      uses: vmactions/freebsd-vm@v0
-      with:
-        usesh: true
-        release: ${{ matrix.FreeBSD.release }}
-        envs: 'PAGER ASSUME_ALWAYS_YES'
-        mem: 2048
-        prepare: |
-          portsnap fetch update
-          pkg install -y curl
-          pkg install -y python3
-          pkg install -y rust
-          pkg install -y ansible
-          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py
-          pip install ansible
-          ansible localhost -m ansible.builtin.gather_facts
-        run: |
-          ansible-playbook ${{ matrix.FreeBSD.opts }} mythtv.yml
 
