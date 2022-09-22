@@ -2,11 +2,20 @@
 name: Run ansible-playbook
 
   #
-  # This simply tests that ansible can successfully run
-  # on Linux (macOS ansible with macports is extremely
-  # slow to install and run, and FreeBSD running in a
-  # macos vm is especially fragile, so we defer to the
-  # full build workflow).
+  # This workflow tests that ansible can successfully run
+  # on linux (macos ansible with macports is extremely
+  # slow to install and run, and freebsd running in a
+  # macos vm is extremely fragile, so we defer to the
+  # full build workflow for macos).  As most churn in
+  # this repo tends to happen in the linux ecosystem this
+  # provides a quick check for the most common cases.
+  #
+  # The containers are selected to be from the set of
+  # linux distributions and versions that are currently
+  # among the list (or will soon be for beta/rc) of the
+  # MythTV project lists of supported variants that are
+  # targeted to be able to run the current fixes and
+  # master branches of MythTV.
   #
 
 on:
@@ -29,28 +38,28 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       opts: '--limit localhost' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   opts: '--limit localhost' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          opts: '--limit localhost' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       ansibleopts: '--limit localhost' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   ansibleopts: '--limit localhost' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          ansibleopts: '--limit localhost' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 opts: '--limit localhost' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 opts: '--limit localhost' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 ansibleopts: '--limit localhost' }
+          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 ansibleopts: '--limit localhost' }
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35',                            opts: '--limit localhost' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36',                            opts: '--limit localhost' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37',                            opts: '--limit localhost' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       opts: '--limit localhost' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       ansibleopts: '--limit localhost' }
 
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      opts: '--limit localhost' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      opts: '--limit localhost' }
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      ansibleopts: '--limit localhost' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      ansibleopts: '--limit localhost' }
           
-          - { image: 'rockylinux:8',                   desc: 'Rocky 8',                              opts: '--limit localhost' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky 9',                              opts: '--limit localhost' }
+          - { image: 'rockylinux:8',                   desc: 'Rocky Linux 8',                        ansibleopts: '--limit localhost' }
+          - { image: 'rockylinux:9',                   desc: 'Rocky Linux 9',                        ansibleopts: '--limit localhost' }
 
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed',                  opts: '--limit localhost' }
-          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap',                        opts: '--limit localhost' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'openSUSE Tumbleweed',                  ansibleopts: '--limit localhost' }
+          - { image: 'opensuse/leap:latest',           desc: 'openSUSE Leap',                        ansibleopts: '--limit localhost' }
 
-          - { image: 'archlinux:latest',               desc: 'ArchLinux',                            opts: '--limit localhost' }
+          - { image: 'archlinux:latest',               desc: 'Arch Linux',                           ansibleopts: '--limit localhost' }
 
       fail-fast: false
 
@@ -112,30 +121,6 @@ jobs:
         run: pacman --noconfirm -Sy ansible
         if: env.OS_RELEASE_ID == 'arch'
 
-      - name: AmazonLinux 2 OS update
-        run: yum upgrade -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
-
-      - name: AmazonLinux 2 install amazon-linux-extras
-        run: yum install amazon-linux-extras -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
-
-      - name: AmazonLinux 2 enable amazon-linux-extras ansible
-        run: amazon-linux-extras enable ansible2
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
-
-      - name: AmazonLinux 2 install ansible
-        run: yum install ansible tar gzip -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR == '2'
-
-      - name: AmazonLinux 2022 OS update
-        run: dnf upgrade -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
-
-      - name: AmazonLinux 2022 install ansible
-        run: dnf install ansible tar gzip -y
-        if: env.OS_RELEASE_ID == 'amzn' && env.OS_RELEASE_VERSION_MAJOR >= '2022'
-
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
@@ -143,5 +128,5 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.opts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
 
