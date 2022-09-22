@@ -113,6 +113,10 @@ jobs:
         run: zypper install -y ansible tar gzip
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
+      - name: OpenSuse query packages
+        run: rpm -q -a
+        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
+
       - name: ArchLinux OS update
         run: pacman --noconfirm -Syu
         if: env.OS_RELEASE_ID == 'arch'
@@ -129,4 +133,9 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
+
+      - name: OpenSuse query packages
+        run: rpm -q -a
+        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
+
 

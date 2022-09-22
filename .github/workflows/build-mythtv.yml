@@ -47,36 +47,36 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)' }
+          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       ansibleopts: '--limit localhost' }
+          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   ansibleopts: '--limit localhost' }
+          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          ansibleopts: '--limit localhost' }
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)' }
+          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 ansibleopts: '--limit localhost' }
+          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 ansibleopts: '--limit localhost' }
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide' }
+          - { image: 'fedora:35',                      desc: 'Fedora 35',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:36',                      desc: 'Fedora 36',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:37',                      desc: 'Fedora 37',                            ansibleopts: '--limit localhost' }
+          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       ansibleopts: '--limit localhost' }
 
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream' }
+          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      ansibleopts: '--limit localhost' }
+          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      ansibleopts: '--limit localhost' }
           
-          - { image: 'rockylinux:8',                   desc: 'Rocky 8' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky 9' }
+          - { image: 'rockylinux:8',                   desc: 'Rocky Linux 8',                        ansibleopts: '--limit localhost' }
+          - { image: 'rockylinux:9',                   desc: 'Rocky Linux 9',                        ansibleopts: '--limit localhost' }
 
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'OpenSUSE Tumbleweed' }
-          - { image: 'opensuse/leap:latest',           desc: 'OpenSUSE Leap' }
+          - { image: 'opensuse/tumbleweed:latest',     desc: 'openSUSE Tumbleweed',                  ansibleopts: '--limit localhost' }
+          - { image: 'opensuse/leap:latest',           desc: 'openSUSE Leap',                        ansibleopts: '--limit localhost' }
 
-          - { image: 'archlinux:latest',               desc: 'ArchLinux' }
+          - { image: 'archlinux:latest',               desc: 'Arch Linux',                           ansibleopts: '--limit localhost' }
 
         compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '' }
 
         branch:
-          - { ref: 'master',                           desc: 'MythTV master' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32',                      branchopts: '' }
 
       fail-fast: false
 
@@ -146,7 +146,7 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook -i hosts qt5.yml
+        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
 
       - name: Debian/Ubuntu OS install clang if requested
         env:
@@ -157,6 +157,7 @@ jobs:
       - name: Redhat/Fedora OS install clang if requested
         run: dnf install ${{ matrix.compiler.cc }} -y
         if: ( env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky' ) && matrix.compiler.cc == 'clang'
+
       - name: OpenSUSE OS install clang if requested
         run: zypper install -y ${{ matrix.compiler.cc }}
         if: ( env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed' ) && matrix.compiler.cc == 'clang'
@@ -174,7 +175,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }} ${{ matrix.branch.branchopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
