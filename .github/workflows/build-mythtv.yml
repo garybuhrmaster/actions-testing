@@ -191,8 +191,8 @@ jobs:
     strategy:
       matrix:
         macOS:
-          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',                   portspkg: '11-BigSur'}
-          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',                  portspkg: '12-Monterey' }
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',                  ansibleopts: '--limit localhost',                 portspkg: '11-BigSur'}
+          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',                 ansibleopts: '--limit localhost',                 portspkg: '12-Monterey' }
 
         pkg-mgr:
           - { mgr: 'macports',                         desc: 'macports' }
@@ -245,12 +245,12 @@ jobs:
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
-        run: sudo ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml --extra-vars "install_qtwebkit=true"
+        run: sudo ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml
         if: matrix.pkg-mgr.mgr == 'homebrew'
 
       - name: Add qt5 qmake path for macports
