@@ -148,6 +148,10 @@ jobs:
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
 
+      - name: OpenSUSE OS remove valgrind-devel (fix for broken MythTV compilation)
+        run: rpm --query --quiet valgrind-devel || rpm --erase --nodeps valgrind-devel
+        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
+
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
@@ -201,7 +205,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
