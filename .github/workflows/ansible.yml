@@ -87,10 +87,10 @@ jobs:
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Debian/Ubuntu OS install ansible
+      - name: Debian/Ubuntu OS install ansible and compilers
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ansible apt-utils -y
+        run: apt install ansible apt-utils gcc g++ clang -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux (for ansible)
@@ -101,28 +101,24 @@ jobs:
         run: dnf upgrade -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
-      - name: Redhat/Fedora OS install ansible
-        run: dnf install ansible dnf-plugins-core -y
+      - name: Redhat/Fedora OS install ansible and compilers
+        run: dnf install ansible dnf-plugins-core gcc g++ clang -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
         run: zypper update -y
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
-      - name: OpenSUSE OS install ansible
-        run: zypper install -y ansible tar gzip
-        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
-
-      - name: OpenSuse query packages
-        run: rpm -q -a
+      - name: OpenSUSE OS install ansible and compilers
+        run: zypper install -y ansible tar gzip gcc g++ clang
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: ArchLinux OS update
         run: pacman --noconfirm -Syu
         if: env.OS_RELEASE_ID == 'arch'
 
-      - name: ArchLinux OS install ansible
-        run: pacman --noconfirm -Sy ansible
+      - name: ArchLinux OS install ansible and compilers
+        run: pacman --noconfirm -Sy ansible gcc g++ clang
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout MythTV/ansible repo
@@ -133,9 +129,4 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
-
-      - name: OpenSuse query packages
-        run: rpm -q -a
-        if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
-
 
