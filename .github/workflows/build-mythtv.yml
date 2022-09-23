@@ -71,8 +71,8 @@ jobs:
           - { image: 'archlinux:latest',               desc: 'Arch Linux',                           ansibleopts: '--limit localhost' }
 
         compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '' }
+          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
@@ -118,25 +118,28 @@ jobs:
         run: dnf upgrade -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
-      - name: Redhat/Fedora OS install ansible
-        run: dnf install ansible dnf-plugins-core -y
+      - name: Redhat/Fedora OS install ansible and compilers
+        run: dnf install ansible dnf-plugins-core gcc gcc-c++ clang -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
         run: zypper update -y
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
-      - name: OpenSUSE OS install ansible
-        run: zypper install -y ansible tar gzip
+      - name: OpenSUSE OS install ansible and compilers
+        run: zypper install -y ansible tar gzip gcc gcc-c++ clang
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: ArchLinux OS update
         run: pacman --noconfirm -Syu
         if: env.OS_RELEASE_ID == 'arch'
 
-      - name: ArchLinux OS install ansible
-        run: pacman --noconfirm -Sy ansible
+      - name: ArchLinux OS install ansible and compilers
+        run: pacman --noconfirm -Sy ansible gcc clang
         if: env.OS_RELEASE_ID == 'arch'
+      - name: Redhat/Fedora OS update
+        run: dnf upgrade -y
+        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -175,7 +178,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }} ${{ matrix.branch.branchopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -209,21 +212,21 @@ jobs:
     strategy:
       matrix:
         macOS:
-          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',     portspkg: '11-BigSur'}
-          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',    portspkg: '12-Monterey' }
-
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang' }
+          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',                   portspkg: '11-BigSur'}
+          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',                  portspkg: '12-Monterey' }
 
         pkg-mgr:
           - { mgr: 'macports',                         desc: 'macports' }
           ## Homebrew ansible tasks are still a work in progress
           # { mgr: 'homebrew',                         desc: 'homebrew' }
 
+        compiler:
+          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
+          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+
         branch:
-          - { ref: 'master',                           desc: 'MythTV master' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32' }
+          - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
+          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32',                      branchopts: '' }
 
       fail-fast: false
 
@@ -296,7 +299,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} --cc=${{ matrix.compiler.cc }} --cxx=${{ matrix.compiler.cxx }} ${{ env.MYTHTV_CONFIG_EXTRA }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }} ${{ matrix.branch.branchopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
