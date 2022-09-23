@@ -137,9 +137,6 @@ jobs:
       - name: ArchLinux OS install ansible and compilers
         run: pacman --noconfirm -Sy ansible gcc clang
         if: env.OS_RELEASE_ID == 'arch'
-      - name: Redhat/Fedora OS update
-        run: dnf upgrade -y
-        if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
