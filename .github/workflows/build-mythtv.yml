@@ -72,7 +72,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
@@ -150,24 +150,6 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
-
-      - name: Debian/Ubuntu OS install clang if requested
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: apt install ${{ matrix.compiler.cc }} -y
-        if: ( env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu' ) && matrix.compiler.cc == 'clang'
-
-      - name: Redhat/Fedora OS install clang if requested
-        run: dnf install ${{ matrix.compiler.cc }} -y
-        if: ( env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky' ) && matrix.compiler.cc == 'clang'
-
-      - name: OpenSUSE OS install clang if requested
-        run: zypper install -y ${{ matrix.compiler.cc }}
-        if: ( env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed' ) && matrix.compiler.cc == 'clang'
-
-      - name: ArchLinux OS install clang if requested
-        run: pacman --noconfirm -Sy ${{ matrix.compiler.cc }}
-        if: env.OS_RELEASE_ID == 'arch' && matrix.compiler.cc == 'clang'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -266,12 +248,12 @@ jobs:
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
-        run: sudo ansible-playbook -i hosts qt5.yml --extra-vars "install_qtwebkit=true"
+        run: sudo ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml --extra-vars "install_qtwebkit=true"
         if: matrix.pkg-mgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
-        run: ansible-playbook -i hosts qt5.yml
+        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
         if: matrix.pkg-mgr.mgr == 'homebrew'
 
       - name: Add qt5 qmake path for macports
