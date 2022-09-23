@@ -102,7 +102,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS install ansible and compilers
-        run: dnf install ansible dnf-plugins-core gcc g++ clang -y
+        run: dnf install ansible dnf-plugins-core gcc gcc-c++ clang -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
@@ -110,7 +110,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: OpenSUSE OS install ansible and compilers
-        run: zypper install -y ansible tar gzip gcc g++ clang
+        run: zypper install -y ansible tar gzip gcc gcc-c++ clang
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: ArchLinux OS update
@@ -118,7 +118,7 @@ jobs:
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: ArchLinux OS install ansible and compilers
-        run: pacman --noconfirm -Sy ansible gcc g++ clang
+        run: pacman --noconfirm -Sy ansible gcc clang
         if: env.OS_RELEASE_ID == 'arch'
 
       - name: Checkout MythTV/ansible repo
