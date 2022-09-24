@@ -1,5 +1,5 @@
 ---
-name: Build MythTV many variants
+name: Build MythTV all variants
 
 on:
   workflow_run:

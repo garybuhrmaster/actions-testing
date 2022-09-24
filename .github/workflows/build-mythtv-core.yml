@@ -20,9 +20,10 @@ jobs:
   # current and current-1.  This provides good coverage
   # quickly in at least some use cases.
   #
-  # If the github cache has not been flushed, this
-  # job should run in about 10 minutes.  If it has
-  # been flushed it may take around an hour to run.
+  # If the github cache (used for the compiler ccache)
+  # has not been flushed, this job should run in about
+  # 10 minutes.  If it has been flushed it may take
+  # around an hour to run.
   #
   build-mythtv-linux:
     name: Building MythTV on ${{ matrix.container.desc }} 
