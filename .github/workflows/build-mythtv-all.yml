@@ -1,5 +1,5 @@
 ---
-name: Build MythTV
+name: Build MythTV many variants
 
 on:
   workflow_run:
@@ -25,6 +25,12 @@ jobs:
   #
   # We test both the master and the current fixes branches,
   # as there can be divergence in their requirements.
+  #
+  # This set of jobs takes a number of hours, as due
+  # to the number of variants the github cache (used
+  # for the compiler ccache) is not available, and
+  # because one cannot run more than 20 jobs per repo
+  # for the free service. 
   #
   build-mythtv-linux:
     name: Building ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
@@ -292,5 +298,4 @@ jobs:
       - name: Install plugins
         working-directory: mythtv/mythplugins
         run: make install
-
 

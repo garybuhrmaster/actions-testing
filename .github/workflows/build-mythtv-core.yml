@@ -18,10 +18,14 @@ jobs:
   # MythTV project lists of supported variants (which
   # are Ubuntu LTS and current, Debian stable, and Fedora
   # current and current-1.  This provides good coverage
-  # quickly.
+  # quickly in at least some use cases.
+  #
+  # If the github cache has not been flushed, this
+  # job should run in about 10 minutes.  If it has
+  # been flushed it may take around an hour to run.
   #
   build-mythtv-linux:
-    name: Building MythTV on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
+    name: Building MythTV on ${{ matrix.container.desc }} 
 
     runs-on: ubuntu-latest
 
@@ -43,10 +47,6 @@ jobs:
           - { image: 'fedora:35',                      desc: 'Fedora 35',                            ansibleopts: '--limit localhost' }
           - { image: 'fedora:36',                      desc: 'Fedora 36',                            ansibleopts: '--limit localhost' }
           - { image: 'fedora:37',                      desc: 'Fedora 37',                            ansibleopts: '--limit localhost' }
-
-        compiler:
-          - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
       fail-fast: false
 
@@ -74,10 +74,10 @@ jobs:
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Debian/Ubuntu OS install ansible and compilers
+      - name: Debian/Ubuntu OS install ansible
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ansible apt-utils gcc g++ clang -y
+        run: apt install ansible apt-utils -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux (for ansible)
@@ -88,8 +88,8 @@ jobs:
         run: dnf upgrade -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
-      - name: Redhat/Fedora OS install ansible and compilers
-        run: dnf install ansible dnf-plugins-core gcc gcc-c++ clang -y
+      - name: Redhat/Fedora OS install ansible
+        run: dnf install ansible dnf-plugins-core -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Checkout MythTV/ansible repo
@@ -130,7 +130,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }}
 
       - name: Make core
         working-directory: mythtv/mythtv
