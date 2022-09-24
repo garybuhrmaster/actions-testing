@@ -4,11 +4,11 @@ name: Run ansible-playbook
   #
   # This workflow tests that ansible can successfully run
   # on linux (macos ansible with macports is extremely
-  # slow to install and run, and freebsd running in a
-  # macos vm is extremely fragile, so we defer to the
-  # full build workflow for macos).  As most churn in
-  # this repo tends to happen in the linux ecosystem this
-  # provides a quick check for the most common cases.
+  # slow to install and run ansible, and freebsd running
+  # in a macos vm is extremely fragile, so we defer to
+  # the full build workflow for macos).  As most churn
+  # in this repo tends to happen in the linux ecosystem
+  # this provides a quick check for the most common cases.
   #
   # The containers are selected to be from the set of
   # linux distributions and versions that are currently
