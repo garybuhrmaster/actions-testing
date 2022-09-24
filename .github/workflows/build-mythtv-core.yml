@@ -73,10 +73,10 @@ jobs:
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Debian/Ubuntu OS install ansible
+      - name: Debian/Ubuntu OS install ansible and compilers
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ansible apt-utils -y
+        run: apt install ansible apt-utils gcc g++ clang -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux (for ansible)
