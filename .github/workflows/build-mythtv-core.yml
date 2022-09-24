@@ -1,10 +1,11 @@
 ---
-name: Build MythTV
+name: Build MythTV core variants
 
 on:
-  push:
-
-  pull_request:
+  workflow_run:
+    workflows: ["Run ansible-playbook"]
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -45,7 +46,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
       fail-fast: false
 
@@ -94,8 +95,7 @@ jobs:
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
         with:
-          repository: MythTV/ansible
-          ref: master
+          ref: ${{ github.event.workflow_run.head_branch }}
           path: ansible
 
       - name: Run ansible to install build requirements
@@ -130,7 +130,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.compiler.compileropts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
