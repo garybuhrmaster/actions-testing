@@ -1,16 +1,6 @@
 ---
 name: Build MythTV all variants
 
-on:
-  workflow_run:
-    workflows: ["Build MythTV core variants"]
-    types:
-      - completed
-
-permissions:
-  contents: read
-
-jobs:
   #
   # This workflow attempts to compile MythTV across a large
   # set of variants (including non-core ones).
@@ -24,7 +14,8 @@ jobs:
   # not use it for this workflow.
   #
   # We test both the master and the current fixes branches,
-  # as there can be divergence in their requirements.
+  # as there can be divergence in their requirements.  We
+  # also test both gcc and clang as the compiler.
   #
   # This set of jobs takes a number of hours, as due
   # to the number of variants the github cache (used
@@ -32,6 +23,17 @@ jobs:
   # because one cannot run more than 20 jobs per repo
   # for the free service. 
   #
+
+on:
+  workflow_run:
+    workflows: ["Build MythTV core variants"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
   build-mythtv-linux:
     name: Building ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} with ${{ matrix.compiler.desc }} 
 

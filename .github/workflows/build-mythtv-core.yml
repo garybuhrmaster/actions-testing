@@ -1,6 +1,23 @@
 ---
 name: Build MythTV core variants
 
+  #
+  # This workflow is intended to provide good coverage
+  # quickly to insure that the build "basicall" works.
+  #
+  # The containers are selected to be from the set of
+  # linux distributions and versions that are currently
+  # among the list (or will soon be for beta/rc) of the
+  # MythTV project lists of supported variants (which
+  # are Ubuntu LTS and current, Debian stable, and Fedora
+  # current and current-1.
+  #
+  # If the github cache (used for the compiler ccache)
+  # has not been flushed, this job should run in about
+  # 10 minutes.  If it has been flushed it may take
+  # around an hour to run.
+  #
+
 on:
   workflow_run:
     workflows: ["Run ansible-playbook"]
@@ -11,20 +28,6 @@ permissions:
   contents: read
 
 jobs:
-  #
-  # The containers are selected to be from the set of
-  # linux distributions and versions that are currently
-  # among the list (or will soon be for beta/rc) of the
-  # MythTV project lists of supported variants (which
-  # are Ubuntu LTS and current, Debian stable, and Fedora
-  # current and current-1.  This provides good coverage
-  # quickly in at least some use cases.
-  #
-  # If the github cache (used for the compiler ccache)
-  # has not been flushed, this job should run in about
-  # 10 minutes.  If it has been flushed it may take
-  # around an hour to run.
-  #
   build-mythtv-linux:
     name: Building MythTV on ${{ matrix.container.desc }} 
 

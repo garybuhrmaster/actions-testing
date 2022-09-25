@@ -13,10 +13,9 @@ name: Run ansible-playbook
   # The containers are selected to be from the set of
   # linux distributions and versions that are currently
   # among the list (or will soon be for beta/rc) of the
-  # MythTV project lists of supported variants that are
-  # targeted to be able to run the current fixes and
-  # master branches of MythTV.
+  # supported variants for ansible.
   #
+  # Typically this takes less than 10 minutes to run.
 
 on:
   push:
