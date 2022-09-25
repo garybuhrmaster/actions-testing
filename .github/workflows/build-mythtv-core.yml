@@ -120,8 +120,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.ccache
-          key: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache-${{ github.sha }}
-          restore-keys: ${{ matrix.container.image }}-${{ matrix.compiler.cc }}-ccache
+          key: ${{ matrix.container.image }}-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.container.image }}-ccache
 
       - name: ccache statistics [pre]
         run: ccache -sV
