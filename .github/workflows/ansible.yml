@@ -16,6 +16,7 @@ name: Run ansible-playbook
   # supported variants for ansible.
   #
   # Typically this takes less than 10 minutes to run.
+  #
 
 on:
   push:
