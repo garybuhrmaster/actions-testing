@@ -37,6 +37,9 @@ jobs:
       TZ: Etc/UTC
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
       MYTHTV_CONFIG_EXTRA:
+      CCACHE_DIR: $HOME/.ccache
+      CCACHE_COMPRESS: true
+      CCACHE_MAXSIZE: 1G
 
     strategy:
       matrix:
@@ -113,9 +116,6 @@ jobs:
           ref: master
           path: mythtv
 
-      - name: set ccache directory
-        run: echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-
       - name: Checkout ccache
         uses: actions/cache@v3
         with:
@@ -124,13 +124,7 @@ jobs:
           restore-keys: ${{ matrix.container.image }}-ccache
 
       - name: ccache statistics [pre]
-        run: ccache -sV
-
-      - name: ccache limit total size
-        # Needed because github limits the total size of all
-        # caches to 10G, and with all of the distro variants
-        # we are building on one can end up exceeding that.
-        run: ccache -M 1400M
+        run: ccache -s
 
       - name: Configure core
         working-directory: mythtv/mythtv
@@ -157,5 +151,5 @@ jobs:
         run: make install
 
       - name: ccache statistics [post]
-        run: ccache -sV
+        run: ccache -s
 
