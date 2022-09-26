@@ -14,14 +14,19 @@ name: Build MythTV all variants
   # not use it for this workflow.
   #
   # We test both the master and the current fixes branches,
-  # as there can be divergence in their requirements.  We
-  # also test both gcc and clang as the compiler.
+  # as there can be divergence in their requirements.
   #
   # This set of jobs takes a number of hours, as due
   # to the number of variants the github cache (used
   # for the compiler ccache) is not available, and
   # because one cannot run more than 20 jobs per repo
-  # for the free service. 
+  # for the free github workflow service.
+  #
+  # We currently have commented out compiling with
+  # clang, as the project standard is currently gcc.
+  # However, for better coverage, clang can be
+  # enabled (which means this workflow will take
+  # even longer to run).
   #
 
 on:
@@ -61,6 +66,9 @@ jobs:
 
           - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      ansibleopts: '--limit localhost' }
           - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      ansibleopts: '--limit localhost' }
+
+          - { image: 'rockylinux:8',                   desc: 'Rocky Linux 8',                        ansibleopts: '--limit localhost' }
+          - { image: 'rockylinux:9',                   desc: 'Rocky Linux 9',                        ansibleopts: '--limit localhost' }
           
           - { image: 'opensuse/tumbleweed:latest',     desc: 'openSUSE Tumbleweed',                  ansibleopts: '--limit localhost' }
           - { image: 'opensuse/leap:latest',           desc: 'openSUSE Leap',                        ansibleopts: '--limit localhost' }
@@ -69,7 +77,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
@@ -202,7 +210,7 @@ jobs:
 
         compiler:
           - { cc: 'gcc',   cxx: 'g++',                 desc: 'gcc',                                  compileropts: '--cc=gcc --cxx=g++' }
-          - { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
+          # { cc: 'clang', cxx: 'clang++',             desc: 'clang',                                compileropts: '--cc=clang --cxx=clang++' }
 
         branch:
           - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
