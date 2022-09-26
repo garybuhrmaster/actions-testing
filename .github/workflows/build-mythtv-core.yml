@@ -130,7 +130,7 @@ jobs:
         # Needed because github limits the total size of all
         # caches to 10G, and with all of the distro variants
         # we are building on one can end up exceeding that.
-        run: ccache -M 1200M
+        run: ccache -M 1400M
 
       - name: Configure core
         working-directory: mythtv/mythtv
