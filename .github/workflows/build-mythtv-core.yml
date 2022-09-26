@@ -39,7 +39,7 @@ jobs:
       MYTHTV_CONFIG_EXTRA:
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
-      CCACHE_MAXSIZE: 1G
+      CCACHE_MAXSIZE: 1200M
 
     strategy:
       matrix:
