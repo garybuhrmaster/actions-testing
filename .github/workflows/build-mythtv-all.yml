@@ -337,7 +337,7 @@ jobs:
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
-          repository: MythTV/mythtv
+          repository: ${{ matrix.branch.repository }}
           ref: ${{ matrix.branch.ref }}
           path: mythtv
 
