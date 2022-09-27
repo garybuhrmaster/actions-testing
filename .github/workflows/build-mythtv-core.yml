@@ -87,7 +87,8 @@ jobs:
           - desc: 'MythTV master'
             repository: 'MythTV/mythtv'
             ref: 'master'
-            branchopts: ''
+            ansibleopts: ''
+            configureopts: ''
 
       fail-fast: false
 
@@ -141,7 +142,7 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.container.ansibleopts }} ${{ matrix.branch.ansibleopts }} mythtv.yml
 
       - name: Checkout Mythtv/mythtv repository
         uses: actions/checkout@v3
@@ -162,7 +163,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.container.configureopts }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.container.configureopts }} ${{ matrix.branch.configureopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv

@@ -129,11 +129,13 @@ jobs:
           - desc: 'MythTV master'
             repository: 'MythTV/mythtv'
             ref: 'master'
-            branchopts: ''
+            ansibleopts: ''
+            configureopts: ''
           - desc: 'MythTV fixes/32'
             repository: 'MythTV/mythtv'
             ref: 'fixes/32'
-            branchopts: ''
+            ansibleopts: ''
+            configureopts: ''
 
       fail-fast: false
 
@@ -203,7 +205,7 @@ jobs:
 
       - name: Run ansible to install build requirements
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.container.ansibleopts }} ${{ matrix.branch.ansibleopts }} mythtv.yml
 
       - name: OpenSUSE OS remove valgrind-devel (fix for broken MythTV compilation)
         run: rpm --erase --nodeps valgrind-devel
@@ -218,7 +220,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.container.configureopts }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.container.configureopts }} ${{ matrix.branch.configureopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -255,30 +257,36 @@ jobs:
           - desc: 'macOS 11 (Big Sur)'
             os: 'macos-11'
             ansibleopts: '--limit localhost'
+            configureopts: ''
             portspkg: '11-BigSur'
           - desc: 'macOS 12 (Monterey)'
             os: 'macos-12'
             ansibleopts: '--limit localhost'
+            configureopts: ''
             portspkg: '12-Monterey'
 
         pkgmgr:
           - desc: 'macports'
             mgr: 'macports'
-            pkgmgropts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/lib"'
+            ansibleopts: ''
+            configureopts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/lib"'
           ## Homebrew ansible tasks are still a work in progress
           # desc: 'homebrew'
           # mgr: 'homebrew'
-          # pkgmgropts: '--extra-cflags="-I/usr/local/include" --extra-cxxflags="-I/usr/local/include" --extra-ldflags="-L/usr/local/lib"'
+          # ansibleopts: ''
+          # configureopts: '--extra-cflags="-I/usr/local/include" --extra-cxxflags="-I/usr/local/include" --extra-ldflags="-L/usr/local/lib"'
 
         branch:
           - desc: 'MythTV master'
             repository: 'MythTV/mythtv'
             ref: 'master'
-            branchopts: ''
+            ansibleopts: ''
+            configureopts: ''
           - desc: 'MythTV fixes/32'
             repository: 'MythTV/mythtv'
             ref: 'fixes/32'
-            branchopts: ''
+            ansibleopts: ''
+            configureopts: ''
 
       fail-fast: false
 
@@ -318,12 +326,12 @@ jobs:
 
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
-        run: sudo ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml --extra-vars "install_qtwebkit=true"
+        run: sudo ansible-playbook ${{ matrix.macOS.ansibleopts }} ${{ matrix.pkgmgr.ansibleopts }} ${{ matrix.branch.ansibleopts }} mythtv.yml
         if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
-        run: ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml
+        run: ansible-playbook ${{ matrix.macOS.ansibleopts }} ${{ matrix.pkgmgr.ansibleopts }} ${{ matrix.branch.ansibleopts }} mythtv.yml
         if: matrix.pkgmgr.mgr == 'homebrew'
 
       - name: Add qt5 qmake path for macports
@@ -343,7 +351,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.pkgmgr.pkgmgropts }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.macOS.configureopts }} ${{ matrix.pkgmgr.configureopts }} ${{ matrix.branch.configureopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
