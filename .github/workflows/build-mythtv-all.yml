@@ -264,11 +264,11 @@ jobs:
         pkgmgr:
           - desc: 'macports'
             mgr: 'macports'
-            pkgmgropts: "--extra-cxxflags='-I/opt/local/include' --extra-ldflags='-L/opt/local/lib'"
+            pkgmgropts: '--extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/lib"'
           ## Homebrew ansible tasks are still a work in progress
           # desc: 'homebrew'
           # mgr: 'homebrew'
-          # pkgmgropts: "--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib'"
+          # pkgmgropts: '--extra-cxxflags="-I/usr/local/include" --extra-ldflags="-L/usr/local/lib"'
 
         branch:
           - desc: 'MythTV master'
@@ -287,14 +287,14 @@ jobs:
     steps:
       - name: Uninstall homebrew if using macports (package conflicts)
         run: /bin/bash -c "$(NONINTERACTIVE=1 curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
-        if: matrix.pkg-mgr.mgr == 'macports'
+        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Install macports if using macports
         run: |
           curl --location https://github.com/macports/macports-base/releases/download/v${{ env.MACPORTS_VERSION }}/MacPorts-${{ env.MACPORTS_VERSION }}-${{ matrix.macOS.portspkg }}.pkg --output MacPorts.pkg
           sudo installer -pkg ./MacPorts.pkg -target /
           echo "PATH=/opt/local/bin:/opt/local/sbin:$PATH" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'macports'
+        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Adjust path for homebrew
         run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
