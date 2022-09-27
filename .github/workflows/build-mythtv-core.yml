@@ -82,10 +82,6 @@ jobs:
             image: 'fedora:37'
             ansibleopts: '--limit localhost'
             configureopts: ''
-          - desc: 'Fedora Rawhide'
-            image: 'fedora:rawhide'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
 
         branch:
           - desc: 'MythTV master'
