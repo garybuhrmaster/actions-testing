@@ -1,29 +1,29 @@
 ---
 name: Build MythTV all variants
 
-  #
-  # This workflow attempts to compile MythTV across a large
-  # set of variants (including non-core ones).
-  #
-  # Note that in theory we should use github cache for ccache
-  # in order to (substantially) improve build time, but as
-  # github limits the total size of cache files to 10GB,
-  # and for MythTV ccache to be useful it needs to be rather
-  # large, and we are building a lot of variants, the github
-  # cache ends up being too small to be helpful, so we do
-  # not use it for this workflow.
-  #
-  # We test both the master and the current fixes branches,
-  # as there can be divergence in their requirements.
-  #
-  # This set of jobs takes a number of hours, as due
-  # to the number of variants the github cache (used
-  # for the compiler ccache) is not available, and
-  # because one cannot run more than 20 jobs per repo
-  # for the free github workflow service.
-  #
+#
+# This workflow attempts to compile MythTV across a large
+# set of variants (including non-core ones).
+#
+# Note that in theory we should use github cache for ccache
+# in order to (substantially) improve build time, but as
+# github limits the total size of cache files to 10GB,
+# and for MythTV ccache to be useful it needs to be rather
+# large, and we are building a lot of variants, the github
+# cache ends up being too small to be helpful, so we do
+# not use it for this workflow.
+#
+# We test both the master and the current fixes branches,
+# as there can be divergence in their requirements.
+#
+# This set of jobs takes a number of hours, as due
+# to the number of variants the github cache (used
+# for the compiler ccache) is not available, and
+# because one cannot run more than 20 jobs per repo
+# for the free github workflow service.
+#
 
-on:
+on:                # yamllint disable-line rule:truthy
   workflow_run:
     workflows: ["Build MythTV core variants"]
     types:
@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   build-mythtv-linux:
-    name: Building MythTV ${{ matrix.branch.desc }} on ${{ matrix.container.desc }} 
+    name: Building MythTV ${{ matrix.branch.desc }} on ${{ matrix.container.desc }}
 
     runs-on: ubuntu-latest
 
@@ -42,36 +42,98 @@ jobs:
       TZ: Etc/UTC
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
       MYTHTV_CONFIG_EXTRA:
+      MYTHTV_REPO: MythTV/mythtv
 
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       ansibleopts: '--limit localhost' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   ansibleopts: '--limit localhost' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          ansibleopts: '--limit localhost' }
+          # Ubuntu group
+          - desc: 'Ubuntu 20.04 LTS (Focal Fossa)'
+            image: 'ubuntu:20.04'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)'
+            image: 'ubuntu:22.04'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Ubuntu 22.10 (Kinetic Kudu)'
+            image: 'ubuntu:22.10'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 ansibleopts: '--limit localhost' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 ansibleopts: '--limit localhost' }
+          # Debian group
+          - desc: 'Debian 11 (Bullseye)'
+            image: 'debian:bullseye'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Debian 12 (Bookworm)'
+            image: 'debian:bookworm'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       ansibleopts: '--limit localhost' }
+          # Fedora group
+          - desc: 'Fedora 35'
+            image: 'fedora:35'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Fedora 36'
+            image: 'fedora:36'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Fedora 37'
+            image: 'fedora:37'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Fedora Rawhide'
+            image: 'fedora:rawhide'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      ansibleopts: '--limit localhost' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      ansibleopts: '--limit localhost' }
+          # CentOS group
+          - desc: 'CentOS 8 Stream'
+            image: 'quay.io/centos/centos:stream8'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'CentOS 9 Stream'
+            image: 'quay.io/centos/centos:stream9'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
-          - { image: 'rockylinux:8',                   desc: 'Rocky Linux 8',                        ansibleopts: '--limit localhost' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky Linux 9',                        ansibleopts: '--limit localhost' }
-          
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'openSUSE Tumbleweed',                  ansibleopts: '--limit localhost' }
-          - { image: 'opensuse/leap:latest',           desc: 'openSUSE Leap',                        ansibleopts: '--limit localhost' }
+          # Rocky Linux group
+          - desc: 'Rocky Linux 8'
+            image: 'rockylinux:8'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'Rocky Linux 9'
+            image: 'rockylinux:9'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
-          - { image: 'archlinux:latest',               desc: 'Arch Linux',                           ansibleopts: '--limit localhost' }
+          # openSUSE group
+          - desc: 'openSUSE Tumbleweed'
+            image: 'opensuse/tumbleweed:latest'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+          - desc: 'openSUSE Leap'
+            image: 'opensuse/leap:latest'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
+
+          # Arch Linux group
+          - desc: 'Arch Linux'
+            image: 'archlinux:latest'
+            ansibleopts: '--limit localhost'
+            configureopts: ''
 
         branch:
-          - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32',                      branchopts: '' }
+          - desc: 'MythTV master'
+            repository: 'MythTV/mythtv'
+            ref: 'master'
+            branchopts: ''
+          - desc: 'MythTV fixes/32'
+            repository: 'MythTV/mythtv'
+            ref: 'fixes/32'
+            branchopts: ''
 
       fail-fast: false
 
@@ -150,13 +212,13 @@ jobs:
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
         with:
-          repository: MythTV/mythtv
+          repository: ${{ matrix.branch.repository }}
           ref: ${{ matrix.branch.ref }}
           path: mythtv
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.container.configureopts }} ${{ matrix.branch.branchopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -179,7 +241,7 @@ jobs:
         run: make install
 
   build-mythtv-macOS:
-    name: Building MythTV ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }} using ${{ matrix.pkg-mgr.desc }}
+    name: Building MythTV ${{ matrix.branch.desc }} on ${{ matrix.macOS.desc }} using ${{ matrix.pkgmgr.desc }}
 
     env:
       MACPORTS_VERSION: 2.7.2
@@ -190,17 +252,33 @@ jobs:
     strategy:
       matrix:
         macOS:
-          - { os: 'macos-11',                          desc: 'macOS 11 (Big Sur)',                  ansibleopts: '--limit localhost',                 portspkg: '11-BigSur'}
-          - { os: 'macos-12',                          desc: 'macOS 12 (Monterey)',                 ansibleopts: '--limit localhost',                 portspkg: '12-Monterey' }
+          - desc: 'macOS 11 (Big Sur)'
+            os: 'macos-11'
+            ansibleopts: '--limit localhost'
+            portspkg: '11-BigSur'
+          - desc: 'macOS 12 (Monterey)'
+            os: 'macos-12'
+            ansibleopts: '--limit localhost'
+            portspkg: '12-Monterey'
 
-        pkg-mgr:
-          - { mgr: 'macports',                         desc: 'macports' }
+        pkgmgr:
+          - desc: 'macports'
+            mgr: 'macports'
+            pkgmgropts: "--extra-cxxflags='-I/opt/local/include' --extra-ldflags='-L/opt/local/lib'"
           ## Homebrew ansible tasks are still a work in progress
-          # { mgr: 'homebrew',                         desc: 'homebrew' }
+          # desc: 'homebrew'
+          # mgr: 'homebrew'
+          # pkgmgropts: "--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib'"
 
         branch:
-          - { ref: 'master',                           desc: 'MythTV master',                        branchopts: '' }
-          - { ref: 'fixes/32',                         desc: 'MythTV fixes/32',                      branchopts: '' }
+          - desc: 'MythTV master'
+            repository: 'MythTV/mythtv'
+            ref: 'master'
+            branchopts: ''
+          - desc: 'MythTV fixes/32'
+            repository: 'MythTV/mythtv'
+            ref: 'fixes/32'
+            branchopts: ''
 
       fail-fast: false
 
@@ -220,17 +298,17 @@ jobs:
 
       - name: Adjust path for homebrew
         run: echo "PATH=/usr/local/bin:/usr/local/sbin:$PATH" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'homebrew'
+        if: matrix.pkgmgr.mgr == 'homebrew'
 
       - name: Install ansible for macports
         run: |
           sudo port install py310-ansible
           sudo port select --set ansible py310-ansible
-        if: matrix.pkg-mgr.mgr == 'macports'
+        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Install ansible for homebrew
         run: brew install ansible
-        if: matrix.pkg-mgr.mgr == 'homebrew'
+        if: matrix.pkgmgr.mgr == 'homebrew'
 
       - name: Checkout MythTV/ansible repo
         uses: actions/checkout@v3
@@ -241,28 +319,20 @@ jobs:
       - name: Run ansible to install build requirements for macports
         working-directory: ansible
         run: sudo ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml --extra-vars "install_qtwebkit=true"
-        if: matrix.pkg-mgr.mgr == 'macports'
+        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Run ansible to install build requirements for homebrew
         working-directory: ansible
         run: ansible-playbook ${{ matrix.macOS.ansibleopts }} mythtv.yml
-        if: matrix.pkg-mgr.mgr == 'homebrew'
+        if: matrix.pkgmgr.mgr == 'homebrew'
 
       - name: Add qt5 qmake path for macports
         run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'macports'
-
-      - name: Add extra flags for macports
-        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/opt/local/include' --extra-ldflags='-L/opt/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'macports'
+        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Force qt5 for homebrew
         run: brew link qt5 --force
-        if: matrix.pkg-mgr.mgr == 'homebrew'
-
-      - name: Add extra flags for homebrew
-        run: echo "MYTHTV_CONFIG_EXTRA=--extra-cxxflags='-I/usr/local/include' --extra-ldflags='-L/usr/local/lib' $MYTHTV_CONFIG_EXTRA" >> $GITHUB_ENV
-        if: matrix.pkg-mgr.mgr == 'homebrew'
+        if: matrix.pkgmgr.mgr == 'homebrew'
 
       - name: Checkout Mythtv/mythtv
         uses: actions/checkout@v3
@@ -273,7 +343,7 @@ jobs:
 
       - name: Configure core
         working-directory: mythtv/mythtv
-        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.branch.branchopts }}
+        run: ./configure --prefix=${{ env.MYTHTV_CONFIG_PREFIX }} ${{ env.MYTHTV_CONFIG_EXTRA }} ${{ matrix.pgkmgr.pkgmgropts }} ${{ matrix.branch.branchopts }}
 
       - name: Make core
         working-directory: mythtv/mythtv
@@ -294,4 +364,3 @@ jobs:
       - name: Install plugins
         working-directory: mythtv/mythplugins
         run: make install
-

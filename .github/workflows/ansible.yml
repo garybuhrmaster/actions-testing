@@ -1,24 +1,24 @@
 ---
 name: Run ansible-playbook
 
-  #
-  # This workflow tests that ansible can successfully run
-  # on linux (macos ansible with macports is extremely
-  # slow to install and run ansible, and freebsd running
-  # in a macos vm is extremely fragile, so we defer to
-  # the full build workflow for macos).  As most churn
-  # in this repo tends to happen in the linux ecosystem
-  # this provides a quick check for the most common cases.
-  #
-  # The containers are selected to be from the set of
-  # linux distributions and versions that are currently
-  # among the list (or will soon be for beta/rc) of the
-  # supported variants for ansible.
-  #
-  # Typically this takes less than 10 minutes to run.
-  #
+#
+# This workflow tests that ansible can successfully run
+# on linux (macos ansible with macports is extremely
+# slow to install and run ansible, and freebsd running
+# in a macos vm is extremely fragile, so we defer to
+# the full build workflow for macos).  As most churn
+# in this repo tends to happen in the linux ecosystem
+# this provides a quick check for the most common cases.
+#
+# The containers are selected to be from the set of
+# linux distributions and versions that are currently
+# among the list (or will soon be for beta/rc) of the
+# supported variants for ansible.
+#
+# Typically this takes less than 10 minutes to run.
+#
 
-on:
+on:                # yamllint disable-line rule:truthy
   push:
 
   pull_request:
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   ansible-linux:
-    name: Running ansible-playbook on ${{ matrix.container.desc }} 
+    name: Running ansible-playbook on ${{ matrix.container.desc }}
 
     runs-on: ubuntu-latest
 
@@ -38,28 +38,67 @@ jobs:
     strategy:
       matrix:
         container:
-          - { image: 'ubuntu:20.04',                   desc: 'Ubuntu 20.04 LTS (Focal Fossa)',       ansibleopts: '--limit localhost' }
-          - { image: 'ubuntu:22.04',                   desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)',   ansibleopts: '--limit localhost' }
-          - { image: 'ubuntu:22.10',                   desc: 'Ubuntu 22.10 (Kinetic Kudu)',          ansibleopts: '--limit localhost' }
+          # Ubuntu group
+          - desc: 'Ubuntu 20.04 LTS (Focal Fossa)'
+            image: 'ubuntu:20.04'
+            ansibleopts: '--limit localhost'
+          - desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)'
+            image: 'ubuntu:22.04'
+            ansibleopts: '--limit localhost'
+          - desc: 'Ubuntu 22.10 (Kinetic Kudu)'
+            image: 'ubuntu:22.10'
+            ansibleopts: '--limit localhost'
 
-          - { image: 'debian:bullseye',                desc: 'Debian 11 (Bullseye)',                 ansibleopts: '--limit localhost' }
-          - { image: 'debian:bookworm',                desc: 'Debian 12 (Bookworm)',                 ansibleopts: '--limit localhost' }
+          # Debian group
+          - desc: 'Debian 11 (Bullseye)'
+            image: 'debian:bullseye'
+            ansibleopts: '--limit localhost'
+          - desc: 'Debian 12 (Bookworm)'
+            image: 'debian:bookworm'
+            ansibleopts: '--limit localhost'
 
-          - { image: 'fedora:35',                      desc: 'Fedora 35',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:36',                      desc: 'Fedora 36',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:37',                      desc: 'Fedora 37',                            ansibleopts: '--limit localhost' }
-          - { image: 'fedora:rawhide',                 desc: 'Fedora Rawhide',                       ansibleopts: '--limit localhost' }
+          # Fedora group
+          - desc: 'Fedora 35'
+            image: 'fedora:35'
+            ansibleopts: '--limit localhost'
+          - desc: 'Fedora 36'
+            image: 'fedora:36'
+            ansibleopts: '--limit localhost'
+          - desc: 'Fedora 37'
+            image: 'fedora:37'
+            ansibleopts: '--limit localhost'
+          - desc: 'Fedora Rawhide'
+            image: 'fedora:rawhide'
+            ansibleopts: '--limit localhost'
 
-          - { image: 'quay.io/centos/centos:stream8',  desc: 'CentOS 8 Stream',                      ansibleopts: '--limit localhost' }
-          - { image: 'quay.io/centos/centos:stream9',  desc: 'CentOS 9 Stream',                      ansibleopts: '--limit localhost' }
-          
-          - { image: 'rockylinux:8',                   desc: 'Rocky Linux 8',                        ansibleopts: '--limit localhost' }
-          - { image: 'rockylinux:9',                   desc: 'Rocky Linux 9',                        ansibleopts: '--limit localhost' }
+          # CentOS group
+          - desc: 'CentOS 8 Stream'
+            image: 'quay.io/centos/centos:stream8'
+            ansibleopts: '--limit localhost'
+          - desc: 'CentOS 9 Stream'
+            image: 'quay.io/centos/centos:stream9'
+            ansibleopts: '--limit localhost'
 
-          - { image: 'opensuse/tumbleweed:latest',     desc: 'openSUSE Tumbleweed',                  ansibleopts: '--limit localhost' }
-          - { image: 'opensuse/leap:latest',           desc: 'openSUSE Leap',                        ansibleopts: '--limit localhost' }
+          # Rocky Linux group
+          - desc: 'Rocky Linux 8'
+            image: 'rockylinux:8'
+            ansibleopts: '--limit localhost'
+          - desc: 'Rocky Linux 9'
+            image: 'rockylinux:9'
+            ansibleopts: '--limit localhost'
 
-          - { image: 'archlinux:latest',               desc: 'Arch Linux',                           ansibleopts: '--limit localhost' }
+          # openSUSE group
+          - desc: 'openSUSE Tumbleweed'
+            image: 'opensuse/tumbleweed:latest'
+            ansibleopts: '--limit localhost'
+          - desc: 'openSUSE Leap'
+            image: 'opensuse/leap:latest'
+            ansibleopts: '--limit localhost'
+
+          # Arch Linux group
+          - desc: 'Arch Linux'
+            image: 'archlinux:latest'
+            ansibleopts: '--limit localhost'
 
       fail-fast: false
 
@@ -87,41 +126,41 @@ jobs:
           apt upgrade -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
-      - name: Debian/Ubuntu OS install ansible and compilers
+      - name: Debian/Ubuntu OS install ansible
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: apt install ansible apt-utils gcc g++ clang -y
+        run: apt install ansible apt-utils -y
         if: env.OS_RELEASE_ID == 'debian' || env.OS_RELEASE_ID == 'ubuntu'
 
       - name: Redhat OS - add EPEL repo for EL linux (for ansible)
-        run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{env.OS_RELEASE_VERSION_MAJOR}}.noarch.rpm
+        run: dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${{ env.OS_RELEASE_VERSION_MAJOR }}.noarch.rpm
         if: env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: Redhat/Fedora OS update
         run: dnf upgrade -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
-      - name: Redhat/Fedora OS install ansible and compilers
-        run: dnf install ansible dnf-plugins-core gcc gcc-c++ clang -y
+      - name: Redhat/Fedora OS install ansible
+        run: dnf install ansible dnf-plugins-core -y
         if: env.OS_RELEASE_ID == 'fedora' || env.OS_RELEASE_ID == 'centos' || env.OS_RELEASE_ID == 'rocky'
 
       - name: OpenSUSE OS update
         run: zypper update -y
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
-      - name: OpenSUSE OS install ansible and compilers
-        run: zypper install -y ansible tar gzip gcc gcc-c++ clang
+      - name: OpenSUSE OS install ansible
+        run: zypper install -y ansible tar gzip
         if: env.OS_RELEASE_ID == 'opensuse-leap' || env.OS_RELEASE_ID == 'opensuse-tumbleweed'
 
       - name: ArchLinux OS update
         run: pacman --noconfirm -Syu
         if: env.OS_RELEASE_ID == 'arch'
 
-      - name: ArchLinux OS install ansible and compilers
-        run: pacman --noconfirm -Sy ansible gcc clang
+      - name: ArchLinux OS install ansible
+        run: pacman --noconfirm -Sy ansible
         if: env.OS_RELEASE_ID == 'arch'
 
-      - name: Checkout MythTV/ansible repo
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
           path: ansible
@@ -129,4 +168,3 @@ jobs:
       - name: Run ansible to install build requirements
         working-directory: ansible
         run: ansible-playbook ${{ matrix.container.ansibleopts }} mythtv.yml
-
