@@ -45,6 +45,7 @@ jobs:
       MYTHTV_REPO: MythTV/mythtv
 
     strategy:
+      max-parallel: 10
       matrix:
         container:
           # Ubuntu group
@@ -252,6 +253,7 @@ jobs:
       MYTHTV_CONFIG_EXTRA:
 
     strategy:
+      max-parallel: 4
       matrix:
         macOS:
           - desc: 'macOS 11 (Big Sur)'
