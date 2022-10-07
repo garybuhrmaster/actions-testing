@@ -271,7 +271,7 @@ jobs:
           - desc: 'macports'
             mgr: 'macports'
             ansibleopts: ''
-            configureopts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/lib"'
+            configureopts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/libi" --qmake="/opt/local/libexec/qt5/bin/qmake"'
           ## Homebrew ansible tasks are still a work in progress
           # desc: 'homebrew'
           # mgr: 'homebrew'
@@ -335,10 +335,6 @@ jobs:
         working-directory: ansible
         run: ansible-playbook ${{ matrix.macOS.ansibleopts }} ${{ matrix.pkgmgr.ansibleopts }} ${{ matrix.branch.ansibleopts }} mythtv.yml
         if: matrix.pkgmgr.mgr == 'homebrew'
-
-      - name: Add qt5 qmake path for macports
-        run: echo "PATH=/opt/local/libexec/qt5/bin:$PATH" >> $GITHUB_ENV
-        if: matrix.pkgmgr.mgr == 'macports'
 
       - name: Force qt5 for homebrew
         run: brew link qt5 --force
