@@ -271,7 +271,7 @@ jobs:
           - desc: 'macports'
             mgr: 'macports'
             ansibleopts: ''
-            configureopts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/libi" --qmake="/opt/local/libexec/qt5/bin/qmake"'
+            configureopts: '--extra-cflags="-I/opt/local/include" --extra-cxxflags="-I/opt/local/include" --extra-ldflags="-L/opt/local/lib" --qmake="/opt/local/libexec/qt5/bin/qmake"'
           ## Homebrew ansible tasks are still a work in progress
           # desc: 'homebrew'
           # mgr: 'homebrew'
