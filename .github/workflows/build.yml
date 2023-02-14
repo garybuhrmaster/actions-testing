@@ -27,7 +27,7 @@ jobs:
       matrix:
         include:
           - container: ubuntu:16.04
-            name: Ubuntu 16.06 LTS (Xenial Xerus)
+            name: Ubuntu 16.04 LTS (Xenial Xerus)
           - container: ubuntu:18.04
             name: Ubuntu 18.04 LTS (Bionic Beaver)
           - container: ubuntu:20.04
