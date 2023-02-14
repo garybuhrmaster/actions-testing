@@ -79,10 +79,10 @@ jobs:
         if: |
           env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION == '7'
 
-      - name: Add dnf plugins for EL
+      - name: Add dnf plugins for recent EL
         run: ${{env.RPM_PKG_MGR}} install -y dnf-plugins-core
         if: |
-          env.OS_RELEASE_ID == 'centos'
+          env.OS_RELEASE_ID == 'centos' && env.RPM_PKG_MGR == 'dnf'
 
       - name: Add powertools repo for EL 8
         run: ${{env.RPM_PKG_MGR}} config-manager --set-enabled powertools
