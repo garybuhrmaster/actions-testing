@@ -54,6 +54,8 @@ jobs:
             name: Fedora 36
           - container: fedora:37
             name: Fedora 37
+          - container: fedora:38
+            name: Fedora 38
           - container: quay.io/centos/centos:centos7
             name: CentOS 7
           - container: quay.io/centos/centos:stream8
