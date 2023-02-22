@@ -17,6 +17,18 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Check perl version
+        run: perl -V
+
+      - name: uninstall existing strawberry perl
+        run: choco uninstall strawberryperl
+
+      - name: install 32-bit strawberry perl
+        run: choco install strawberryperl --x86
+
+      - name: Check perl version
+        run: perl -V
+
       - name: Insure Strawberry perl is first in path
         run: echo "PATH=C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin;$Env:Path" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         shell: powershell
