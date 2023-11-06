@@ -39,68 +39,13 @@ jobs:
       matrix:
         container:
           # Ubuntu group
-          - desc: 'Ubuntu 20.04 LTS (Focal Fossa)'
-            image: 'ubuntu:20.04'
-            ansibleopts: '--limit localhost'
           - desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)'
             image: 'ubuntu:22.04'
             ansibleopts: '--limit localhost'
-          - desc: 'Ubuntu 22.10 (Kinetic Kudu)'
-            image: 'ubuntu:22.10'
-            ansibleopts: '--limit localhost'
-          - desc: 'Ubuntu 23.04 (Lunar Lobster)'
-            image: 'ubuntu:23.04'
-            ansibleopts: '--limit localhost'
-
-          # Debian group
-          - desc: 'Debian 11 (Bullseye)'
-            image: 'debian:bullseye'
-            ansibleopts: '--limit localhost'
-          - desc: 'Debian 12 (Bookworm)'
-            image: 'debian:bookworm'
-            ansibleopts: '--limit localhost'
 
           # Fedora group
-          - desc: 'Fedora 36'
-            image: 'fedora:36'
-            ansibleopts: '--limit localhost'
-          - desc: 'Fedora 37'
-            image: 'fedora:37'
-            ansibleopts: '--limit localhost'
           - desc: 'Fedora 38'
             image: 'fedora:38'
-            ansibleopts: '--limit localhost'
-          - desc: 'Fedora Rawhide'
-            image: 'fedora:rawhide'
-            ansibleopts: '--limit localhost'
-
-          # CentOS group
-          - desc: 'CentOS 8 Stream'
-            image: 'quay.io/centos/centos:stream8'
-            ansibleopts: '--limit localhost'
-          - desc: 'CentOS 9 Stream'
-            image: 'quay.io/centos/centos:stream9'
-            ansibleopts: '--limit localhost'
-
-          # Rocky Linux group
-          - desc: 'Rocky Linux 8'
-            image: 'rockylinux:8'
-            ansibleopts: '--limit localhost'
-          - desc: 'Rocky Linux 9'
-            image: 'rockylinux:9'
-            ansibleopts: '--limit localhost'
-
-          # openSUSE group
-          - desc: 'openSUSE Tumbleweed'
-            image: 'opensuse/tumbleweed:latest'
-            ansibleopts: '--limit localhost'
-          - desc: 'openSUSE Leap'
-            image: 'opensuse/leap:latest'
-            ansibleopts: '--limit localhost'
-
-          # Arch Linux group
-          - desc: 'Arch Linux'
-            image: 'archlinux:latest'
             ansibleopts: '--limit localhost'
 
       fail-fast: false

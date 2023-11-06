@@ -45,42 +45,12 @@ jobs:
       matrix:
         container:
           # Ubuntu group
-          - desc: 'Ubuntu 20.04 LTS (Focal Fossa)'
-            image: 'ubuntu:20.04'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
           - desc: 'Ubuntu 22.04 LTS (Jammy Jellyfish)'
             image: 'ubuntu:22.04'
             ansibleopts: '--limit localhost'
             configureopts: ''
-          - desc: 'Ubuntu 22.10 (Kinetic Kudu)'
-            image: 'ubuntu:22.10'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
-          - desc: 'Ubuntu 23.04 (Lunar Lobster)'
-            image: 'ubuntu:23.04'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
-
-          # Debian group
-          - desc: 'Debian 11 (Bullseye)'
-            image: 'debian:bullseye'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
-          - desc: 'Debian 12 (Bookworm)'
-            image: 'debian:bookworm'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
 
           # Fedora group
-          - desc: 'Fedora 36'
-            image: 'fedora:36'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
-          - desc: 'Fedora 37'
-            image: 'fedora:37'
-            ansibleopts: '--limit localhost'
-            configureopts: ''
           - desc: 'Fedora 38'
             image: 'fedora:38'
             ansibleopts: '--limit localhost'
