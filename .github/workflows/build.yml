@@ -291,7 +291,7 @@ jobs:
 
       - name Checkout (legacy)
         uses: actions/checkout@v3
-        if: |
+        if: >
           ((( env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8)) ||
           (( env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR < 20)))
 
