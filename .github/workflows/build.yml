@@ -291,7 +291,7 @@ jobs:
 
       - name Checkout legacy
         uses: actions/checkout@v3
-        if: ${{ ( env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8 ) }}
+        if: env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8
 
       - name: Checkout
         uses: actions/checkout@v4
