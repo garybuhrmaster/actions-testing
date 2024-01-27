@@ -289,13 +289,17 @@ jobs:
         if: |
           env.OS_RELEASE_ID == 'alpine'
 
-      - name: Checkout legacy
+      - name: Checkout using legacy node version
         uses: actions/checkout@v3
         if: |
-          ( ( env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8 ) ||
-          ( env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR < 20 ) )
+          ( ( ( env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8 ) ||
+          ( env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR < 20 ) ) )
 
       - name: Checkout
         uses: actions/checkout@v4
+        if: |
+          ( ! ( ( env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8 ) ||
+          ( env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR < 20 ) ) )
+
 
 
