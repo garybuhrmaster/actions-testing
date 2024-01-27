@@ -289,7 +289,7 @@ jobs:
         if: |
           env.OS_RELEASE_ID == 'alpine'
 
-      - name Checkout (legacy)
+      - name Checkout 
         uses: actions/checkout@v3
         if: ${{ ((env.OS_RELEASE_ID == 'centos' && env.OS_RELEASE_VERSION_MAJOR < 8) || (env.OS_RELEASE_ID == 'ubuntu' && env.OS_RELEASE_VERSION_MAJOR < 20)) }}
 
