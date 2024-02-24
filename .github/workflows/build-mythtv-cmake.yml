@@ -132,15 +132,15 @@ jobs:
 
       - name: Configure Plugins
         working-directory: mythtv
-        run: ${{ ${{ matrix.container.plugins_configure_cmd }}
+        run: ${{ matrix.container.plugins_configure_cmd }}
         if: ${{ matrix.container.plugins_configure_cmd != '' }}
 
       - name: Build Plugins
         working-directory: mythtv
-        run: ${{ ${{ matrix.container.plugins_build_cmd }}
+        run: ${{ matrix.container.plugins_build_cmd }}
         if: ${{ matrix.container.plugins_build_cmd != '' }}
 
       - name: Install Plugins
         working-directory: mythtv
-        run: ${{ ${{ matrix.container.plugins_install_cmd }}
+        run: ${{ matrix.container.plugins_install_cmd }}
         if: ${{ matrix.container.plugins_install_cmd != '' }}
