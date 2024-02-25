@@ -51,11 +51,11 @@ jobs:
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
-            configure_cmd: 'cd mythtv && ./configure --compile-type=release --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-bdjava --enable-vulkan'
+            configure_cmd: 'cd mythtv && ./configure --compile-type=release --enable-debug=0 --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-bdjava --enable-vulkan'
             build_cmd: 'cd mythtv && make -j4 all_no_test'
             install_cmd: 'cd mythtv && make -j4 install'
             test_cmd: 'cd mythtv && make -j4 tests'
-            plugins_configure_cmd: 'cd mythplugings && ./configure'
+            plugins_configure_cmd: 'cd mythplugins && ./configure'
             plugins_build_cmd: 'cd mythplugins && make -j4'
             plugins_install_cmd: 'cd mythplugins && make -j4'
           # Fedora group
