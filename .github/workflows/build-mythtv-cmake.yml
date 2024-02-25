@@ -211,7 +211,8 @@ jobs:
       - name: Checkout Mythtv/mythtv repository
         uses: actions/checkout@v4
         with:
-          repository: MythTV/mythtv
+          repository: garybuhrmaster/mythtv
+          branch: FFNVCODEC
           path: mythtv
 
       - name: ccache statistics [pre]
