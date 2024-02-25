@@ -146,7 +146,7 @@ jobs:
             update_cmd: 'dnf upgrade -y'
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
-            install_extra_pkgs_cmd: 'dnf install ant nv-codec-headers -y'
+            install_extra_pkgs_cmd: 'dnf install ant -y'
             core_working_subdirectory: ''
             core_configure_cmd: 'cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/build/install'
             core_build_cmd: 'cmake --build build-qt5'
@@ -211,8 +211,7 @@ jobs:
       - name: Checkout Mythtv/mythtv repository
         uses: actions/checkout@v4
         with:
-          repository: garybuhrmaster/mythtv
-          ref: FFNVCODEC
+          repository: MythTV/mythtv
           path: mythtv
 
       - name: ccache statistics [pre]
