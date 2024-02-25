@@ -54,7 +54,7 @@ jobs:
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
-            configure_cmd: 'cmake --preset qt5'
+            configure_cmd: 'cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release'
             build_cmd: 'cmake --build build-qt5'
             install_cmd: ''
             test_cmd: ''
