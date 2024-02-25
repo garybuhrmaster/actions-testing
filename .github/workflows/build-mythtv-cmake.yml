@@ -68,6 +68,13 @@ jobs:
       image: ${{ matrix.container.image }}
 
     steps:
+      - name: Checkout ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ${{ matrix.container.desc }}-build-core-ccache-${{ github.sha }}
+          restore-keys: ${{ matrix.container.desc }}-build-core-ccache
+
       - name: Detect OS release
         run: |
           . /etc/os-release
@@ -112,6 +119,9 @@ jobs:
           repository: MythTV/mythtv
           path: mythtv
 
+      - name: ccache statistics [pre]
+        run: ccache -s
+
       - name: Configure
         working-directory: mythtv
         run: ${{ matrix.container.configure_cmd }}
@@ -146,3 +156,6 @@ jobs:
         working-directory: mythtv
         run: ${{ matrix.container.plugins_install_cmd }}
         if: ${{ matrix.container.plugins_install_cmd != '' }}
+
+      - name: ccache statistics [post]
+        run: ccache -s
