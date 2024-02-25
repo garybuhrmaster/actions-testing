@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 jobs:
-  build-mythtv-linux-cmake:
+  build-mythtv-linux:
     name: Building MythTV on ${{ matrix.container.desc }}
 
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'apt install ant default-jdk-headless -y'
             core_working_subdirectory: 'mythtv'
-            core_configure_cmd: './configure --compile-type=release --enable-debug=0 --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan --prefix=/tmp/mythtv/build/install'
+            core_configure_cmd: 'echo $HOME && ./configure --compile-type=release --enable-debug=0 --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan --prefix=/tmp/mythtv/build/install'
             core_build_cmd: 'make -j4 all_no_test'
             core_install_cmd: 'make -j4 install'
             core_test_cmd: 'make -j4 tests'
