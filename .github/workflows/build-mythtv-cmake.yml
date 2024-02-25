@@ -37,6 +37,7 @@ jobs:
     env:
       TZ: Etc/UTC
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
+      DCMAKE_INSTALL_PREFIX: ${{ github.workspace }}/build/install
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
       CCACHE_MAXSIZE: 900M
@@ -52,7 +53,7 @@ jobs:
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
-            configure_cmd: 'cmake --preset qt5 -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/build/install'
+            configure_cmd: 'cmake --preset qt5'
             build_cmd: 'cmake --build build-qt5'
             install_cmd: ''
             test_cmd: ''
