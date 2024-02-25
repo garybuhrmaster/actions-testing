@@ -37,7 +37,7 @@ jobs:
     env:
       TZ: Etc/UTC
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
-      DCMAKE_INSTALL_PREFIX: ${{ github.workspace }}/build/install
+      CMAKE_INSTALL_PREFIX: ${{ github.workspace }}/build/install
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
       CCACHE_MAXSIZE: 900M
