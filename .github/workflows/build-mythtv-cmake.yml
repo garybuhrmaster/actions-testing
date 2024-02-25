@@ -112,6 +112,7 @@ jobs:
 
           # Qt6, clang, and cmake alternative(s) group
           - desc: 'Fedora - Qt6'
+            image: 'quay.io/fedora/fedora:latest'
             update_cmd: 'dnf upgrade -y'
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost -e "qt6=true" mythtv.yml'
