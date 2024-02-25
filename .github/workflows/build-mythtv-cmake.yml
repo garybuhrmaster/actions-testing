@@ -38,7 +38,7 @@ jobs:
       TZ: Etc/UTC
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
-      CCACHE_MAXSIZE: 150M
+      CCACHE_MAXSIZE: 300M
       DEBIAN_FRONTEND: noninteractive
 
     strategy:
@@ -51,13 +51,15 @@ jobs:
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
-            configure_cmd: 'cd mythtv && ./configure --compile-type=release --enable-debug=0 --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-bdjava --enable-vulkan'
-            build_cmd: 'cd mythtv && make -j4 all_no_test'
-            install_cmd: 'cd mythtv && make -j4 install'
-            test_cmd: 'cd mythtv && make -j4 tests'
-            plugins_configure_cmd: 'cd mythplugins && ./configure'
-            plugins_build_cmd: 'cd mythplugins && make -j4'
-            plugins_install_cmd: 'cd mythplugins && make -j4'
+            core_working_subdirectory: 'mythtv'
+            core_configure_cmd: './configure --compile-type=release --enable-debug=0 --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-libx265 --enable-bdjava --enable-vulkan'
+            core_build_cmd: 'make -j4 all_no_test'
+            core_install_cmd: 'make -j4 install'
+            core_test_cmd: 'make -j4 tests'
+            plugins_working_subdirectory: 'mythplugins'
+            plugins_configure_cmd: './configure'
+            plugins_build_cmd: 'make -j4'
+            plugins_install_cmd: 'make -j4'
           # Fedora group
           - desc: 'Fedora - CMake Qt5'
             image: 'quay.io/fedora/fedora:latest'
@@ -65,10 +67,12 @@ jobs:
             install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
-            configure_cmd: 'cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release'
-            build_cmd: 'cmake --build build-qt5'
-            install_cmd: ''
-            test_cmd: ''
+            core_working_subdirectory: ''
+            core_configure_cmd: 'cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release'
+            core_build_cmd: 'cmake --build build-qt5'
+            core_install_cmd: ''
+            core_test_cmd: ''
+            plugins_working_subdirectory: ''
             plugins_configure_cmd: ''
             plugins_build_cmd: ''
             plugins_install_cmd: ''
@@ -134,37 +138,37 @@ jobs:
         run: ccache -s
 
       - name: Configure
-        working-directory: mythtv
-        run: ${{ matrix.container.configure_cmd }}
-        if: ${{ matrix.container.configure_cmd != '' }}
+        working-directory: mythtv/${{ matrix.container.core_working_subdirectory }}
+        run: ${{ matrix.container.core_configure_cmd }}
+        if: ${{ matrix.container.core_configure_cmd != '' }}
 
       - name: Build
-        working-directory: mythtv
-        run: ${{ matrix.container.build_cmd }}
-        if: ${{ matrix.container.build_cmd != '' }}
+        working-directory: mythtv/${{ matrix.container.core_working_subdirectory }}
+        run: ${{ matrix.container.core_build_cmd }}
+        if: ${{ matrix.container.core_build_cmd != '' }}
 
       - name: Install
-        working-directory: mythtv
-        run: ${{ matrix.container.install_cmd }}
-        if: ${{ matrix.container.install_cmd != '' }}
+        working-directory: mythtv/${{ matrix.container.core_working_subdirectory }}
+        run: ${{ matrix.container.core_install_cmd }}
+        if: ${{ matrix.container.core_install_cmd != '' }}
 
       - name: Test
-        working-directory: mythtv
-        run: ${{ matrix.container.test_cmd }}
-        if: ${{ matrix.container.test_cmd != '' }}
+        working-directory: mythtv/${{ matrix.container.core_working_subdirectory }}
+        run: ${{ matrix.container.core_test_cmd }}
+        if: ${{ matrix.container.core_test_cmd != '' }}
 
       - name: Configure Plugins
-        working-directory: mythtv
+        working-directory: mythtv/${{ matrix.container.plugins_working_subdirectory }}
         run: ${{ matrix.container.plugins_configure_cmd }}
         if: ${{ matrix.container.plugins_configure_cmd != '' }}
 
       - name: Build Plugins
-        working-directory: mythtv
+        working-directory: mythtv/${{ matrix.container.plugins_working_subdirectory }}
         run: ${{ matrix.container.plugins_build_cmd }}
         if: ${{ matrix.container.plugins_build_cmd != '' }}
 
       - name: Install Plugins
-        working-directory: mythtv
+        working-directory: mythtv/${{ matrix.container.plugins_working_subdirectory }}
         run: ${{ matrix.container.plugins_install_cmd }}
         if: ${{ matrix.container.plugins_install_cmd != '' }}
 
