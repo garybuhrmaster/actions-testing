@@ -212,7 +212,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: garybuhrmaster/mythtv
-          branch: FFNVCODEC
+          ref: FFNVCODEC
           path: mythtv
 
       - name: ccache statistics [pre]
