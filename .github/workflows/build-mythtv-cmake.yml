@@ -37,11 +37,9 @@ jobs:
     env:
       TZ: Etc/UTC
       MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
-      CMAKE_INSTALL_PREFIX: ${{ github.workspace }}/build/install
-      CMAKE_BUILD_TYPE: Release
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
-      CCACHE_MAXSIZE: 900M
+      CCACHE_MAXSIZE: 150M
       DEBIAN_FRONTEND: noninteractive
 
     strategy:
