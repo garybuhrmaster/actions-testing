@@ -36,7 +36,6 @@ jobs:
 
     env:
       TZ: Etc/UTC
-      MYTHTV_CONFIG_PREFIX: ${{ github.workspace }}/build/install
       CCACHE_DIR: $HOME/.ccache
       CCACHE_COMPRESS: true
       CCACHE_MAXSIZE: 150M
@@ -45,6 +44,20 @@ jobs:
     strategy:
       matrix:
         container:
+          # Fedora group
+          - desc: 'Fedora'
+            image: 'quay.io/fedora/fedora:latest'
+            update_cmd: 'dnf upgrade -y'
+            install_ansible_cmd: 'dnf install ansible dnf-plugins-core -y'
+            ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
+            install_extra_pkgs_cmd: 'dnf install ant -y'
+            configure_cmd: 'cd mythtv && ./configure --compile-type=release --disable-debug --enable-libmp3lame --enable-libvpx --enable-libx264 --enable-bdjava --enable-vulkan'
+            build_cmd: 'cd mythtv && make -j4 all_no_test'
+            install_cmd: 'cd mythtv && make -j4 install'
+            test_cmd: 'cd mythtv && make -j4 tests'
+            plugins_configure_cmd: 'cd mythplugings && ./configure'
+            plugins_build_cmd: 'cd mythplugins && make -j4'
+            plugins_install_cmd: 'cd mythplugins && make -j4'
           # Fedora group
           - desc: 'Fedora - CMake Qt5'
             image: 'quay.io/fedora/fedora:latest'
