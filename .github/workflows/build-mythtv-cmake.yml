@@ -163,7 +163,7 @@ jobs:
             ansible_cmd: 'ansible-playbook --limit localhost mythtv.yml'
             install_extra_pkgs_cmd: 'dnf install ant -y'
             core_working_subdirectory: ''
-            core_configure_cmd: 'cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/build/install'
+            core_configure_cmd: 'git describe --dirty && git branch --show-current && cmake --preset qt5 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/build/install'
             core_build_cmd: 'cmake --build build-qt5'
             core_install_cmd: ''
             core_test_cmd: ''
