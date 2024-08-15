@@ -32,6 +32,9 @@ jobs:
       # required for all workflows
       security-events: write
 
+    container:
+      image: ubuntu:latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -94,7 +97,7 @@ jobs:
         run: |
           cd mythtv
           ./configure
-          make
+          make -j4
  
       # - run: |
       #     echo "Run, Build Application using script"
