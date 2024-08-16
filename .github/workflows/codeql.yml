@@ -79,7 +79,7 @@ jobs:
           make -j `nproc`
           make install
           cd ../mythplugins
-          ./configure
+          ./configure --prefix=/tmp/usr/local
           make -j `nproc`
           make install
  
