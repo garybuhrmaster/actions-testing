@@ -75,12 +75,12 @@ jobs:
       - name: Configure/Build
         run: |
           cd mythtv
-          ./configure
-          make -j4
+          ./configure --prefix=/tmp/usr/local
+          make -j `nproc`
           make install
           cd ../mythplugins
           ./configure
-          make -j4
+          make -j `nproc`
           make install
  
       - name: Perform CodeQL Analysis
