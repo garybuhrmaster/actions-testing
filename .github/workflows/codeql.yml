@@ -14,29 +14,39 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
+
   pull_request:
     branches: [ "main" ]
+
   workflow_dispatch:
 
 jobs:
   analyze:
     name: Analyze
-    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    
+    env:
+      TZ: Etc/UTC
+      CCACHE_DIR: $HOME/.ccache
+      CCACHE_COMPRESS: true
+      CCACHE_MAXSIZE: 250M
+      DEBIAN_FRONTEND: noninteractive
+
+  i  # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners
     # Consider using larger runners for possible analysis time improvements.
-    runs-on: 'ubuntu-latest'
+    runs-on: 'self-hosted'
+
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+
     permissions:
       # required for all workflows
       security-events: write
 
-    container:
-      image: ubuntu:latest
-
     strategy:
       fail-fast: false
+
       matrix:
         language: [ 'c-cpp'  ]
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
@@ -45,26 +55,7 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
-      - name: OS update
-        run: apt update -y && apt upgrade -y
-
-      - name: OS install ansible
-        run: apt install ansible apt-utils -y
-
-      - name: Checkout MythTV/ansible repository
-        uses: actions/checkout@v4
-        with:
-          repository: MythTV/ansible
-          path: ansible
-
-      - name: Run ansible to install build requirements
-        working-directory: ansible
-        run: ansible-playbook --limit localhost mythtv.yml
-
-      - name: Install extra packages for additional coverage
-        run: apt install ant default-jdk-headless -y
-
-      - name: Checkout repository
+      - name: Checkout MythTV repository
         uses: actions/checkout@v4
         with:
           repository: MythTV/mythtv
@@ -81,28 +72,17 @@ jobs:
           # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           # queries: security-extended,security-and-quality
 
-
-      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
-      # If this step fails, then you should remove it and run the build manually (see below)
-      # - name: Autobuild
-      #   uses: github/codeql-action/autobuild@v3
-
-      # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-      #   If the Autobuild fails above, remove it and uncomment the following three lines.
-      #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
-
-      - name: Build
+      - name: Configure/Build
         run: |
           cd mythtv
           ./configure
           make -j4
+          make install
+          cd ../mythplugins
+          ./configure
+          make -j4
+          make install
  
-      # - run: |
-      #     echo "Run, Build Application using script"
-      #     ./location_of_script_within_repo/buildscript.sh
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
